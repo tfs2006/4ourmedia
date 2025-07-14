@@ -34,7 +34,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Link to your new stylesheet -->
+    <!-- Link to your stylesheet -->
     <link rel="stylesheet" href="css/style.css">
 
 </head>
@@ -67,6 +67,68 @@
                     <a href="#apply" class="brand-bg text-white font-bold py-4 px-10 rounded-full text-lg brand-bg-hover transition-all duration-300 transform hover:scale-105">
                         Become a Growth Partner
                     </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Shopify Growth Partner Simulator Game -->
+        <section id="simulator" class="py-16 md:py-24 bg-gray-800 text-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">Shopify Growth Partner Simulator</h2>
+                <p class="mt-4 section-subtitle text-gray-300">Can you build an affiliate empire? Experience the life of a 4ourmedia partner in this 60-second challenge.</p>
+
+                <div class="mt-8 bg-gray-900/50 p-4 sm:p-6 rounded-2xl shadow-2xl max-w-4xl mx-auto border border-gray-700">
+                    <!-- Game Stats Dashboard -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-left">
+                        <div class="bg-gray-700/50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-400">Time Left</p>
+                            <p class="text-2xl font-bold text-white"><span id="sim-time-left">60</span>s</p>
+                        </div>
+                        <div class="bg-gray-700/50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-400">One-Time Bounties</p>
+                            <p class="text-2xl font-bold text-green-400">$<span id="sim-bounties">0</span></p>
+                        </div>
+                        <div class="bg-gray-700/50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-400">Monthly Recurring Revenue</p>
+                            <p class="text-2xl font-bold text-blue-400">$<span id="sim-mrr">0</span>/mo</p>
+                        </div>
+                         <div class="bg-gray-700/50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-400">Total Deals Closed</p>
+                            <p class="text-2xl font-bold text-white"><span id="sim-deals">0</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Game Area -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div id="sim-game-board" class="md:col-span-2 bg-gray-800/60 rounded-lg p-4 min-h-[300px] md:min-h-[400px] relative overflow-hidden shadow-inner">
+                            <!-- Leads will appear here -->
+                            <div id="sim-start-screen" class="absolute inset-0 flex flex-col justify-center items-center bg-gray-800/80 backdrop-blur-sm z-10">
+                                <h3 class="text-3xl font-bold mb-4">Ready to Start?</h3>
+                                <p class="max-w-sm mb-6 text-gray-300">Click on leads as they appear to close deals. Use your earnings to buy upgrades and maximize your income!</p>
+                                <button id="start-simulator" class="brand-bg text-white font-bold py-3 px-8 rounded-full text-lg brand-bg-hover transition-colors duration-300 transform hover:scale-105">Start 60-Second Challenge</button>
+                            </div>
+                             <div id="sim-end-screen" class="hidden absolute inset-0 flex-col justify-center items-center bg-gray-800/80 backdrop-blur-sm z-10 p-4">
+                                <h3 class="text-3xl font-bold mb-2">Year-End Report!</h3>
+                                <p class="text-lg text-gray-300 mb-4">Here's how you did:</p>
+                                <div class="text-left bg-gray-700/50 p-4 rounded-lg mb-6">
+                                    <p class="text-xl">Deals Closed: <span class="font-bold text-white" id="end-deals">0</span></p>
+                                    <p class="text-xl">Final MRR: <span class="font-bold text-blue-400" id="end-mrr">$0/mo</span></p>
+                                    <p class="text-xl">Total Bounties: <span class="font-bold text-green-400" id="end-bounties">$0</span></p>
+                                    <p class="text-2xl mt-2">Annualized Recurring Revenue: <strong class="text-yellow-300" id="end-arr">$0</strong></p>
+                                </div>
+                                <button id="restart-simulator" class="brand-bg text-white font-bold py-3 px-8 rounded-full text-lg brand-bg-hover transition-colors duration-300 transform hover:scale-105">Play Again</button>
+                            </div>
+                        </div>
+
+                        <!-- Upgrades Panel -->
+                        <div class="bg-gray-800/60 rounded-lg p-4 text-left shadow-inner">
+                            <h4 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Upgrades</h4>
+                            <div id="sim-upgrades" class="space-y-3">
+                                <!-- Upgrades will be generated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                     <div id="sim-event-log" class="mt-4 text-center text-yellow-300 font-semibold h-6"></div>
                 </div>
             </div>
         </section>
@@ -261,5 +323,8 @@
             <p class="text-sm mt-2">We are an independent firm and a proud Shopify Partner. This site is not affiliated with or endorsed by Shopify.</p>
         </div>
     </footer>
+
+    <!-- Link to your new game logic file -->
+    <script src="js/simulator.js"></script>
 </body>
 </html>
