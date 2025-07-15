@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const investmentsContainer = document.getElementById('sim-investments');
     const eventLogContainer = document.getElementById('sim-event-log');
     const startButton = document.getElementById('start-simulator');
+    const resetButton = document.getElementById('reset-simulator');
 
     // --- Stat Displays ---
     const monthDisplay = document.getElementById('sim-month');
@@ -35,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const investments = [
-        { id: 'va', name: 'Hire a VA', baseCost: 500, description: 'Auto-clicks a lead every 5s.', level: 0, action: () => { gameState.autoClickInterval = 5000; setupAutoClicker(); }},
-        { id: 'blog', name: 'Launch a Blog', baseCost: 2000, description: 'Passively generates small leads.', level: 0, action: () => { gameState.passiveLeadInterval = 10000; setupPassiveLeads(); }},
+        { id: 'va', name: 'Hire a VA', baseCost: 500, description: 'Auto-clicks a lead every 5s.', level: 0, action: () => { setupAutoClicker(); }},
+        { id: 'blog', name: 'Launch a Blog', baseCost: 2000, description: 'Passively generates small leads.', level: 0, action: () => { setupPassiveLeads(); }},
         { id: 'ads', name: 'Run Ad Campaigns', baseCost: 5000, description: 'Increases high-value lead chance.', level: 0, action: () => { 
             leadTypes.find(l=>l.name==='Enterprise').probability *= 1.5; 
             leadTypes.find(l=>l.name==='WHALE!').probability *= 2; 
@@ -49,34 +50,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Functions ---
     function init() {
         startButton.addEventListener('click', startGame);
+        resetButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset your empire? All progress will be lost.')) {
+                resetGameState();
+                startScreen.classList.remove('hidden');
+                resetButton.classList.add('hidden');
+            }
+        });
     }
 
     function startGame() {
         resetGameState();
         startScreen.classList.add('hidden');
+        resetButton.classList.remove('hidden');
         gameState.gameIsActive = true;
         
+        // Main Game Loop - runs every second
         const mainInterval = setInterval(() => {
             if (!gameState.gameIsActive) return;
             
-            // Month passes
+            // Lead Spawner - chance to spawn a lead every second
+            if (Math.random() < gameState.leadSpawnChance) {
+                spawnLead();
+            }
+            
+        }, 1000); // Faster pace
+        
+        // Monthly Payout Loop
+        const monthInterval = setInterval(() => {
+            if (!gameState.gameIsActive) return;
             gameState.month++;
-            // Payout MRR
             const mrrPayout = gameState.mrr;
             if (mrrPayout > 0) {
                 gameState.cash += mrrPayout;
                 logEvent(`Payday! +<span class="text-green-400 font-bold">$${mrrPayout.toLocaleString()}</span> from MRR.`, 'text-green-400');
             }
-            
-            // Lead Spawner
-            if (Math.random() < gameState.leadSpawnChance) {
-                spawnLead();
-            }
-            
             updateDisplay();
-        }, 5000); // 1 month = 5 seconds
-        
-        gameState.intervals.push(mainInterval);
+        }, 4000); // 1 month = 4 seconds
+
+        gameState.intervals.push(mainInterval, monthInterval);
     }
 
     function resetGameState() {
@@ -85,8 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         gameState = {
             month: 1, cash: 0, mrr: 0, level: 1, xp: 0, xpNeeded: 10, clickPower: 1,
-            leadSpawnChance: 0.7, gameIsActive: false, intervals: [], lastClickedLead: null, combo: 0,
-            autoClickInterval: null, passiveLeadInterval: null,
+            leadSpawnChance: 0.4, gameIsActive: false, intervals: [],
+            autoClicker: { interval: null, speed: 5000 },
+            passiveLeads: { interval: null, speed: 10000 },
         };
         investments.forEach(inv => inv.level = 0);
         // Reset probabilities to default
@@ -98,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDisplay();
         renderInvestments();
         eventLogContainer.innerHTML = '';
+        gameBoard.innerHTML = ''; // Clear any leftover leads
     }
 
     function updateDisplay() {
@@ -112,18 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderInvestments();
     }
 
-    function spawnLead(specificLeadType = null) {
-        let leadData;
-        if (specificLeadType) {
-            leadData = { ...specificLeadType };
-        } else {
-            const rand = Math.random();
-            let cumulativeProb = 0;
-            leadData = { ...leadTypes.find(lead => {
-                cumulativeProb += lead.probability;
-                return rand < cumulativeProb;
-            })};
-        }
+    function spawnLead() {
+        const rand = Math.random();
+        let cumulativeProb = 0;
+        let chosenLead = leadTypes.find(lead => {
+            cumulativeProb += lead.probability;
+            return rand < cumulativeProb;
+        });
+        if (!chosenLead) chosenLead = leadTypes[0]; // Fallback
+        const leadData = { ...chosenLead };
 
         leadData.currentHealth = leadData.health;
         
@@ -131,8 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
         leadElement.className = 'sim-lead absolute cursor-pointer p-2 rounded-lg shadow-lg';
         if (leadData.isWhale) leadElement.classList.add('whale');
         
-        leadElement.style.left = `${Math.random() * 85}%`;
-        leadElement.style.top = `${Math.random() * 85}%`;
+        leadElement.style.left = `${Math.random() * 88}%`; // Use 88% to keep it fully in view
+        leadElement.style.top = `${Math.random() * 88}%`;
         
         leadElement.innerHTML = `${leadData.icon}<p class="font-bold text-sm">${leadData.name}</p>`;
         
@@ -144,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 leadElement.style.animation = 'pop-out 0.3s ease-in forwards';
                 setTimeout(() => leadElement.remove(), 300);
             }
-        }, 5000);
+        }, 4000); // Leads disappear after 4 seconds
     }
 
     function handleLeadClick(event, leadElement, leadData) {
@@ -158,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => leadElement.classList.remove('shake'), 300);
 
         if (leadData.currentHealth <= 0) {
-            leadElement.style.pointerEvents = 'none'; // Prevent multi-clicks on a dead lead
+            leadElement.style.pointerEvents = 'none';
             const bounty = leadData.bounty;
             const newMrr = leadData.mrr;
             gameState.cash += bounty;
@@ -197,22 +208,20 @@ document.addEventListener('DOMContentLoaded', () => {
             button.innerHTML = `
                 <p class="font-bold">${inv.name} (Lvl ${inv.level})</p>
                 <p class="text-sm text-gray-400">${inv.description}</p>
-                <p class="text-sm font-bold text-green-400">Cost: $${cost.toLocaleString()}</p>
+                <p class="text-sm font-bold text-green-400">Upgrade Cost: $${cost.toLocaleString()}</p>
             `;
             
             if (gameState.cash < cost) {
                 button.disabled = true;
-                button.classList.add('bg-gray-700', 'text-gray-500', 'cursor-not-allowed');
             } else {
                 button.disabled = false;
-                button.classList.add('bg-gray-700', 'hover:bg-gray-600');
             }
             
             button.addEventListener('click', () => {
                 if (gameState.cash >= cost) {
                     gameState.cash -= cost;
-                    inv.action(); // Apply the effect first
-                    inv.level++; // Then increment level
+                    inv.level++;
+                    inv.action();
                     logEvent(`Upgraded ${inv.name} to Level ${inv.level}!`, 'text-purple-400');
                     updateDisplay();
                 }
@@ -222,41 +231,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function setupAutoClicker() {
-        // Clear existing interval to prevent stacking
-        const existingInterval = gameState.intervals.find(i => i.id === 'autoClicker');
-        if (existingInterval) clearInterval(existingInterval);
+        if (gameState.autoClicker.interval) clearInterval(gameState.autoClicker.interval);
         
-        const interval = setInterval(() => {
+        const speed = gameState.autoClicker.speed / investments.find(i=>i.id==='va').level;
+        gameState.autoClicker.interval = setInterval(() => {
             if(!gameState.gameIsActive) return;
             const randomLead = gameBoard.querySelector('.sim-lead');
             if(randomLead) {
-                // Simulate a click event at the lead's position
                 const rect = randomLead.getBoundingClientRect();
-                const clickEvent = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: rect.left + rect.width / 2,
-                    clientY: rect.top + rect.height / 2
-                });
+                const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true, clientX: rect.left, clientY: rect.top });
                 randomLead.dispatchEvent(clickEvent);
             }
-        }, gameState.autoClickInterval / (investments.find(i=>i.id==='va').level)); // Speed up with levels
-        interval.id = 'autoClicker';
-        gameState.intervals = gameState.intervals.filter(i => i.id !== 'autoClicker');
-        gameState.intervals.push(interval);
+        }, speed);
     }
 
     function setupPassiveLeads() {
-        const existingInterval = gameState.intervals.find(i => i.id === 'passiveLeads');
-        if (existingInterval) clearInterval(existingInterval);
-
-        const interval = setInterval(() => {
+        if (gameState.passiveLeads.interval) clearInterval(gameState.passiveLeads.interval);
+        
+        const speed = gameState.passiveLeads.speed / investments.find(i=>i.id==='blog').level;
+        gameState.passiveLeads.interval = setInterval(() => {
             if(!gameState.gameIsActive) return;
-            spawnLead(leadTypes[0]); // Spawn a startup lead
-        }, gameState.passiveLeadInterval / (investments.find(i=>i.id==='blog').level)); // Speed up with levels
-        interval.id = 'passiveLeads';
-        gameState.intervals = gameState.intervals.filter(i => i.id !== 'passiveLeads');
-        gameState.intervals.push(interval);
+            spawnLead(leadTypes[0]);
+        }, speed);
     }
     
     function createFloatingText(text, x, y, colorClass) {
@@ -272,10 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function logEvent(message, color = 'text-gray-300') {
         const logEntry = document.createElement('p');
-        logEntry.className = `text-xs ${color}`;
+        logEntry.className = `text-xs ${color} animate-fade-in`;
         logEntry.innerHTML = `> ${message}`;
         eventLogContainer.prepend(logEntry);
-        if (eventLogContainer.children.length > 12) {
+        if (eventLogContainer.children.length > 8) {
             eventLogContainer.lastChild.remove();
         }
     }

@@ -37,6 +37,22 @@ body {
 }
 
 /* --- Enhanced Simulator Game Styles --- */
+.stat-card {
+    background-color: rgba(55, 65, 81, 0.5); /* gray-700 with opacity */
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+.stat-label {
+    font-size: 0.75rem; /* 12px */
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: 0.25rem;
+}
+.stat-value {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 700;
+    line-height: 1;
+}
+
 .sim-lead {
     background-color: rgba(31, 41, 55, 0.9); /* gray-800 with opacity */
     border: 1px solid rgba(75, 85, 99, 0.9); /* gray-600 with opacity */
@@ -70,10 +86,6 @@ body {
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 15px rgba(252, 211, 77, 0.5); }
     50% { box-shadow: 0 0 25px rgba(252, 211, 77, 1); }
-}
-
-.sim-lead .progress-bar {
-    transition: width 0.1s linear;
 }
 
 .floating-text {
@@ -124,4 +136,18 @@ body {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70% { transform: translateX(-5px); }
   20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+#sim-investments button:disabled {
+    background-color: rgba(55, 65, 81, 0.3);
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+#sim-investments button {
+    background-color: rgba(55, 65, 81, 0.7);
+}
+
+#sim-investments button:hover:not(:disabled) {
+    background-color: rgba(75, 85, 99, 0.7);
 }
