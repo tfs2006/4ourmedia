@@ -120,12 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (specificLeadType) {
             leadData = { ...specificLeadType };
         } else {
-            // Weighted random selection of lead type
+            // Corrected weighted random selection of lead type
             const rand = Math.random();
             let cumulativeProb = 0;
             leadData = { ...leadTypes.find(lead => {
                 cumulativeProb += lead.probability;
-                return rand <= cumulativeProb;
+                return rand < cumulativeProb;
             })};
         }
 
