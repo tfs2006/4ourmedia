@@ -36,16 +36,45 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const investments = [
-        { id: 'va', name: 'Hire a VA', baseCost: 500, description: 'Auto-clicks a lead every 5s.', level: 0, action: () => { setupAutoClicker(); }},
+        { id: 'va', name: 'Hire a VA', baseCost: 500, description: 'Auto-clicks a lead every few seconds.', level: 0, action: () => { setupAutoClicker(); }},
         { id: 'blog', name: 'Launch a Blog', baseCost: 2000, description: 'Passively generates small leads.', level: 0, action: () => { setupPassiveLeads(); }},
-        { id: 'ads', name: 'Run Ad Campaigns', baseCost: 5000, description: 'Increases high-value lead chance.', level: 0, action: () => { 
-            leadTypes.find(l=>l.name==='Enterprise').probability *= 1.5; 
-            leadTypes.find(l=>l.name==='WHALE!').probability *= 2; 
-            // Re-normalize probabilities
-            const totalProb = leadTypes.reduce((sum, lead) => sum + lead.probability, 0);
-            leadTypes.forEach(lead => lead.probability /= totalProb);
+        { id: 'ads', name: 'Run Ad Campaigns', baseCost: 5000, description: 'Increases high-value lead chance.', level: 0, action: () => { updateLeadProbabilities(); }},
+        { id: 'seo', name: 'SEO Specialist', baseCost: 7500, description: 'Passively increases MRR by 2% each month.', level: 0, action: () => {} },
+        { id: 'contentTeam', name: 'Content Team', baseCost: 10000, description: 'Doubles the effectiveness of your Blog.', level: 0, action: () => { if(gameState.passiveLeads.interval) setupPassiveLeads(); } },
+        { id: 'podcast', name: 'Podcast Sponsorship', baseCost: 25000, description: 'Small chance to spawn a Whale lead each month.', level: 0, action: () => {} },
+        { id: 'followup', name: 'Follow-up Automation', baseCost: 4000, description: 'Leads stay on screen 25% longer.', level: 0, action: () => { gameState.leadLifetime *= 1.25; } },
+        { id: 'salesTraining', name: 'Advanced Sales Training', baseCost: 15000, description: 'Permanently increases bounty cash by 10%.', level: 0, action: () => { gameState.bountyMultiplier += 0.1; } },
+        { id: 'referralNetwork', name: 'Build Referral Network', baseCost: 30000, description: 'Closing a deal has a chance to spawn a new lead.', level: 0, action: () => {} },
+        { id: 'coffee', name: 'Espresso Machine', baseCost: 250, description: 'Speeds up the passage of time slightly.', level: 0, action: () => { updateGameSpeed(); } },
+        { id: 'marketResearch', name: 'Market Research', baseCost: 50000, description: 'Increases chance of a "Hot" market next month.', level: 0, action: () => {} },
+    ];
+    
+    const setbacks = [
+        { name: 'Client Churn', message: 'Oh no! A client churned, losing you MRR.', effect: () => {
+            const lostMrr = Math.min(gameState.mrr, Math.round(gameState.mrr * (Math.random() * 0.2 + 0.05)));
+            gameState.mrr -= lostMrr;
+            logEvent(`Client Churn! Lost <span class="text-red-400 font-bold">$${lostMrr}/mo</span> MRR.`, 'text-red-400');
+        }},
+        { name: 'Tax Season', message: 'It\'s tax season! You pay your dues.', effect: () => {
+            const taxAmount = Math.round(gameState.cash * 0.1);
+            gameState.cash -= taxAmount;
+            logEvent(`Tax Season! Paid <span class="text-red-400 font-bold">$${taxAmount.toLocaleString()}</span> in taxes.`, 'text-red-400');
+        }},
+        { name: 'Ad Campaign Failed', message: 'Your latest ad campaign flopped!', effect: () => {
+            logEvent(`An ad campaign failed to deliver results.`, 'text-red-400');
+        }},
+        { name: 'Platform Outage', message: 'A platform outage has frozen all activity!', effect: () => {
+            logEvent(`Platform Outage! No income or leads this month.`, 'text-red-500');
+            gameState.isFrozen = true;
+            setTimeout(() => { gameState.isFrozen = false; }, gameState.gameSpeed);
         }},
     ];
+
+    const marketConditions = {
+        normal: { name: 'Normal', multiplier: 1, leadChance: 0.4, color: 'text-gray-300' },
+        hot: { name: 'Hot', multiplier: 1.5, leadChance: 0.7, color: 'text-green-400' },
+        cold: { name: 'Cold', multiplier: 0.7, leadChance: 0.2, color: 'text-blue-400' },
+    };
 
     // --- Functions ---
     function init() {
@@ -65,59 +94,69 @@ document.addEventListener('DOMContentLoaded', () => {
         resetButton.classList.remove('hidden');
         gameState.gameIsActive = true;
         
-        // Main Game Loop - runs every second
         const mainInterval = setInterval(() => {
-            if (!gameState.gameIsActive) return;
-            
-            // Lead Spawner - chance to spawn a lead every second
-            if (Math.random() < gameState.leadSpawnChance) {
-                spawnLead();
-            }
-            
-        }, 1000); // Faster pace
+            if (!gameState.gameIsActive || gameState.isFrozen) return;
+            if (Math.random() < gameState.market.leadChance) spawnLead();
+        }, 1200);
         
-        // Monthly Payout Loop
         const monthInterval = setInterval(() => {
             if (!gameState.gameIsActive) return;
-            gameState.month++;
-            const mrrPayout = gameState.mrr;
-            if (mrrPayout > 0) {
-                gameState.cash += mrrPayout;
-                logEvent(`Payday! +<span class="text-green-400 font-bold">$${mrrPayout.toLocaleString()}</span> from MRR.`, 'text-green-400');
+            
+            if (!gameState.isFrozen) {
+                gameState.month++;
+                const mrrPayout = Math.round(gameState.mrr * gameState.market.multiplier);
+                if (mrrPayout > 0) {
+                    gameState.cash += mrrPayout;
+                    logEvent(`Payday! +<span class="text-green-400 font-bold">$${mrrPayout.toLocaleString()}</span> from MRR.`, 'text-green-400');
+                }
+                
+                const seoInvestment = investments.find(i=>i.id==='seo');
+                if (seoInvestment.level > 0) {
+                    const seoBonus = Math.round(gameState.mrr * 0.02 * seoInvestment.level);
+                    gameState.mrr += seoBonus;
+                    if (seoBonus > 0) logEvent(`SEO efforts boosted MRR by <span class="text-blue-400 font-bold">$${seoBonus}</span>!`, 'text-blue-400');
+                }
+                const podcastInvestment = investments.find(i=>i.id==='podcast');
+                if (podcastInvestment.level > 0 && Math.random() < (0.05 * podcastInvestment.level)) {
+                    logEvent(`Podcast sponsorship paid off! A Whale lead is inbound!`, 'text-yellow-300');
+                    spawnLead(leadTypes.find(l=>l.isWhale));
+                }
+
+                if (Math.random() < 0.1) {
+                    const setback = setbacks[Math.floor(Math.random() * setbacks.length)];
+                    setback.effect();
+                }
             }
+            
+            updateMarketCondition();
             updateDisplay();
-        }, 4000); // 1 month = 4 seconds
+        }, gameState.gameSpeed);
 
         gameState.intervals.push(mainInterval, monthInterval);
     }
 
     function resetGameState() {
-        if (gameState.intervals) {
-            gameState.intervals.forEach(clearInterval);
-        }
+        if (gameState.intervals) gameState.intervals.forEach(clearInterval);
         gameState = {
             month: 1, cash: 0, mrr: 0, level: 1, xp: 0, xpNeeded: 10, clickPower: 1,
-            leadSpawnChance: 0.4, gameIsActive: false, intervals: [],
+            gameIsActive: false, intervals: [], leadLifetime: 4000, bountyMultiplier: 1.0, 
+            gameSpeed: 4000, market: marketConditions.normal, isFrozen: false,
+            critChance: 0.05, critMultiplier: 3,
             autoClicker: { interval: null, speed: 5000 },
             passiveLeads: { interval: null, speed: 10000 },
         };
         investments.forEach(inv => inv.level = 0);
-        // Reset probabilities to default
-        leadTypes[0].probability = 0.5;
-        leadTypes[1].probability = 0.35;
-        leadTypes[2].probability = 0.14;
-        leadTypes[3].probability = 0.01;
-
+        leadTypes[0].probability = 0.5; leadTypes[1].probability = 0.35; leadTypes[2].probability = 0.14; leadTypes[3].probability = 0.01;
         updateDisplay();
         renderInvestments();
         eventLogContainer.innerHTML = '';
-        gameBoard.innerHTML = ''; // Clear any leftover leads
+        gameBoard.innerHTML = '';
     }
 
     function updateDisplay() {
         monthDisplay.textContent = gameState.month;
-        cashDisplay.textContent = gameState.cash.toLocaleString();
-        mrrDisplay.textContent = gameState.mrr.toLocaleString();
+        cashDisplay.textContent = Math.round(gameState.cash).toLocaleString();
+        mrrDisplay.textContent = Math.round(gameState.mrr).toLocaleString();
         levelDisplay.textContent = gameState.level;
         clickPowerDisplay.textContent = gameState.clickPower;
         xpDisplay.textContent = gameState.xp;
@@ -126,15 +165,19 @@ document.addEventListener('DOMContentLoaded', () => {
         renderInvestments();
     }
 
-    function spawnLead() {
-        const rand = Math.random();
-        let cumulativeProb = 0;
-        let chosenLead = leadTypes.find(lead => {
-            cumulativeProb += lead.probability;
-            return rand < cumulativeProb;
-        });
-        if (!chosenLead) chosenLead = leadTypes[0]; // Fallback
-        const leadData = { ...chosenLead };
+    function spawnLead(specificLeadType = null) {
+        let leadData;
+        if (specificLeadType) {
+            leadData = { ...specificLeadType };
+        } else {
+            const rand = Math.random();
+            let cumulativeProb = 0;
+            leadData = { ...leadTypes.find(lead => {
+                cumulativeProb += lead.probability;
+                return rand < cumulativeProb;
+            })};
+        }
+        if(!leadData.name) leadData = {...leadTypes[0]};
 
         leadData.currentHealth = leadData.health;
         
@@ -142,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         leadElement.className = 'sim-lead absolute cursor-pointer p-2 rounded-lg shadow-lg';
         if (leadData.isWhale) leadElement.classList.add('whale');
         
-        leadElement.style.left = `${Math.random() * 88}%`; // Use 88% to keep it fully in view
+        leadElement.style.left = `${Math.random() * 88}%`;
         leadElement.style.top = `${Math.random() * 88}%`;
         
         leadElement.innerHTML = `${leadData.icon}<p class="font-bold text-sm">${leadData.name}</p>`;
@@ -155,29 +198,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 leadElement.style.animation = 'pop-out 0.3s ease-in forwards';
                 setTimeout(() => leadElement.remove(), 300);
             }
-        }, 4000); // Leads disappear after 4 seconds
+        }, gameState.leadLifetime);
     }
 
     function handleLeadClick(event, leadElement, leadData) {
         if (!gameState.gameIsActive || !leadData.currentHealth || leadData.currentHealth <= 0) return;
 
-        const damage = gameState.clickPower;
+        let damage = gameState.clickPower;
+        const isCrit = Math.random() < gameState.critChance;
+        if (isCrit) {
+            damage *= gameState.critMultiplier;
+            createFloatingText(`CRIT! -${damage}`, event.clientX, event.clientY, 'text-red-500 text-lg');
+        } else {
+            createFloatingText(`-${damage}`, event.clientX, event.clientY, 'text-white');
+        }
+
         leadData.currentHealth -= damage;
         
-        createFloatingText(`-${damage}`, event.clientX, event.clientY, 'text-white');
         leadElement.classList.add('shake');
         setTimeout(() => leadElement.classList.remove('shake'), 300);
 
         if (leadData.currentHealth <= 0) {
             leadElement.style.pointerEvents = 'none';
-            const bounty = leadData.bounty;
-            const newMrr = leadData.mrr;
+            const bounty = Math.round(leadData.bounty * gameState.bountyMultiplier * gameState.market.multiplier);
+            const newMrr = Math.round(leadData.mrr * gameState.market.multiplier);
             gameState.cash += bounty;
             gameState.mrr += newMrr;
             addXp(leadData.xp);
             
             logEvent(`Closed ${leadData.name}! +<span class="text-green-400 font-bold">$${bounty.toLocaleString()}</span> & +<span class="text-blue-400 font-bold">$${newMrr}/mo</span>!`);
             
+            const referralInvestment = investments.find(i=>i.id==='referralNetwork');
+            if (referralInvestment.level > 0 && Math.random() < (0.1 * referralInvestment.level)) {
+                logEvent(`Referral! A new lead appeared!`, 'text-cyan-400');
+                spawnLead(leadTypes[0]);
+            }
+
             leadElement.remove();
         }
         updateDisplay();
@@ -196,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState.xp -= gameState.xpNeeded;
         gameState.xpNeeded = Math.round(gameState.xpNeeded * 1.7);
         gameState.clickPower += gameState.level;
+        gameState.critChance += 0.005; // Small crit chance increase on level up
         logEvent(`Level Up! Reached Level <span class="text-yellow-300 font-bold">${gameState.level}</span>! Click Power increased!`, 'text-yellow-300');
     }
 
@@ -211,11 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="text-sm font-bold text-green-400">Upgrade Cost: $${cost.toLocaleString()}</p>
             `;
             
-            if (gameState.cash < cost) {
-                button.disabled = true;
-            } else {
-                button.disabled = false;
-            }
+            if (gameState.cash < cost) button.disabled = true;
             
             button.addEventListener('click', () => {
                 if (gameState.cash >= cost) {
@@ -232,10 +285,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function setupAutoClicker() {
         if (gameState.autoClicker.interval) clearInterval(gameState.autoClicker.interval);
-        
         const speed = gameState.autoClicker.speed / investments.find(i=>i.id==='va').level;
         gameState.autoClicker.interval = setInterval(() => {
-            if(!gameState.gameIsActive) return;
+            if(!gameState.gameIsActive || gameState.isFrozen) return;
             const randomLead = gameBoard.querySelector('.sim-lead');
             if(randomLead) {
                 const rect = randomLead.getBoundingClientRect();
@@ -247,12 +299,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupPassiveLeads() {
         if (gameState.passiveLeads.interval) clearInterval(gameState.passiveLeads.interval);
-        
-        const speed = gameState.passiveLeads.speed / investments.find(i=>i.id==='blog').level;
+        const contentTeamLevel = investments.find(i=>i.id==='contentTeam').level;
+        const speed = gameState.passiveLeads.speed / (investments.find(i=>i.id==='blog').level * (contentTeamLevel > 0 ? contentTeamLevel * 2 : 1));
         gameState.passiveLeads.interval = setInterval(() => {
-            if(!gameState.gameIsActive) return;
+            if(!gameState.gameIsActive || gameState.isFrozen) return;
             spawnLead(leadTypes[0]);
         }, speed);
+    }
+    
+    function updateGameSpeed() {
+        const coffeeLevel = investments.find(i=>i.id==='coffee').level;
+        gameState.gameSpeed = 4000 / (1 + (0.1 * coffeeLevel));
+    }
+
+    function updateLeadProbabilities() {
+        // This function is called when 'Run Ad Campaigns' is purchased.
+    }
+    
+    function updateMarketCondition() {
+        const researchLevel = investments.find(i=>i.id==='marketResearch').level;
+        const hotChance = 0.15 + (0.05 * researchLevel);
+        const rand = Math.random();
+
+        if (rand < hotChance) {
+            gameState.market = marketConditions.hot;
+        } else if (rand < hotChance + 0.15) { // 15% chance of cold market
+            gameState.market = marketConditions.cold;
+        } else {
+            gameState.market = marketConditions.normal;
+        }
+        logEvent(`Market is now <span class="${gameState.market.color} font-bold">${gameState.market.name}</span>!`, gameState.market.color);
     }
     
     function createFloatingText(text, x, y, colorClass) {
