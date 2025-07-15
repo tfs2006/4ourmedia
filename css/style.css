@@ -41,6 +41,7 @@ body {
     background-color: rgba(55, 65, 81, 0.5); /* gray-700 with opacity */
     padding: 0.75rem;
     border-radius: 0.5rem;
+    border: 1px solid rgba(75, 85, 99, 0.5);
 }
 .stat-label {
     font-size: 0.75rem; /* 12px */
@@ -150,4 +151,13 @@ body {
 
 #sim-investments button:hover:not(:disabled) {
     background-color: rgba(75, 85, 99, 0.7);
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
