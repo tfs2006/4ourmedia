@@ -115,14 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
         xpBar.style.width = `${(gameState.xp / gameState.xpNeeded) * 100}%`;
     }
 
-    function spawnLead() {
-        // Weighted random selection of lead type
-        const rand = Math.random();
-        let cumulativeProb = 0;
-        const leadData = { ...leadTypes.find(lead => {
-            cumulativeProb += lead.probability;
-            return rand <= cumulativeProb;
-        })};
+    function spawnLead(specificLeadType = null) {
+        let leadData;
+        if (specificLeadType) {
+            leadData = { ...specificLeadType };
+        } else {
+            // Weighted random selection of lead type
+            const rand = Math.random();
+            let cumulativeProb = 0;
+            leadData = { ...leadTypes.find(lead => {
+                cumulativeProb += lead.probability;
+                return rand <= cumulativeProb;
+            })};
+        }
 
         leadData.currentHealth = leadData.health;
         
