@@ -5,58 +5,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const endScreen = document.getElementById('sim-end-screen');
     const startButton = document.getElementById('start-simulator');
     const restartButton = document.getElementById('restart-simulator');
-    const upgradesContainer = document.getElementById('sim-upgrades');
-    const eventLog = document.getElementById('sim-event-log');
+    const eventLogContainer = document.getElementById('sim-event-log');
 
     // --- Stat Displays ---
     const timeLeftDisplay = document.getElementById('sim-time-left');
-    const bountiesDisplay = document.getElementById('sim-bounties');
-    const mrrDisplay = document.getElementById('sim-mrr');
-    const dealsDisplay = document.getElementById('sim-deals');
+    const earningsDisplay = document.getElementById('sim-earnings');
+    const levelDisplay = document.getElementById('sim-level');
+    const clickPowerDisplay = document.getElementById('sim-click-power');
+    const xpBar = document.getElementById('sim-xp-bar');
+    const xpDisplay = document.getElementById('sim-xp');
+    const xpNeededDisplay = document.getElementById('sim-xp-needed');
+    
+    // --- End Screen Displays ---
+    const endLevelDisplay = document.getElementById('end-level');
     const endDealsDisplay = document.getElementById('end-deals');
-    const endMrrDisplay = document.getElementById('end-mrr');
-    const endBountiesDisplay = document.getElementById('end-bounties');
-    const endArrDisplay = document.getElementById('end-arr');
+    const endEarningsDisplay = document.getElementById('end-earnings');
 
     // --- Game State ---
-    let gameState = {
-        time: 60,
-        bounties: 0,
-        mrr: 0,
-        deals: 0,
-        clickPower: 1,
-        leadSpawnRate: 1500,
-        gameIsActive: false,
-        intervals: [],
+    let gameState = {};
+
+    // --- Game Configuration ---
+    const ICONS = {
+        Startup: `<svg class="sim-lead-icon text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>`,
+        Business: `<svg class="sim-lead-icon text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path></svg>`,
+        Enterprise: `<svg class="sim-lead-icon text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>`,
+        Whale: `<svg class="sim-lead-icon text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg>`
     };
-
-    // --- Game Data (Based on Hiring Plan) ---
-    const leadTypes = [
-        { name: 'Startup', plan: 'Shopify Basic', health: 5, mrr: 8, bounty: 0, color: 'bg-green-500' },
-        { name: 'Retail Store', plan: 'Shopify Advanced', health: 8, mrr: 80, bounty: 0, color: 'bg-blue-500' },
-        { name: 'Enterprise Client', plan: 'Shopify Plus', health: 12, mrr: 0, bounty: 2500, color: 'bg-purple-500' },
-        { name: 'POS Pro Prospect', plan: 'POS Pro', health: 6, mrr: 0, bounty: 500, color: 'bg-yellow-500' },
-    ];
-
-    const upgrades = [
-        { id: 'crm', name: 'CRM Automation', cost: 250, description: '+1 Click Power', action: () => gameState.clickPower++, purchased: false },
-        { id: 'network', name: 'Networking Event', cost: 1000, description: 'Faster Lead Spawns', action: () => gameState.leadSpawnRate *= 0.8, purchased: false },
-        { id: 'training', name: 'Advanced Training', cost: 2000, description: '+5 Click Power', action: () => gameState.clickPower += 5, purchased: false },
-        { id: 'plus', name: 'Plus Partner Status', cost: 5000, description: 'Double All Earnings!', action: () => { leadTypes.forEach(l => { l.mrr *= 2; l.bounty *= 2; }); }, purchased: false },
-    ];
     
-    const randomEvents = [
-        { text: "Market Boom! Leads are flooding in!", effect: () => { tempChangeSpawnRate(0.5, 5000); }},
-        { text: "BigCommerce affiliate program shut down! More leads!", effect: () => { tempChangeSpawnRate(0.6, 8000); }},
-        { text: "A key lead went with a competitor...", effect: () => { removeHighValueLead(); }},
-        { text: "Your blog post went viral! High-quality leads incoming!", effect: () => { spawnSpecificLead(2, 3); }},
+    const leadTypes = [
+        { name: 'Startup', health: 3, value: 50, xp: 2, icon: ICONS.Startup, probability: 0.5 },
+        { name: 'Growing Business', health: 8, value: 250, xp: 5, icon: ICONS.Business, probability: 0.35 },
+        { name: 'Enterprise', health: 15, value: 1000, xp: 15, icon: ICONS.Enterprise, probability: 0.14 },
+        { name: 'WHALE!', health: 25, value: 5000, xp: 50, icon: ICONS.Whale, probability: 0.01, isWhale: true },
     ];
 
     // --- Functions ---
     function init() {
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
-        renderUpgrades();
     }
 
     function startGame() {
@@ -65,24 +51,25 @@ document.addEventListener('DOMContentLoaded', () => {
         endScreen.classList.add('hidden');
         gameState.gameIsActive = true;
         
-        const countdownInterval = setInterval(() => {
+        const mainInterval = setInterval(() => {
+            if (!gameState.gameIsActive) return;
+            
+            // Countdown
             gameState.time--;
-            updateStats();
+            
+            // Lead Spawner
+            if (Math.random() < gameState.leadSpawnChance) {
+                spawnLead();
+            }
+            
+            updateDisplay();
+            
             if (gameState.time <= 0) {
                 endGame();
             }
         }, 1000);
-        gameState.intervals.push(countdownInterval);
-
-        const leadSpawnInterval = setInterval(() => {
-            if (gameState.gameIsActive) spawnLead();
-        }, gameState.leadSpawnRate);
-        gameState.intervals.push(leadSpawnInterval);
         
-        const eventInterval = setInterval(() => {
-            if (gameState.gameIsActive) triggerRandomEvent();
-        }, 10000);
-         gameState.intervals.push(eventInterval);
+        gameState.intervals.push(mainInterval);
     }
 
     function endGame() {
@@ -90,155 +77,159 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState.intervals.forEach(clearInterval);
         gameBoard.innerHTML = ''; // Clear board
         
-        // Show end screen
+        endLevelDisplay.textContent = gameState.level;
         endDealsDisplay.textContent = gameState.deals;
-        endMrrDisplay.textContent = `$${gameState.mrr.toLocaleString()}/mo`;
-        endBountiesDisplay.textContent = `$${gameState.bounties.toLocaleString()}`;
-        endArrDisplay.textContent = `$${(gameState.mrr * 12).toLocaleString()}`;
+        endEarningsDisplay.textContent = `$${gameState.earnings.toLocaleString()}`;
         endScreen.classList.remove('hidden');
     }
 
     function resetGameState() {
+        if (gameState.intervals) {
+            gameState.intervals.forEach(clearInterval);
+        }
         gameState = {
-            time: 60, bounties: 0, mrr: 0, deals: 0, clickPower: 1, leadSpawnRate: 1500, gameIsActive: false, intervals: [],
+            time: 60,
+            earnings: 0,
+            level: 1,
+            xp: 0,
+            xpNeeded: 10,
+            clickPower: 1,
+            deals: 0,
+            leadSpawnChance: 0.6,
+            gameIsActive: false,
+            intervals: [],
+            lastClickedLead: null,
+            combo: 0,
         };
-        leadTypes.forEach(l => { // Reset potential mutations from upgrades
-            if(l.name === 'Startup') { l.mrr = 8; l.bounty = 0; }
-            if(l.name === 'Retail Store') { l.mrr = 80; l.bounty = 0; }
-            if(l.name === 'Enterprise Client') { l.mrr = 0; l.bounty = 2500; }
-            if(l.name === 'POS Pro Prospect') { l.mrr = 0; l.bounty = 500; }
-        });
-        upgrades.forEach(u => u.purchased = false);
-        renderUpgrades();
-        updateStats();
-        eventLog.textContent = '';
+        updateDisplay();
+        eventLogContainer.innerHTML = '';
     }
 
-    function updateStats() {
+    function updateDisplay() {
         timeLeftDisplay.textContent = gameState.time;
-        bountiesDisplay.textContent = gameState.bounties.toLocaleString();
-        mrrDisplay.textContent = gameState.mrr.toLocaleString();
-        dealsDisplay.textContent = gameState.deals;
-        renderUpgrades(); // To update button disabled state
+        earningsDisplay.textContent = gameState.earnings.toLocaleString();
+        levelDisplay.textContent = gameState.level;
+        clickPowerDisplay.textContent = gameState.clickPower;
+        xpDisplay.textContent = gameState.xp;
+        xpNeededDisplay.textContent = gameState.xpNeeded;
+        xpBar.style.width = `${(gameState.xp / gameState.xpNeeded) * 100}%`;
     }
 
     function spawnLead() {
-        const leadData = { ...leadTypes[Math.floor(Math.random() * leadTypes.length)] };
+        // Weighted random selection of lead type
+        const rand = Math.random();
+        let cumulativeProb = 0;
+        const leadData = { ...leadTypes.find(lead => {
+            cumulativeProb += lead.probability;
+            return rand <= cumulativeProb;
+        })};
+
         leadData.currentHealth = leadData.health;
         
         const leadElement = document.createElement('div');
-        leadElement.className = 'sim-lead absolute cursor-pointer p-2 rounded-lg shadow-lg transition-all duration-300';
+        leadElement.className = 'sim-lead absolute cursor-pointer p-2 rounded-lg shadow-lg';
+        if (leadData.isWhale) {
+            leadElement.classList.add('whale');
+        }
         leadElement.style.left = `${Math.random() * 85}%`;
         leadElement.style.top = `${Math.random() * 85}%`;
         
         leadElement.innerHTML = `
+            ${leadData.icon}
             <p class="font-bold text-sm">${leadData.name}</p>
-            <p class="text-xs text-gray-300">${leadData.plan}</p>
-            <div class="progress-bar-bg bg-gray-600 rounded-full h-2 mt-1 overflow-hidden">
-                <div class="progress-bar h-full rounded-full ${leadData.color}" style="width: 100%;"></div>
-            </div>
         `;
         
-        leadElement.addEventListener('click', () => {
-            if (!gameState.gameIsActive) return;
-            
-            leadData.currentHealth -= gameState.clickPower;
-            const progressBar = leadElement.querySelector('.progress-bar');
-            progressBar.style.width = `${(leadData.currentHealth / leadData.health) * 100}%`;
-
-            if (leadData.currentHealth <= 0) {
-                // Deal Closed!
-                gameState.bounties += leadData.bounty;
-                gameState.mrr += leadData.mrr;
-                gameState.deals++;
-                updateStats();
-                leadElement.remove();
-            }
-        });
+        leadElement.addEventListener('click', (e) => handleLeadClick(e, leadElement, leadData));
 
         gameBoard.appendChild(leadElement);
 
         setTimeout(() => {
-            if (leadElement) leadElement.remove();
-        }, 5000); // Lead disappears after 5 seconds if not closed
+            if (leadElement) {
+                leadElement.style.animation = 'pop-out 0.3s ease-in forwards';
+                setTimeout(() => leadElement.remove(), 300);
+            }
+        }, 4000); // Lead disappears after 4 seconds
+    }
+
+    function handleLeadClick(event, leadElement, leadData) {
+        if (!gameState.gameIsActive) return;
+
+        // Combo logic
+        if (gameState.lastClickedLead === leadElement && gameState.combo < 5) {
+            gameState.combo++;
+        } else {
+            gameState.combo = 1;
+        }
+        gameState.lastClickedLead = leadElement;
+        
+        const damage = gameState.clickPower * gameState.combo;
+        leadData.currentHealth -= damage;
+        
+        // Visual feedback
+        createFloatingText(`-${damage}`, event.clientX, event.clientY, 'text-white');
+        if(gameState.combo > 1) {
+             createFloatingText(`x${gameState.combo} Combo!`, event.clientX, event.clientY + 20, 'text-cyan-400');
+        }
+        leadElement.classList.add('shake');
+        setTimeout(() => leadElement.classList.remove('shake'), 300);
+
+        if (leadData.currentHealth <= 0) {
+            // Deal Closed!
+            const baseEarning = leadData.value;
+            const comboBonus = Math.round(baseEarning * (0.2 * (gameState.combo - 1)));
+            const totalEarning = baseEarning + comboBonus;
+
+            gameState.earnings += totalEarning;
+            gameState.deals++;
+            addXp(leadData.xp);
+            
+            logEvent(`Closed ${leadData.name} for <span class="text-green-400 font-bold">$${totalEarning.toLocaleString()}</span>!`);
+            if (comboBonus > 0) {
+                logEvent(`Combo Bonus: <span class="text-cyan-400 font-bold">$${comboBonus.toLocaleString()}</span>!`);
+            }
+            
+            leadElement.remove();
+        }
+        updateDisplay();
     }
     
-    function renderUpgrades() {
-        upgradesContainer.innerHTML = '';
-        upgrades.forEach(upgrade => {
-            const button = document.createElement('button');
-            button.id = upgrade.id;
-            button.className = 'w-full text-left p-3 rounded-md transition-colors duration-200 sim-upgrade-btn';
-            button.innerHTML = `
-                <p class="font-bold">${upgrade.name}</p>
-                <p class="text-sm text-gray-400">${upgrade.description}</p>
-                <p class="text-sm font-bold text-green-400">Cost: $${upgrade.cost.toLocaleString()}</p>
-            `;
-            
-            if (upgrade.purchased) {
-                button.disabled = true;
-                button.classList.add('bg-green-800', 'text-gray-400', 'cursor-not-allowed');
-                button.querySelector('p:last-child').textContent = 'Purchased';
-            } else if (gameState.bounties < upgrade.cost) {
-                button.disabled = true;
-                button.classList.add('bg-gray-700', 'text-gray-500', 'cursor-not-allowed');
-            } else {
-                button.disabled = false;
-                button.classList.add('bg-gray-700', 'hover:bg-gray-600');
-            }
-            
-            button.addEventListener('click', () => {
-                if (gameState.bounties >= upgrade.cost && !upgrade.purchased) {
-                    gameState.bounties -= upgrade.cost;
-                    upgrade.action();
-                    upgrade.purchased = true;
-                    updateStats();
-                }
-            });
-            upgradesContainer.appendChild(button);
-        });
+    function addXp(amount) {
+        gameState.xp += amount;
+        while (gameState.xp >= gameState.xpNeeded) {
+            levelUp();
+        }
+        updateDisplay();
     }
 
-    function triggerRandomEvent() {
-        const eventData = randomEvents[Math.floor(Math.random() * randomEvents.length)];
-        eventLog.textContent = eventData.text;
-        eventData.effect();
-        setTimeout(() => { eventLog.textContent = ''; }, 4000);
+    function levelUp() {
+        gameState.level++;
+        gameState.xp -= gameState.xpNeeded;
+        gameState.xpNeeded = Math.round(gameState.xpNeeded * 1.5);
+        gameState.clickPower += Math.ceil(gameState.level / 2);
+        logEvent(`Level Up! Reached Level <span class="text-yellow-300 font-bold">${gameState.level}</span>! Click Power increased!`, 'text-yellow-300');
     }
 
-    function tempChangeSpawnRate(multiplier, duration) {
-        const originalRate = gameState.leadSpawnRate;
-        gameState.leadSpawnRate *= multiplier;
-        // Clear and set new interval
-        clearInterval(gameState.intervals[1]);
-        gameState.intervals[1] = setInterval(() => { if(gameState.gameIsActive) spawnLead(); }, gameState.leadSpawnRate);
+    function createFloatingText(text, x, y, colorClass) {
+        const textElement = document.createElement('div');
+        textElement.className = `floating-text ${colorClass}`;
+        textElement.textContent = text;
         
-        setTimeout(() => {
-            gameState.leadSpawnRate = originalRate;
-            clearInterval(gameState.intervals[1]);
-            gameState.intervals[1] = setInterval(() => { if(gameState.gameIsActive) spawnLead(); }, gameState.leadSpawnRate);
-        }, duration);
+        const rect = gameBoard.getBoundingClientRect();
+        textElement.style.left = `${x - rect.left}px`;
+        textElement.style.top = `${y - rect.top}px`;
+        
+        gameBoard.appendChild(textElement);
+        setTimeout(() => textElement.remove(), 1500);
     }
-
-    function removeHighValueLead() {
-        const leads = gameBoard.querySelectorAll('.sim-lead');
-        let highestValue = 0;
-        let leadToRemove = null;
-        leads.forEach(lead => {
-            // A simple heuristic for value
-            const value = (lead.innerHTML.includes('Plus') ? 2500 : 0) + (lead.innerHTML.includes('Advanced') ? 80 : 0);
-            if (value > highestValue) {
-                highestValue = value;
-                leadToRemove = lead;
-            }
-        });
-        if(leadToRemove) leadToRemove.remove();
-    }
-
-    function spawnSpecificLead(typeIndex, count) {
-        for(let i = 0; i < count; i++) {
-             const leadData = { ...leadTypes[typeIndex] };
-             spawnLead(leadData); // Pass the specific lead data
+    
+    function logEvent(message, color = 'text-gray-300') {
+        const logEntry = document.createElement('p');
+        logEntry.className = color;
+        logEntry.innerHTML = `> ${message}`;
+        eventLogContainer.prepend(logEntry);
+        
+        if (eventLogContainer.children.length > 10) {
+            eventLogContainer.lastChild.remove();
         }
     }
 

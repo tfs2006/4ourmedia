@@ -79,56 +79,67 @@
 
                 <div class="mt-8 bg-gray-900/50 p-4 sm:p-6 rounded-2xl shadow-2xl max-w-4xl mx-auto border border-gray-700">
                     <!-- Game Stats Dashboard -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-left">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-left">
                         <div class="bg-gray-700/50 p-3 rounded-lg">
                             <p class="text-sm text-gray-400">Time Left</p>
                             <p class="text-2xl font-bold text-white"><span id="sim-time-left">60</span>s</p>
                         </div>
                         <div class="bg-gray-700/50 p-3 rounded-lg">
-                            <p class="text-sm text-gray-400">One-Time Bounties</p>
-                            <p class="text-2xl font-bold text-green-400">$<span id="sim-bounties">0</span></p>
+                            <p class="text-sm text-gray-400">Total Earnings</p>
+                            <p class="text-2xl font-bold text-green-400">$<span id="sim-earnings">0</span></p>
                         </div>
                         <div class="bg-gray-700/50 p-3 rounded-lg">
-                            <p class="text-sm text-gray-400">Monthly Recurring Revenue</p>
-                            <p class="text-2xl font-bold text-blue-400">$<span id="sim-mrr">0</span>/mo</p>
+                            <p class="text-sm text-gray-400">Partner Level</p>
+                            <p class="text-2xl font-bold text-white">LVL <span id="sim-level">1</span></p>
                         </div>
                          <div class="bg-gray-700/50 p-3 rounded-lg">
-                            <p class="text-sm text-gray-400">Total Deals Closed</p>
-                            <p class="text-2xl font-bold text-white"><span id="sim-deals">0</span></p>
+                            <p class="text-sm text-gray-400">Click Power</p>
+                            <p class="text-2xl font-bold text-blue-400"><span id="sim-click-power">1</span></p>
                         </div>
+                    </div>
+                    
+                    <!-- XP Bar -->
+                    <div class="mb-6">
+                        <div class="xp-bar-bg">
+                            <div id="sim-xp-bar" class="xp-bar" style="width: 0%;"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1 text-right">XP: <span id="sim-xp">0</span> / <span id="sim-xp-needed">10</span></p>
                     </div>
 
                     <!-- Game Area -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div id="sim-game-board" class="md:col-span-2 bg-gray-800/60 rounded-lg p-4 min-h-[300px] md:min-h-[400px] relative overflow-hidden shadow-inner">
                             <!-- Leads will appear here -->
-                            <div id="sim-start-screen" class="absolute inset-0 flex flex-col justify-center items-center bg-gray-800/80 backdrop-blur-sm z-10">
-                                <h3 class="text-3xl font-bold mb-4">Ready to Start?</h3>
-                                <p class="max-w-sm mb-6 text-gray-300">Click on leads as they appear to close deals. Use your earnings to buy upgrades and maximize your income!</p>
+                            <div id="sim-start-screen" class="absolute inset-0 flex flex-col justify-center items-center bg-gray-800/80 backdrop-blur-sm z-20">
+                                <h3 class="text-3xl font-bold mb-4">How to Play</h3>
+                                <ul class="text-left list-disc list-inside mb-6 text-gray-300 max-w-sm">
+                                    <li>Click on leads to close deals and earn cash.</li>
+                                    <li>Closing deals grants XP. Level up to increase your Click Power!</li>
+                                    <li>Keep clicking the same lead to build a combo for bonus cash.</li>
+                                    <li>Watch out for rare "Whale" leads for massive payouts!</li>
+                                </ul>
                                 <button id="start-simulator" class="brand-bg text-white font-bold py-3 px-8 rounded-full text-lg brand-bg-hover transition-colors duration-300 transform hover:scale-105">Start 60-Second Challenge</button>
                             </div>
-                             <div id="sim-end-screen" class="hidden absolute inset-0 flex-col justify-center items-center bg-gray-800/80 backdrop-blur-sm z-10 p-4">
+                             <div id="sim-end-screen" class="hidden absolute inset-0 flex-col justify-center items-center bg-gray-800/80 backdrop-blur-sm z-20 p-4">
                                 <h3 class="text-3xl font-bold mb-2">Year-End Report!</h3>
-                                <p class="text-lg text-gray-300 mb-4">Here's how you did:</p>
+                                <p class="text-lg text-gray-300 mb-4">Here's your performance:</p>
                                 <div class="text-left bg-gray-700/50 p-4 rounded-lg mb-6">
+                                    <p class="text-xl">Final Level: <span class="font-bold text-white" id="end-level">0</span></p>
                                     <p class="text-xl">Deals Closed: <span class="font-bold text-white" id="end-deals">0</span></p>
-                                    <p class="text-xl">Final MRR: <span class="font-bold text-blue-400" id="end-mrr">$0/mo</span></p>
-                                    <p class="text-xl">Total Bounties: <span class="font-bold text-green-400" id="end-bounties">$0</span></p>
-                                    <p class="text-2xl mt-2">Annualized Recurring Revenue: <strong class="text-yellow-300" id="end-arr">$0</strong></p>
+                                    <p class="text-2xl mt-2">Total Earnings: <strong class="text-green-400" id="end-earnings">$0</strong></p>
                                 </div>
                                 <button id="restart-simulator" class="brand-bg text-white font-bold py-3 px-8 rounded-full text-lg brand-bg-hover transition-colors duration-300 transform hover:scale-105">Play Again</button>
                             </div>
                         </div>
 
-                        <!-- Upgrades Panel -->
+                        <!-- Live Feed Panel -->
                         <div class="bg-gray-800/60 rounded-lg p-4 text-left shadow-inner">
-                            <h4 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Upgrades</h4>
-                            <div id="sim-upgrades" class="space-y-3">
-                                <!-- Upgrades will be generated by JavaScript -->
+                            <h4 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Live Feed</h4>
+                            <div id="sim-event-log" class="space-y-2 text-sm h-full overflow-y-auto">
+                                <!-- Events will be logged here -->
                             </div>
                         </div>
                     </div>
-                     <div id="sim-event-log" class="mt-4 text-center text-yellow-300 font-semibold h-6"></div>
                 </div>
             </div>
         </section>
