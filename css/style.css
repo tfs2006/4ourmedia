@@ -4,10 +4,6 @@ body {
     background-color: #f8fafc; /* Sets a base background color */
 }
 .hero-bg {
-    background-image: url('https://davidjwoodbury.com/assets/hero.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     background-color: #f8fafc;
 }
 .brand-text {
