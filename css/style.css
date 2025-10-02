@@ -4,6 +4,10 @@ body {
     background-color: #f8fafc; /* Sets a base background color */
 }
 .hero-bg {
+    background-image: url('https://davidjwoodbury.com/assets/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-color: #f8fafc;
 }
 .brand-text {
@@ -35,7 +39,6 @@ body {
     transform: translateY(-5px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
-
 /* --- Enhanced Simulator Game Styles --- */
 .stat-card {
     background-color: rgba(55, 65, 81, 0.5); /* gray-700 with opacity */
@@ -53,7 +56,6 @@ body {
     font-weight: 700;
     line-height: 1;
 }
-
 .sim-lead {
     background-color: rgba(31, 41, 55, 0.9); /* gray-800 with opacity */
     border: 1px solid rgba(75, 85, 99, 0.9); /* gray-600 with opacity */
@@ -68,27 +70,22 @@ body {
     width: 120px;
     height: 70px;
 }
-
 .sim-lead.whale {
     border-color: #fcd34d; /* yellow-300 */
     animation: pop-in 0.3s ease-out forwards, pulse 1.5s infinite;
 }
-
 @keyframes pop-in {
     from { transform: scale(0); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
-
 @keyframes pop-out {
     from { transform: scale(1); opacity: 1; }
     to { transform: scale(0); opacity: 0; }
 }
-
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 15px rgba(252, 211, 77, 0.5); }
     50% { box-shadow: 0 0 25px rgba(252, 211, 77, 1); }
 }
-
 .floating-text {
     position: absolute;
     pointer-events: none;
@@ -97,7 +94,6 @@ body {
     animation: float-up 1.5s ease-out forwards;
     text-shadow: 0 0 5px rgba(0,0,0,0.7);
 }
-
 @keyframes float-up {
     from {
         transform: translateY(0);
@@ -108,55 +104,45 @@ body {
         opacity: 0;
     }
 }
-
 .xp-bar-bg {
     background-color: #374151; /* gray-700 */
     border-radius: 9999px;
     overflow: hidden;
     height: 12px;
 }
-
 .xp-bar {
     background-color: #fbbf24; /* amber-400 */
     height: 100%;
     border-radius: 9999px;
     transition: width 0.5s ease-in-out;
 }
-
 .sim-lead-icon {
     width: 24px;
     height: 24px;
     margin-bottom: 4px;
 }
-
 .shake {
     animation: shake-horizontal 0.3s cubic-bezier(.36,.07,.19,.97) both;
 }
-
 @keyframes shake-horizontal {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70% { transform: translateX(-5px); }
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
-
 #sim-investments button:disabled {
     background-color: rgba(55, 65, 81, 0.3);
     color: #6b7280;
     cursor: not-allowed;
 }
-
 #sim-investments button {
     background-color: rgba(55, 65, 81, 0.7);
 }
-
 #sim-investments button:hover:not(:disabled) {
     background-color: rgba(75, 85, 99, 0.7);
 }
-
 .animate-fade-in {
     animation: fade-in 0.5s ease-in-out;
 }
-
 @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
