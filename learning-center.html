@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Learning Center | Shopify Guides & Resources | 4ourmedia</title>
+    <meta content="Free Shopify guides, tutorials, calculators, and resources to help you succeed in ecommerce." name="description"/>
+    <link href="images/favicon.ico" rel="icon" type="image/x-icon"/>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4G2W1V5XFP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} 
+      gtag('js', new Date());
+      gtag('config', 'G-4G2W1V5XFP');
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="index.html"><span class="brand-text">4our</span><span>media</span></a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="services.html" class="nav-link">Services</a>
+                    <a href="portfolio.html" class="nav-link">Portfolio</a>
+                    <a href="learning-center.html" class="nav-link text-green-600">Learn</a>
+                    <a href="pricing.html" class="nav-link">Pricing</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </div>
+                <a class="cta-button" href="questionnaire.html">Get Your Roadmap</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero-section py-16 md:py-24">
+            <div class="hero-bg-pattern"></div>
+            <div class="container mx-auto px-4 sm:px-6 relative z-10 text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6">Learning Center</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Free resources, guides, and tools to help you succeed with Shopify.
+                </p>
+            </div>
+        </section>
+
+        <!-- Featured Tools -->
+        <section class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">Interactive Tools</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    
+                    <!-- ROI Calculator -->
+                    <div class="card p-8">
+                        <div class="text-4xl mb-4">🧮</div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">Shopify ROI Calculator</h3>
+                        <p class="text-gray-600 mb-6">Calculate your potential return on investment with a Shopify store.</p>
+                        
+                        <div class="space-y-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Revenue Goal ($)</label>
+                                <input type="number" id="revenue" placeholder="10000" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Average Order Value ($)</label>
+                                <input type="number" id="aov" placeholder="75" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Conversion Rate (%)</label>
+                                <input type="number" id="conversion" placeholder="2" step="0.1" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <button onclick="calculateROI()" class="w-full cta-button py-3">
+                                Calculate ROI
+                            </button>
+                        </div>
+                        
+                        <div id="roi-results" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
+                            <p class="text-sm text-gray-700 mb-2"><strong>Orders Needed:</strong> <span id="orders"></span>/month</p>
+                            <p class="text-sm text-gray-700 mb-2"><strong>Traffic Needed:</strong> <span id="traffic"></span> visitors/month</p>
+                            <p class="text-sm text-gray-700"><strong>Annual Revenue:</strong> <span id="annual" class="text-green-700 font-bold"></span></p>
+                        </div>
+                    </div>
+
+                    <!-- Shopify Quiz -->
+                    <div class="card p-8">
+                        <div class="text-4xl mb-4">❓</div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">Is Shopify Right for You?</h3>
+                        <p class="text-gray-600 mb-6">Take our 2-minute quiz to find out if Shopify is the best platform for your business.</p>
+                        
+                        <div id="quiz-container" class="space-y-4">
+                            <div class="quiz-question">
+                                <p class="font-medium text-gray-900 mb-3">How many products do you plan to sell?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="q1" value="10" class="mr-3">
+                                        <span class="text-sm">1-50 products</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="q1" value="20" class="mr-3">
+                                        <span class="text-sm">51-500 products</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="q1" value="30" class="mr-3">
+                                        <span class="text-sm">500+ products</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="showQuizResult()" class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg mt-6 hover:bg-gray-800">
+                            See Result
+                        </button>
+                        
+                        <div id="quiz-result" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                            <p class="text-green-700 font-bold mb-2">✅ Shopify is a great fit!</p>
+                            <p class="text-sm text-gray-700">Based on your answers, Shopify can handle your needs. Get a custom roadmap to get started.</p>
+                            <a href="questionnaire.html" class="inline-block mt-3 text-green-600 font-semibold hover:text-green-700">
+                                Get Your Roadmap →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guides & Articles -->
+        <section class="py-16 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">Popular Guides</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    
+                    <!-- Guide 1 -->
+                    <div class="card">
+                        <div class="bg-gradient-to-br from-green-400 to-green-600 h-48 rounded-t-xl flex items-center justify-center text-white text-6xl">
+                            📚
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-block bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full mb-3">BEGINNER</span>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Complete Shopify Setup Guide</h3>
+                            <p class="text-gray-600 mb-4">Everything you need to know to launch your first Shopify store in 30 days.</p>
+                            <a href="#" class="text-green-600 font-semibold hover:text-green-700">Read Guide →</a>
+                        </div>
+                    </div>
+
+                    <!-- Guide 2 -->
+                    <div class="card">
+                        <div class="bg-gradient-to-br from-blue-400 to-blue-600 h-48 rounded-t-xl flex items-center justify-center text-white text-6xl">
+                            🚀
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full mb-3">INTERMEDIATE</span>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Platform Migration Checklist</h3>
+                            <p class="text-gray-600 mb-4">Step-by-step guide to migrating from WooCommerce, Magento, or other platforms to Shopify.</p>
+                            <a href="#" class="text-green-600 font-semibold hover:text-green-700">Read Guide →</a>
+                        </div>
+                    </div>
+
+                    <!-- Guide 3 -->
+                    <div class="card">
+                        <div class="bg-gradient-to-br from-purple-400 to-purple-600 h-48 rounded-t-xl flex items-center justify-center text-white text-6xl">
+                            💰
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-block bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full mb-3">ADVANCED</span>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Shopify Plus: Is It Worth It?</h3>
+                            <p class="text-gray-600 mb-4">Comprehensive breakdown of Shopify Plus features, pricing, and when to upgrade.</p>
+                            <a href="#" class="text-green-600 font-semibold hover:text-green-700">Read Guide →</a>
+                        </div>
+                    </div>
+
+                    <!-- Guide 4 -->
+                    <div class="card">
+                        <div class="bg-gradient-to-br from-orange-400 to-orange-600 h-48 rounded-t-xl flex items-center justify-center text-white text-6xl">
+                            🎨
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-block bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full mb-3">DESIGN</span>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Theme Customization 101</h3>
+                            <p class="text-gray-600 mb-4">Learn how to customize your Shopify theme without coding knowledge.</p>
+                            <a href="#" class="text-green-600 font-semibold hover:text-green-700">Read Guide →</a>
+                        </div>
+                    </div>
+
+                    <!-- Guide 5 -->
+                    <div class="card">
+                        <div class="bg-gradient-to-br from-red-400 to-red-600 h-48 rounded-t-xl flex items-center justify-center text-white text-6xl">
+                            📈
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-block bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full mb-3">MARKETING</span>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Conversion Rate Optimization</h3>
+                            <p class="text-gray-600 mb-4">Proven strategies to increase your store's conversion rate by 20%+.</p>
+                            <a href="#" class="text-green-600 font-semibold hover:text-green-700">Read Guide →</a>
+                        </div>
+                    </div>
+
+                    <!-- Guide 6 -->
+                    <div class="card">
+                        <div class="bg-gradient-to-br from-teal-400 to-teal-600 h-48 rounded-t-xl flex items-center justify-center text-white text-6xl">
+                            🔧
+                        </div>
+                        <div class="p-6">
+                            <span class="inline-block bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full mb-3">TECHNICAL</span>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Essential Shopify Apps 2025</h3>
+                            <p class="text-gray-600 mb-4">The must-have apps for inventory, shipping, marketing, and customer service.</p>
+                            <a href="#" class="text-green-600 font-semibold hover:text-green-700">Read Guide →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Video Tutorials -->
+        <section class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">Video Tutorials</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card">
+                        <div class="bg-gray-800 h-64 rounded-t-xl flex items-center justify-center text-white">
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">▶️</div>
+                                <p class="text-lg">How to Set Up Your Shopify Store</p>
+                                <p class="text-sm text-gray-400 mt-2">12 minutes</p>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-bold text-gray-900 mb-2">Shopify Setup Walkthrough</h3>
+                            <p class="text-gray-600 text-sm">Complete video guide showing every step of the setup process.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="bg-gray-800 h-64 rounded-t-xl flex items-center justify-center text-white">
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">▶️</div>
+                                <p class="text-lg">Product Page Optimization</p>
+                                <p class="text-sm text-gray-400 mt-2">18 minutes</p>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-bold text-gray-900 mb-2">Create High-Converting Product Pages</h3>
+                            <p class="text-gray-600 text-sm">Learn the elements of product pages that actually drive sales.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Downloadable Resources -->
+        <section class="py-16 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 max-w-4xl">
+                <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">Free Downloads</h2>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 text-green-600 text-2xl w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                                📄
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">Pre-Launch Checklist</h3>
+                                <p class="text-sm text-gray-600">50-point checklist before going live</p>
+                            </div>
+                        </div>
+                        <button class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700">
+                            Download
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 text-blue-600 text-2xl w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                                📊
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">Ecommerce Metrics Template</h3>
+                                <p class="text-sm text-gray-600">Track all your important KPIs</p>
+                            </div>
+                        </div>
+                        <button class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700">
+                            Download
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 text-purple-600 text-2xl w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                                🎯
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">SEO Optimization Guide</h3>
+                                <p class="text-sm text-gray-600">Shopify SEO best practices PDF</p>
+                            </div>
+                        </div>
+                        <button class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700">
+                            Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-16 md:py-24 bg-gradient-to-br from-green-600 to-green-700 text-white">
+            <div class="container mx-auto px-4 sm:px-6 text-center">
+                <h2 class="text-3xl md:text-5xl font-bold mb-6">Ready to Get Started?</h2>
+                <p class="text-lg md:text-xl text-green-50 max-w-2xl mx-auto mb-10">
+                    Get your personalized Shopify roadmap and launch strategy.
+                </p>
+                <a href="questionnaire.html" class="inline-block bg-white text-green-600 font-bold py-4 px-10 rounded-full text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-xl">
+                    Get Your Free Roadmap →
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="container mx-auto px-4 sm:px-6 py-12">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-white mb-4">
+                    <span class="brand-text">4our</span><span>media</span>
+                </div>
+                <p class="text-sm text-gray-400 mb-4">Certified Shopify Partner</p>
+                <p class="text-sm"><a href="mailto:shopify@4ourmedia.com" class="hover:text-green-500">shopify@4ourmedia.com</a></p>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+                <p>© 2025 4ourmedia. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        function calculateROI() {
+            const revenue = parseFloat(document.getElementById('revenue').value);
+            const aov = parseFloat(document.getElementById('aov').value);
+            const conversion = parseFloat(document.getElementById('conversion').value);
+            
+            if (!revenue || !aov || !conversion) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            const orders = Math.ceil(revenue / aov);
+            const traffic = Math.ceil(orders / (conversion / 100));
+            const annual = revenue * 12;
+            
+            document.getElementById('orders').textContent = orders.toLocaleString();
+            document.getElementById('traffic').textContent = traffic.toLocaleString();
+            document.getElementById('annual').textContent = '$' + annual.toLocaleString();
+            document.getElementById('roi-results').classList.remove('hidden');
+        }
+        
+        function showQuizResult() {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            if (!q1) {
+                alert('Please answer the question');
+                return;
+            }
+            document.getElementById('quiz-result').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

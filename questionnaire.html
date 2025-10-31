@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Get Your Custom Shopify Roadmap | 4ourmedia</title>
+    <meta content="Answer a few questions about your business and receive a personalized Shopify setup roadmap tailored to your needs." name="description"/>
+    <link href="images/favicon.ico" rel="icon" type="image/x-icon"/>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4G2W1V5XFP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} 
+      gtag('js', new Date());
+      gtag('config', 'G-4G2W1V5XFP');
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="css/style.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="index.html" class="flex items-center">
+                        <span class="brand-text">4our</span><span>media</span>
+                    </a>
+                </div>
+                <a href="index.html" class="text-gray-600 hover:text-green-600 font-medium">
+                    ← Back to Home
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="py-12 md:py-20">
+        <div class="container mx-auto px-4 sm:px-6 max-w-4xl">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-600">Step <span id="current-step">1</span> of 5</span>
+                    <span class="text-sm text-gray-500">~5 minutes</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-green-600 h-2.5 rounded-full transition-all duration-300" id="progress-bar" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+                <form id="questionnaire-form">
+                    <!-- Section 1: Business Basics -->
+                    <div class="form-section active" id="section-1">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">Tell Us About Your Business</h2>
+                        <p class="text-gray-600 mb-8">Let's start with the basics so we can understand your needs.</p>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="company-name">
+                                    Company Name <span class="text-red-500">*</span>
+                                </label>
+                                <input class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                       id="company-name" 
+                                       name="company-name" 
+                                       required 
+                                       type="text" 
+                                       placeholder="Your company name"/>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="website">
+                                    Current Website (if any)
+                                </label>
+                                <input class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                       id="website" 
+                                       name="website" 
+                                       type="url" 
+                                       placeholder="https://yourwebsite.com"/>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="industry">
+                                    Industry <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="industry" 
+                                        name="industry" 
+                                        required>
+                                    <option value="">Select your industry</option>
+                                    <option value="fashion">Fashion & Apparel</option>
+                                    <option value="beauty">Beauty & Cosmetics</option>
+                                    <option value="electronics">Electronics & Tech</option>
+                                    <option value="home">Home & Garden</option>
+                                    <option value="food">Food & Beverage</option>
+                                    <option value="health">Health & Wellness</option>
+                                    <option value="sports">Sports & Fitness</option>
+                                    <option value="jewelry">Jewelry & Accessories</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Business Stage <span class="text-red-500">*</span>
+                                </label>
+                                <div class="space-y-3">
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="business-stage" value="idea" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Just an Idea</div>
+                                            <div class="text-sm text-gray-600">I'm still planning and researching</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="business-stage" value="ready" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Ready to Launch</div>
+                                            <div class="text-sm text-gray-600">I have products and ready to build the store</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="business-stage" value="existing" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Existing Business</div>
+                                            <div class="text-sm text-gray-600">I'm selling on another platform and want to migrate</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Business Goals -->
+                    <div class="form-section hidden" id="section-2">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">What Are Your Goals?</h2>
+                        <p class="text-gray-600 mb-8">Help us understand what success looks like for you.</p>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Primary Goal <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="primary-goal" 
+                                        name="primary-goal" 
+                                        required>
+                                    <option value="">Select your primary goal</option>
+                                    <option value="launch">Launch my first online store</option>
+                                    <option value="migrate">Migrate from another platform</option>
+                                    <option value="rebrand">Rebrand and redesign</option>
+                                    <option value="scale">Scale my existing Shopify store</option>
+                                    <option value="plus">Upgrade to Shopify Plus</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Launch Timeline <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="timeline" 
+                                        name="timeline" 
+                                        required>
+                                    <option value="">Select your timeline</option>
+                                    <option value="asap">ASAP (1-2 weeks)</option>
+                                    <option value="month">Within a month</option>
+                                    <option value="quarter">Within 3 months</option>
+                                    <option value="flexible">Flexible timeline</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Expected Monthly Revenue
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="revenue" 
+                                        name="revenue">
+                                    <option value="">Select expected revenue</option>
+                                    <option value="0-5k">$0 - $5,000</option>
+                                    <option value="5k-25k">$5,000 - $25,000</option>
+                                    <option value="25k-100k">$25,000 - $100,000</option>
+                                    <option value="100k+">$100,000+</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Target Markets (select all that apply)
+                                </label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="markets" value="usa" class="mr-3"/>
+                                        <span>United States</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="markets" value="canada" class="mr-3"/>
+                                        <span>Canada</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="markets" value="europe" class="mr-3"/>
+                                        <span>Europe</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="markets" value="global" class="mr-3"/>
+                                        <span>Global / Multiple Markets</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Technical Requirements -->
+                    <div class="form-section hidden" id="section-3">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">Technical Details</h2>
+                        <p class="text-gray-600 mb-8">Let's understand your product catalog and feature needs.</p>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Number of Products <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="product-count" 
+                                        name="product-count" 
+                                        required>
+                                    <option value="">Select product count</option>
+                                    <option value="1-10">1-10 products</option>
+                                    <option value="11-50">11-50 products</option>
+                                    <option value="51-200">51-200 products</option>
+                                    <option value="201-1000">201-1,000 products</option>
+                                    <option value="1000+">1,000+ products</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Required Features (select all that apply)
+                                </label>
+                                <div class="grid md:grid-cols-2 gap-3">
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="features" value="subscriptions" class="mr-3"/>
+                                        <span class="text-sm">Subscriptions</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="features" value="wholesale" class="mr-3"/>
+                                        <span class="text-sm">Wholesale/B2B</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="features" value="multi-currency" class="mr-3"/>
+                                        <span class="text-sm">Multi-Currency</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="features" value="multi-language" class="mr-3"/>
+                                        <span class="text-sm">Multi-Language</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="features" value="pos" class="mr-3"/>
+                                        <span class="text-sm">POS Integration</span>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="features" value="custom-app" class="mr-3"/>
+                                        <span class="text-sm">Custom App</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Integration Needs
+                                </label>
+                                <textarea class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                          id="integrations" 
+                                          name="integrations" 
+                                          rows="3" 
+                                          placeholder="List any third-party tools you need to integrate (e.g., accounting software, CRM, shipping providers)"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Content Readiness <span class="text-red-500">*</span>
+                                </label>
+                                <div class="space-y-3">
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="content-ready" value="all-ready" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">All Ready</div>
+                                            <div class="text-sm text-gray-600">I have all product photos, descriptions, and branding</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="content-ready" value="partial" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Partially Ready</div>
+                                            <div class="text-sm text-gray-600">I have some content but need help with the rest</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="content-ready" value="need-help" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Need Full Support</div>
+                                            <div class="text-sm text-gray-600">I need help with photography, copywriting, and branding</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Support Needs -->
+                    <div class="form-section hidden" id="section-4">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">Support & Involvement</h2>
+                        <p class="text-gray-600 mb-8">How much support do you need from our team?</p>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Team Experience with Shopify <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="experience" 
+                                        name="experience" 
+                                        required>
+                                    <option value="">Select experience level</option>
+                                    <option value="none">No experience with Shopify</option>
+                                    <option value="basic">Basic knowledge</option>
+                                    <option value="intermediate">Comfortable with Shopify</option>
+                                    <option value="advanced">Advanced Shopify user</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Preferred Involvement <span class="text-red-500">*</span>
+                                </label>
+                                <div class="space-y-3">
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="involvement" value="hands-off" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Fully Managed</div>
+                                            <div class="text-sm text-gray-600">Handle everything - I just want the finished store</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="involvement" value="collaborative" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Collaborative</div>
+                                            <div class="text-sm text-gray-600">Work together - I want to be involved in decisions</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                                        <input type="radio" name="involvement" value="hands-on" required class="mt-1 mr-3"/>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Hands-On</div>
+                                            <div class="text-sm text-gray-600">I want to learn and do some of the work myself</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Post-Launch Support <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="post-launch" 
+                                        name="post-launch" 
+                                        required>
+                                    <option value="">Select support level</option>
+                                    <option value="none">We'll manage it ourselves</option>
+                                    <option value="basic">Basic support (email/chat)</option>
+                                    <option value="ongoing">Ongoing maintenance package</option>
+                                    <option value="full">Full managed service</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Additional Notes
+                                </label>
+                                <textarea class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                          id="notes" 
+                                          name="notes" 
+                                          rows="4" 
+                                          placeholder="Anything else we should know about your project?"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Budget & Contact -->
+                    <div class="form-section hidden" id="section-5">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">Budget & Contact Information</h2>
+                        <p class="text-gray-600 mb-8">Final step! Let's discuss budget and how to reach you.</p>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Project Budget <span class="text-red-500">*</span>
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="budget" 
+                                        name="budget" 
+                                        required>
+                                    <option value="">Select your budget range</option>
+                                    <option value="under-5k">Under $5,000</option>
+                                    <option value="5k-10k">$5,000 - $10,000</option>
+                                    <option value="10k-25k">$10,000 - $25,000</option>
+                                    <option value="25k-50k">$25,000 - $50,000</option>
+                                    <option value="50k+">$50,000+</option>
+                                    <option value="flexible">Flexible - let's discuss</option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="first-name">
+                                        First Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                           id="first-name" 
+                                           name="first-name" 
+                                           required 
+                                           type="text" 
+                                           placeholder="John"/>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="last-name">
+                                        Last Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                           id="last-name" 
+                                           name="last-name" 
+                                           required 
+                                           type="text" 
+                                           placeholder="Doe"/>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="email">
+                                    Email Address <span class="text-red-500">*</span>
+                                </label>
+                                <input class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                       id="email" 
+                                       name="email" 
+                                       required 
+                                       type="email" 
+                                       placeholder="john@company.com"/>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="phone">
+                                    Phone Number
+                                </label>
+                                <input class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                       id="phone" 
+                                       name="phone" 
+                                       type="tel" 
+                                       placeholder="(555) 123-4567"/>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    How did you hear about us?
+                                </label>
+                                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors" 
+                                        id="referral-source" 
+                                        name="referral-source">
+                                    <option value="">Select one</option>
+                                    <option value="google">Google Search</option>
+                                    <option value="social">Social Media</option>
+                                    <option value="referral">Referral</option>
+                                    <option value="shopify">Shopify Partner Directory</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <label class="flex items-start cursor-pointer">
+                                    <input type="checkbox" name="subscribe" value="yes" checked class="mt-1 mr-3"/>
+                                    <span class="text-sm text-gray-700">Yes, I'd like to receive helpful tips, guides, and updates about Shopify and ecommerce.</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between mt-10 pt-6 border-t border-gray-200">
+                        <button type="button" id="prev-btn" class="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors hidden">
+                            ← Previous
+                        </button>
+                        <div></div>
+                        <button type="button" id="next-btn" class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl">
+                            Next Step →
+                        </button>
+                        <button type="submit" id="submit-btn" class="hidden px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl">
+                            Get My Roadmap →
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Privacy Notice -->
+            <p class="text-center text-sm text-gray-500 mt-6">
+                Your information is secure and will only be used to create your custom roadmap. 
+                View our <a href="privacy.html" class="text-green-600 hover:underline">Privacy Policy</a>.
+            </p>
+        </div>
+    </main>
+
+    <script src="js/questionnaire.js"></script>
+</body>
+</html>
