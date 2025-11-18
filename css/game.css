@@ -19,61 +19,114 @@ body {
     position: relative;
 }
 
-/* Grid Layout */
-.game-grid {
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Changed to 2 columns */
-    gap: 1.5rem;
-    flex: 1;
-    min-height: 0; /* Crucial for nested scrolling */
-    width: 100%;
+/* Office Grid */
+#office-grid {
+    transition: all 0.3s ease;
 }
 
-/* Floating Items */
-.floating-item {
-    position: absolute;
-    padding: 12px 16px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    white-space: nowrap;
-    z-index: 50;
-    transition: transform 0.1s;
-    animation: floatAcross 8s linear forwards;
+.office-slot {
+    background: rgba(30, 41, 59, 0.5);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    aspect-ratio: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
-    user-select: none;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
 }
 
-.floating-item:active {
-    transform: scale(0.95);
+.office-slot:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(30, 41, 59, 0.8);
 }
 
-.floating-item.upgrade {
-    background: rgba(37, 99, 235, 0.9);
-    border: 2px solid #60a5fa;
-    color: white;
+.office-slot.occupied {
+    border-style: solid;
+    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(30, 41, 59, 1);
 }
 
-.floating-item.bonus {
-    background: rgba(22, 163, 74, 0.9);
-    border: 2px solid #4ade80;
-    color: white;
+/* Employee Avatar */
+.employee-avatar {
+    font-size: 2.5rem;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.2s;
 }
 
-.floating-item.threat {
-    background: rgba(220, 38, 38, 0.9);
-    border: 2px solid #f87171;
-    color: white;
-    animation: floatAcross 6s linear forwards; /* Faster */
+.employee-avatar.working {
+    animation: bounce 1s infinite;
 }
 
-@keyframes floatAcross {
-    0% { transform: translateX(-100%); left: 0; }
-    100% { transform: translateX(100vw); left: 0; } /* Use vw to ensure it crosses */
+.employee-avatar.sleeping {
+    opacity: 0.5;
+    filter: grayscale(1);
+    transform: scale(0.9) rotate(5deg);
+}
+
+/* Status Indicators */
+.status-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    z-index: 20;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.status-zzz { background: #94a3b8; color: white; }
+.status-bug { background: #ef4444; color: white; animation: pulse 1s infinite; }
+.status-cash { background: #22c55e; color: white; cursor: pointer; }
+
+/* Hire Card */
+.hire-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.hire-card:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+}
+
+.hire-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+/* Sequence Game */
+.seq-btn.active {
+    filter: brightness(1.5);
+    box-shadow: 0 0 20px currentColor;
+    transform: scale(1.1);
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 /* Dashboard Panels */
@@ -410,4 +463,88 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* Memory Market Mini-Game */
+.memory-card {
+    width: 90px;
+    height: 90px;
+    background: #1e293b;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.memory-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.4);
+}
+
+.memory-card.face-down {
+    background: #3b82f6;
+    border-color: #60a5fa;
+    background-image: 
+        linear-gradient(45deg, #2563eb 25%, transparent 25%, transparent 75%, #2563eb 75%, #2563eb),
+        linear-gradient(45deg, #2563eb 25%, transparent 25%, transparent 75%, #2563eb 75%, #2563eb);
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+}
+
+.memory-card.face-down > * {
+    opacity: 0; /* Hide content */
+}
+
+.memory-card.revealed {
+    background: #0f172a;
+}
+
+.memory-card.good {
+    border-color: #4ade80;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
+.memory-card.bad {
+    border-color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+}
+
+.memory-card.taken {
+    opacity: 0.5;
+    filter: grayscale(1);
+    cursor: default;
+}
+
+.memory-icon {
+    font-size: 2rem;
+    margin-bottom: 4px;
+}
+
+.memory-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.1;
+    padding: 0 4px;
+}
+
+.memory-value {
+    font-size: 0.6rem;
+    font-family: 'Courier New', monospace;
+    margin-top: 2px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.3);
+}
+
+.memory-card.good .memory-value { color: #4ade80; }
+.memory-card.bad .memory-value { color: #ef4444; }
 

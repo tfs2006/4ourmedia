@@ -51,131 +51,107 @@
         </header>
 
         <!-- Main Game Area -->
-        <div class="game-grid" style="grid-template-columns: 1fr 2fr;">
+        <div class="game-grid" style="grid-template-columns: 300px 1fr;">
             
-            <!-- Left Panel: Strategy / Info -->
-            <div class="panel" id="tab-home">
-                <h3 class="text-xl font-bold mb-4 text-gray-200 border-b border-gray-700 pb-2 shrink-0">Company Status</h3>
-                <div class="space-y-4 flex-grow overflow-y-auto custom-scrollbar">
-                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
-                        <div class="text-xs text-gray-400">Current Phase</div>
-                        <div class="font-bold text-yellow-400" id="phase-display">Garage Startup</div>
+            <!-- Left Panel: Hiring & Stats -->
+            <div class="panel" id="tab-management">
+                <h3 class="text-xl font-bold mb-4 text-gray-200 border-b border-gray-700 pb-2">Management</h3>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-2 mb-6">
+                    <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                        <div class="text-[10px] text-gray-400 uppercase">Cash</div>
+                        <div class="font-bold text-green-400 text-lg">$<span id="cash-display">0</span></div>
                     </div>
-                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
-                        <div class="text-xs text-gray-400">Valuation</div>
-                        <div class="font-bold text-green-300">$<span id="valuation-display">0</span></div>
+                    <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                        <div class="text-[10px] text-gray-400 uppercase">Users</div>
+                        <div class="font-bold text-blue-400 text-lg"><span id="users-display">0</span></div>
                     </div>
+                </div>
 
-                    <!-- Inventory List (Replaces Shop List) -->
-                    <div class="mt-6">
-                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Active Assets</h4>
-                        <div id="inventory-list" class="space-y-2 text-xs">
-                            <!-- Injected by JS -->
-                            <div class="text-gray-600 italic">No assets acquired yet.</div>
-                        </div>
+                <!-- Hiring Market -->
+                <div class="flex-grow overflow-y-auto custom-scrollbar">
+                    <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Hire Talent</h4>
+                    <div id="hire-list" class="space-y-2">
+                        <!-- Injected by JS -->
                     </div>
+                </div>
+
+                <!-- Office Upgrade -->
+                <div class="mt-4 pt-4 border-t border-gray-700">
+                    <button id="expand-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        Expand Office ($1,000)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Center Panel: The Office Grid -->
+            <div class="panel active relative" id="tab-office">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-200">
+                        <span id="office-name">Garage HQ</span> 
+                        <span class="text-sm font-normal text-gray-500 ml-2">(<span id="slots-used">0</span>/<span id="slots-total">4</span> Desks)</span>
+                    </h3>
                     
-                    <!-- Achievements Mini View -->
-                    <div class="mt-6">
-                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Recent Milestones</h4>
-                        <div id="achievements-list" class="space-y-2">
-                            <!-- Injected by JS -->
-                            <div class="text-xs text-gray-600 italic">No milestones yet. Get to work!</div>
-                        </div>
-                    </div>
-
-                    <!-- Prestige Button -->
-                    <div class="mt-auto pt-4">
-                        <button id="prestige-btn" class="w-full bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 border border-yellow-600/50 py-2 rounded transition-all hidden">
-                            Exit Company (Sell)
+                    <!-- Manual Work Mini-Game Trigger -->
+                    <div class="flex items-center gap-2">
+                        <div class="text-xs text-gray-400 mr-2">Founder Action:</div>
+                        <button id="founder-work-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded text-sm font-bold shadow-lg active:transform active:scale-95">
+                            Code Feature
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Center Panel: The Grind & Floating Events -->
-            <div class="panel active relative overflow-hidden" id="tab-work">
-                <div class="absolute top-4 left-4 text-gray-500 text-sm hidden lg:block">Office View</div>
-                
-                <!-- Floating Items Container -->
-                <div id="floating-container" class="absolute inset-0 pointer-events-none z-20 overflow-hidden"></div>
-
-                <div class="relative mx-auto z-10 flex flex-col items-center justify-center h-full w-full max-w-md px-4">
-                    
-                    <!-- Meters Container -->
-                    <div class="w-full mb-8 space-y-4">
-                        <!-- Hype Meter -->
-                        <div class="relative">
-                            <div class="flex justify-between text-xs font-bold mb-1">
-                                <span class="text-purple-400">VIRAL HYPE <span id="hype-multiplier">x1.0</span></span>
-                                <span class="text-gray-500">MULTIPLIER</span>
-                            </div>
-                            <div class="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-                                <div id="hype-bar" class="h-full bg-gradient-to-r from-purple-600 to-pink-500 w-0 transition-all duration-100 ease-linear"></div>
-                            </div>
-                        </div>
-
-                        <!-- Stress Meter -->
-                        <div class="relative">
-                            <div class="flex justify-between text-xs font-bold mb-1">
-                                <span class="text-orange-400">STRESS LEVEL</span>
-                                <span id="stress-status" class="text-gray-500">STABLE</span>
-                            </div>
-                            <div class="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-                                <div id="stress-bar" class="h-full bg-gradient-to-r from-orange-500 to-red-600 w-0 transition-all duration-100 ease-linear"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="main-action-btn" class="main-btn group relative">
-                        <div>HUSTLE</div>
-                        <span class="group-hover:text-white text-blue-200 text-xs">Click to Work</span>
-                    </button>
-                    
-                    <div class="mt-8 text-center text-gray-400 text-sm max-w-xs italic" id="flavor-text">
-                        "Success is 1% inspiration, 99% perspiration."
-                    </div>
+                <!-- The Grid -->
+                <div id="office-grid" class="grid grid-cols-2 gap-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700 min-h-[400px] content-start transition-all duration-500">
+                    <!-- Slots injected by JS -->
                 </div>
-                
-                <!-- Particle container -->
-                <div id="particles" class="absolute inset-0 pointer-events-none z-30"></div>
-            </div>
 
-            <!-- Shop Panel Removed -->
+                <!-- Founder Sequence Overlay (Memory Game) -->
+                <div id="sequence-overlay" class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
+                    <h3 class="text-2xl font-bold text-white mb-4">SHIP FEATURE</h3>
+                    <div class="text-gray-400 mb-8 text-sm">Memorize & Repeat the Sequence</div>
+                    
+                    <div class="flex gap-4 mb-8" id="sequence-display">
+                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-red-500 bg-red-500/20 cursor-pointer hover:bg-red-500/40 transition-all" data-color="red"></div>
+                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-blue-500 bg-blue-500/20 cursor-pointer hover:bg-blue-500/40 transition-all" data-color="blue"></div>
+                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-green-500 bg-green-500/20 cursor-pointer hover:bg-green-500/40 transition-all" data-color="green"></div>
+                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-yellow-500 bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/40 transition-all" data-color="yellow"></div>
+                    </div>
+
+                    <div id="sequence-status" class="h-8 text-lg font-bold text-white">Ready...</div>
+                    <button id="close-sequence-btn" class="mt-8 text-gray-500 hover:text-white text-sm underline">Cancel</button>
+                </div>
+            </div>
         </div>
 
         <!-- Mobile Navigation -->
         <div class="mobile-nav">
             <div class="mobile-nav-item" onclick="switchTab('home')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                Stats
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2 7 7 7-7 2 2-9 9-9-9z"></path></svg>
+                <span class="text-xs">Status</span>
             </div>
             <div class="mobile-nav-item active" onclick="switchTab('work')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                Work
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2 7 7 7-7 2 2-9 9-9-9z"></path></svg>
+                <span class="text-xs">Work</span>
+            </div>
+            <div class="mobile-nav-item" onclick="openShop()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2 7 7 7-7 2 2-9 9-9-9z"></path></svg>
+                <span class="text-xs">Shop</span>
             </div>
         </div>
-
-        <!-- Footer / News Ticker -->
-        <div class="mt-4 shrink-0 hidden lg:block">
-            <div class="ticker-wrap rounded-lg mb-4">
-                <div class="ticker" id="news-content">
-                    BREAKING: 4ourmedia launches new viral simulator game... Analysts predict productivity drop worldwide...
-                </div>
+        
+        <footer class="text-center text-xs text-gray-500 py-4 border-t border-gray-800">
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-6">
+                <span>&copy; <span id="copyright-year">2025</span> 4ourmedia. All rights reserved.</span>
+                <a href="mailto:hq@4ourmedia.com" class="hover:text-blue-400 transition">hq@4ourmedia.com</a>
+                <a href="https://davidjwoodbury.com" target="_blank" class="hover:text-blue-400 transition">Created by David J. Woodbury</a>
             </div>
-            
-            <footer class="text-center text-xs text-gray-500 py-4 border-t border-gray-800">
-                <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-6">
-                    <span>&copy; <span id="copyright-year">2025</span> 4ourmedia. All rights reserved.</span>
-                    <a href="mailto:hq@4ourmedia.com" class="hover:text-blue-400 transition">hq@4ourmedia.com</a>
-                    <a href="https://davidjwoodbury.com" target="_blank" class="hover:text-blue-400 transition">Created by David J. Woodbury</a>
-                </div>
-                <div class="mt-2 space-x-4">
-                    <a href="privacy.html" class="hover:text-gray-300">Privacy Policy</a>
-                    <a href="terms.html" class="hover:text-gray-300">Terms of Service</a>
-                </div>
-            </footer>
-        </div>
+            <div class="mt-2 space-x-4">
+                <a href="privacy.html" class="hover:text-gray-300">Privacy Policy</a>
+                <a href="terms.html" class="hover:text-gray-300">Terms of Service</a>
+            </div>
+        </footer>
     </div>
 
     <!-- Game Logic -->
