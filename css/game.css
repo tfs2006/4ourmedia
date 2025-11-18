@@ -241,6 +241,19 @@ body {
     user-select: none;
     position: relative;
     overflow: hidden;
+    z-index: 10;
+}
+
+.main-btn.burnout {
+    background: #334155; /* Slate 700 */
+    cursor: not-allowed;
+    filter: grayscale(1);
+    box-shadow: none;
+    border-color: #ef4444; /* Red border */
+}
+
+.main-btn.burnout::after {
+    display: none;
 }
 
 .main-btn::after {
@@ -260,7 +273,7 @@ body {
     100% { transform: translateX(100%) rotate(45deg); }
 }
 
-.main-btn:active {
+.main-btn:active:not(.burnout) {
     transform: scale(0.92);
     box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
 }

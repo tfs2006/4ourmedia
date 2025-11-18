@@ -100,7 +100,33 @@
                 <!-- Floating Items Container -->
                 <div id="floating-container" class="absolute inset-0 pointer-events-none z-20 overflow-hidden"></div>
 
-                <div class="relative mx-auto z-10 flex flex-col items-center justify-center h-full">
+                <div class="relative mx-auto z-10 flex flex-col items-center justify-center h-full w-full max-w-md px-4">
+                    
+                    <!-- Meters Container -->
+                    <div class="w-full mb-8 space-y-4">
+                        <!-- Hype Meter -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span class="text-purple-400">VIRAL HYPE <span id="hype-multiplier">x1.0</span></span>
+                                <span class="text-gray-500">MULTIPLIER</span>
+                            </div>
+                            <div class="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                                <div id="hype-bar" class="h-full bg-gradient-to-r from-purple-600 to-pink-500 w-0 transition-all duration-100 ease-linear"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stress Meter -->
+                        <div class="relative">
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span class="text-orange-400">STRESS LEVEL</span>
+                                <span id="stress-status" class="text-gray-500">STABLE</span>
+                            </div>
+                            <div class="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                                <div id="stress-bar" class="h-full bg-gradient-to-r from-orange-500 to-red-600 w-0 transition-all duration-100 ease-linear"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button id="main-action-btn" class="main-btn group relative">
                         <div>HUSTLE</div>
                         <span class="group-hover:text-white text-blue-200 text-xs">Click to Work</span>

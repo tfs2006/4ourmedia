@@ -9,7 +9,11 @@ const state = {
     valuation: 0,
     phase: "Garage Startup",
     achievements: [],
-    startTime: Date.now()
+    startTime: Date.now(),
+    // New Mechanics
+    hype: 0, // 0-100
+    stress: 0, // 0-100
+    isBurnedOut: false
 };
 
 // Configuration & Data
@@ -92,7 +96,12 @@ const els = {
     inventoryList: document.getElementById('inventory-list'),
     prestigeBtn: document.getElementById('prestige-btn'),
     particles: document.getElementById('particles'),
-    floatingContainer: document.getElementById('floating-container')
+    floatingContainer: document.getElementById('floating-container'),
+    // New UI
+    hypeBar: document.getElementById('hype-bar'),
+    hypeMultiplier: document.getElementById('hype-multiplier'),
+    stressBar: document.getElementById('stress-bar'),
+    stressStatus: document.getElementById('stress-status')
 };
 
 let currentFilter = 'all';
@@ -126,14 +135,32 @@ function init() {
 
 // Core Mechanics
 function handleMainClick(e) {
+    if (state.isBurnedOut) {
+        createParticle(e.clientX, e.clientY, "TOO STRESSED!");
+        return;
+    }
+
     // Calculate earnings with Equity Multiplier
     // Equity gives +10% bonus per point. So 10 equity = +100% = 2x multiplier.
-    const multiplier = 1 + (state.equity * 0.1);
-    const cashEarned = (10 * state.clickPower) * multiplier;
+    const equityMult = 1 + (state.equity * 0.1);
+    
+    // Hype Multiplier (1x to 5x based on hype)
+    const hypeMult = 1 + (state.hype / 25); // Max 5x at 100 hype
+    
+    const cashEarned = (10 * state.clickPower) * equityMult * hypeMult;
     
     state.cash += cashEarned;
     state.lifetimeCash += cashEarned;
     
+    // Increase Hype & Stress
+    state.hype = Math.min(100, state.hype + 2);
+    state.stress = Math.min(100, state.stress + 4); // Stress builds faster than hype
+    
+    // Check Burnout
+    if (state.stress >= 100) {
+        triggerBurnout();
+    }
+
     // Visual Feedback
     // Get coordinates relative to the particle container
     const containerRect = els.particles.getBoundingClientRect();
@@ -157,6 +184,23 @@ function handleMainClick(e) {
 
     updateUI();
     checkAchievements();
+}
+
+function triggerBurnout() {
+    state.isBurnedOut = true;
+    els.clickBtn.classList.add('burnout');
+    els.stressStatus.innerText = "BURNOUT!";
+    els.stressStatus.classList.add('text-red-500');
+    
+    // Reset after 5 seconds
+    setTimeout(() => {
+        state.isBurnedOut = false;
+        state.stress = 0;
+        els.clickBtn.classList.remove('burnout');
+        els.stressStatus.innerText = "RECOVERED";
+        els.stressStatus.classList.remove('text-red-500');
+        setTimeout(() => els.stressStatus.innerText = "STABLE", 1000);
+    }, 5000);
 }
 
 // Floating Items System
@@ -196,9 +240,10 @@ function spawnFloatingItem() {
         const cost = Math.floor(data.baseCost * Math.pow(data.costMultiplier, data.count));
         el.innerHTML = `<span>${data.name}</span> <span class="bg-black/20 px-2 rounded">$${formatNumber(cost)}</span>`;
         el.onclick = () => {
-            buyUpgrade(data.id);
-            el.remove();
-            createParticle(parseFloat(el.style.left), parseFloat(el.style.top), "Acquired!");
+            if(buyUpgrade(data.id)) {
+                el.remove();
+                createParticle(parseFloat(el.style.left), parseFloat(el.style.top), "Acquired!");
+            }
         };
     } else if (type === 'bonus') {
         el.innerHTML = `<span>💰 ${data.name}</span>`;
@@ -365,6 +410,10 @@ function startGameLoop() {
             state.lifetimeCash += cashPerTick;
         }
         
+        // Decay Hype & Stress
+        if (state.hype > 0) state.hype = Math.max(0, state.hype - 0.5);
+        if (state.stress > 0 && !state.isBurnedOut) state.stress = Math.max(0, state.stress - 1);
+        
         // Update Valuation (Cash + MRR * 12)
         state.valuation = state.cash + (state.mrr * 12);
         
@@ -409,6 +458,11 @@ function updateUI() {
     if(els.day) els.day.innerText = Math.floor(state.day);
     if(els.valuation) els.valuation.innerText = formatNumber(state.valuation);
     if(els.phase) els.phase.innerText = state.phase;
+    
+    // Update Meters
+    if(els.hypeBar) els.hypeBar.style.width = `${state.hype}%`;
+    if(els.hypeMultiplier) els.hypeMultiplier.innerText = `x${(1 + state.hype/25).toFixed(1)}`;
+    if(els.stressBar) els.stressBar.style.width = `${state.stress}%`;
     
     // Show Prestige Button if valuation > 1M
     if (state.valuation > 1000000) {
