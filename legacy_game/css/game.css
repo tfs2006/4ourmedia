@@ -157,6 +157,22 @@ canvas {
     font-size: 12px;
 }
 
+.objective-banner {
+    background: #0f380f;
+    color: #9bbc0f;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-bottom: 2px solid #306230;
+    text-align: center;
+    text-transform: uppercase;
+    animation: pulse-text 2s infinite;
+}
+
+@keyframes pulse-text {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
 .dialog-box {
     position: absolute;
     bottom: 10px;

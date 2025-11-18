@@ -14,10 +14,72 @@ const state = {
     prestige: 0,
     valuation: 0,
     // New RPG State
-    player: { x: 5, y: 5, dir: 'down', moving: false },
+    player: { x: 5, y: 5, dir: 'down', moving: false, level: 1, xp: 0, nextLevel: 100 },
     map: 'garage',
-    dialogOpen: false
+    dialogOpen: false,
+    storyIndex: 0,
+    objective: "Write Code (Press Z at PC)"
 };
+
+// Story & Missions
+const STORY_EVENTS = [
+    {
+        id: 0,
+        condition: (s) => true, // Start
+        text: "MOM: 'Stop playing video games and get a real job!'\nYOU: 'I'm building a startup, Mom! It's gonna be huge!'\nMOM: 'Fine. You have 30 days to make $100 or you're moving out.'",
+        objective: "Earn $100 Cash",
+        trigger: () => {}
+    },
+    {
+        id: 1,
+        condition: (s) => s.cash >= 100,
+        text: "MOM: 'Wow, $100? Maybe you're not useless.'\nYOU: 'This is just the beginning. I need help though.'",
+        objective: "Hire an Intern (Cost: $50)",
+        trigger: () => { state.xp += 50; }
+    },
+    {
+        id: 2,
+        condition: (s) => s.employees.length > 0,
+        text: "INTERN: 'Uh, boss? Where do I sit?'\nYOU: 'Anywhere. Just start coding.'\nINTERN: 'I need coffee...'",
+        objective: "Reach 100 Users",
+        trigger: () => { state.xp += 100; }
+    },
+    {
+        id: 3,
+        condition: (s) => s.users >= 100,
+        text: "INVESTOR: 'I see you have some traction. 100 users is cute.'\nYOU: 'We're growing fast!'\nINVESTOR: 'Prove it. Get 500 users and I'll give you a seed round.'",
+        objective: "Reach 500 Users",
+        trigger: () => { state.cash += 500; }
+    },
+    {
+        id: 4,
+        condition: (s) => s.users >= 500,
+        text: "INVESTOR: 'Not bad. Here's $1,000. Get a real office.'\nYOU: 'Goodbye Garage!'",
+        objective: "Expand Office (Door -> Expand)",
+        trigger: () => { state.cash += 1000; }
+    },
+    {
+        id: 5,
+        condition: (s) => state.officeLevel > 1,
+        text: "RIVAL CEO: 'Heard you moved into the incubator. Don't get comfortable. My app 'Bark' is crushing you.'",
+        objective: "Hire a Sales Bro",
+        trigger: () => { state.xp += 500; }
+    },
+    {
+        id: 6,
+        condition: (s) => s.employees.some(e => e.type === 'sales'),
+        text: "SALES BRO: 'Yo boss, let's monetize this! I can turn users into cash, but I need users to burn!'",
+        objective: "Reach $5,000 Cash",
+        trigger: () => {}
+    },
+    {
+        id: 7,
+        condition: (s) => s.cash >= 5000,
+        text: "RIVAL CEO: 'Cute revenue. But do you have a unicorn valuation? I think not.'",
+        objective: "Reach 10,000 Users",
+        trigger: () => {}
+    }
+];
 
 // Configuration
 const officeConfig = {
@@ -87,7 +149,8 @@ const els = {
     day: document.getElementById('day-display'),
     dialog: document.getElementById('dialog-box'),
     dialogText: document.getElementById('dialog-text'),
-    dialogOptions: document.getElementById('dialog-options')
+    dialogOptions: document.getElementById('dialog-options'),
+    objective: document.getElementById('objective-display')
 };
 
 // Input Handling
@@ -121,6 +184,7 @@ function init() {
     // Start Loops
     requestAnimationFrame(gameLoop);
     setInterval(businessTick, 100);
+    setInterval(checkStory, 1000);
     setInterval(saveGame, 5000);
 }
 
@@ -129,6 +193,22 @@ function gameLoop() {
     update();
     draw();
     requestAnimationFrame(gameLoop);
+}
+
+function checkStory() {
+    const event = STORY_EVENTS[state.storyIndex];
+    if (event && event.condition(state)) {
+        showDialog("STORY EVENT", event.text, [{
+            text: "Let's Go!",
+            action: () => {
+                event.trigger();
+                state.storyIndex++;
+                state.objective = STORY_EVENTS[state.storyIndex] ? STORY_EVENTS[state.storyIndex].objective : "Free Play: Become a Unicorn!";
+                if(els.objective) els.objective.innerText = "GOAL: " + state.objective;
+                closeDialog();
+            }
+        }]);
+    }
 }
 
 function update() {
@@ -321,6 +401,13 @@ function draw() {
     ctx.fillRect(px + 6, py, 20, 6);
     ctx.fillRect(px + 6, py, 4, 8); // Brim
 
+    // Draw Level/XP Bar above player
+    ctx.fillStyle = '#000';
+    ctx.fillRect(px, py - 10, 32, 4);
+    ctx.fillStyle = '#4ade80';
+    const xpPct = state.player.xp / state.player.nextLevel;
+    ctx.fillRect(px, py - 10, 32 * xpPct, 4);
+
     // UI Updates
     els.cash.innerText = Math.floor(state.cash);
     els.users.innerText = Math.floor(state.users);
@@ -353,8 +440,20 @@ function businessTick() {
 
 // Actions
 function doFounderWork() {
-    state.cash += 10;
-    state.users += 5;
+    // Leveling Logic
+    const xpGain = 10;
+    state.player.xp += xpGain;
+    if (state.player.xp >= state.player.nextLevel) {
+        state.player.level++;
+        state.player.xp = 0;
+        state.player.nextLevel = Math.floor(state.player.nextLevel * 1.5);
+        showDialog("LEVEL UP!", `You are now Level ${state.player.level}! Coding speed increased.`);
+    }
+
+    const levelMult = state.player.level;
+    state.cash += 10 * levelMult;
+    state.users += 5 * levelMult;
+    
     closeDialog();
 }
 

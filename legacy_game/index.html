@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>The Unicorn Founder | 4ourmedia Game</title>
+    <meta content="Build your empire from a garage to a global conglomerate in this addictive business simulator." name="description"/>
+    
+    <!-- Favicon -->
+    <link href="images/favicon.ico" rel="icon" type="image/x-icon"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
+    
+    <!-- Game Styles -->
+    <link href="css/game.css" rel="stylesheet"/>
+</head>
+<body class="retro-body">
+    <div class="crt-frame">
+        <div class="screen-content">
+            <canvas id="game-canvas" width="640" height="480"></canvas>
+            
+            <!-- Retro UI Overlay -->
+            <div id="retro-ui" class="retro-ui">
+                <div class="stats-bar">
+                    <div class="stat-box">
+                        <span class="label">CASH</span>
+                        <span class="value" id="cash-display">$0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">USERS</span>
+                        <span class="value" id="users-display">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">DAY</span>
+                        <span class="value" id="day-display">1</span>
+                    </div>
+                </div>
+                
+                <!-- Objective Banner -->
+                <div id="objective-display" class="objective-banner">GOAL: Write Code (Press Z at PC)</div>
+
+                <!-- Dialog Box (Hidden by default) -->
+                <div id="dialog-box" class="dialog-box hidden">
+                    <div id="dialog-text">Welcome to Silicon Valley! Press ARROW KEYS to move. Z to Interact.</div>
+                    <div id="dialog-options" class="dialog-options"></div>
+                    <div class="dialog-arrow">▼</div>
+                </div>
+            </div>
+        </div>
+        <div class="scanlines"></div>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+        <div class="d-pad">
+            <div class="d-up" data-key="ArrowUp"></div>
+            <div class="d-left" data-key="ArrowLeft"></div>
+            <div class="d-right" data-key="ArrowRight"></div>
+            <div class="d-down" data-key="ArrowDown"></div>
+        </div>
+        <div class="action-btns">
+            <div class="btn-b" data-key="x">B</div>
+            <div class="btn-a" data-key="z">A</div>
+        </div>
+    </div>
+
+    <!-- Game Logic -->
+    <script src="js/game.js"></script>
+</body>
+</html>

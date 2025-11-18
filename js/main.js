@@ -1,71 +1,45 @@
-// 4ourmedia Agency Website - Main JavaScript
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Mobile Menu Toggle
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    
-    if (mobileMenuBtn && mobileMenu) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-    }
-    
-    // Smooth Scroll for Anchor Links
+    // Smooth Scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            const href = this.getAttribute('href');
-            if (href !== '#' && href.length > 1) {
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if (target) {
-                    const offsetTop = target.offsetTop - 80; // Account for fixed header
-                    window.scrollTo({
-                        top: offsetTop,
-                        behavior: 'smooth'
-                    });
-                    // Close mobile menu if open
-                    if (mobileMenu) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                }
-            }
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
         });
     });
-    
-    // Animate elements on scroll
+
+    // Intersection Observer for Fade In
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.1
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('animate-fade-in-up');
-                observer.unobserve(entry.target);
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
             }
         });
     }, observerOptions);
-    
-    // Observe service cards, testimonials, and process steps
-    document.querySelectorAll('.service-card, .testimonial-card, .process-step, .card').forEach(el => {
+
+    // Animate Features
+    document.querySelectorAll('.feature-card').forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = `all 0.6s ease ${index * 0.1}s`;
         observer.observe(el);
     });
-    
-    // Header scroll effect
-    let lastScroll = 0;
-    const header = document.querySelector('header');
-    
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll > 100) {
-            header.classList.add('shadow-md');
-        } else {
-            header.classList.remove('shadow-md');
-        }
-        
-        lastScroll = currentScroll;
+
+    // Animate Hero Elements
+    const heroElements = document.querySelectorAll('.hero h1, .hero p, .hero .cta-group');
+    heroElements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            el.style.transition = 'all 0.8s ease';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, 100 + (index * 200));
     });
 });
