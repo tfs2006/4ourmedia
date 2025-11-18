@@ -89,8 +89,10 @@ const els = {
     newsTicker: document.getElementById('news-content'),
     flavorText: document.getElementById('flavor-text'),
     achievementsList: document.getElementById('achievements-list'),
+    inventoryList: document.getElementById('inventory-list'),
     prestigeBtn: document.getElementById('prestige-btn'),
-    particles: document.getElementById('particles')
+    particles: document.getElementById('particles'),
+    floatingContainer: document.getElementById('floating-container')
 };
 
 let currentFilter = 'all';
@@ -98,8 +100,9 @@ let currentFilter = 'all';
 // Initialization
 function init() {
     loadGame();
-    renderUpgrades();
+    renderInventory(); // Replaces renderUpgrades
     startGameLoop();
+    startFloatingSpawner(); // New mechanic
     updateUI();
     
     // Event Listeners
@@ -156,6 +159,115 @@ function handleMainClick(e) {
     checkAchievements();
 }
 
+// Floating Items System
+function startFloatingSpawner() {
+    // Spawn something every 2-5 seconds
+    setInterval(() => {
+        if (Math.random() > 0.3) { // 70% chance to spawn
+            spawnFloatingItem();
+        }
+    }, 3000);
+}
+
+function spawnFloatingItem() {
+    const rand = Math.random();
+    let type, data;
+
+    // 10% Threat, 20% Bonus, 70% Upgrade Opportunity
+    if (rand < 0.1) {
+        type = 'threat';
+        data = getRandomThreat();
+    } else if (rand < 0.3) {
+        type = 'bonus';
+        data = { name: 'Angel Investment', value: state.mrr * 60 || 100 }; // 1 min of MRR or $100
+    } else {
+        type = 'upgrade';
+        data = getRandomAffordableUpgrade();
+    }
+
+    if (!data) return; // Nothing to spawn
+
+    const el = document.createElement('div');
+    el.className = `floating-item ${type}`;
+    el.style.top = `${Math.random() * 80 + 10}%`; // Random vertical position (10-90%)
+    
+    // Content based on type
+    if (type === 'upgrade') {
+        const cost = Math.floor(data.baseCost * Math.pow(data.costMultiplier, data.count));
+        el.innerHTML = `<span>${data.name}</span> <span class="bg-black/20 px-2 rounded">$${formatNumber(cost)}</span>`;
+        el.onclick = () => {
+            buyUpgrade(data.id);
+            el.remove();
+            createParticle(parseFloat(el.style.left), parseFloat(el.style.top), "Acquired!");
+        };
+    } else if (type === 'bonus') {
+        el.innerHTML = `<span>💰 ${data.name}</span>`;
+        el.onclick = () => {
+            state.cash += data.value;
+            state.lifetimeCash += data.value;
+            el.remove();
+            createParticle(parseFloat(el.style.left), parseFloat(el.style.top), `+$${formatNumber(data.value)}`);
+            updateUI();
+        };
+    } else if (type === 'threat') {
+        el.innerHTML = `<span>⚠️ ${data.name}</span>`;
+        // Threat logic: Must click to resolve, otherwise penalty on animation end?
+        // For simplicity: Click to resolve (pay fine/fix). If ignored, it just floats by (maybe missed opportunity to fix?)
+        // Let's make it: Click to AVOID penalty.
+        el.onclick = () => {
+            el.remove();
+            createParticle(parseFloat(el.style.left), parseFloat(el.style.top), "Crisis Averted!");
+        };
+        
+        // Penalty if it survives animation
+        el.addEventListener('animationend', () => {
+            if(document.body.contains(el)) {
+                applyThreatPenalty(data);
+                el.remove();
+            }
+        });
+    }
+
+    els.floatingContainer.appendChild(el);
+}
+
+function getRandomAffordableUpgrade() {
+    // Find upgrades we can afford or are close to affording (within 2x cash)
+    const candidates = upgrades.filter(u => {
+        const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.count));
+        return state.cash * 2 >= cost; // Show items slightly out of reach too
+    });
+    if (candidates.length === 0) return upgrades[0]; // Fallback
+    return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function getRandomThreat() {
+    const threats = [
+        { name: "Server Crash", type: 'mrr', amount: 0.05 }, // Lose 5% MRR
+        { name: "Lawsuit", type: 'cash', amount: 0.10 }, // Lose 10% Cash
+        { name: "Tax Audit", type: 'cash', amount: 0.05 }
+    ];
+    return threats[Math.floor(Math.random() * threats.length)];
+}
+
+function applyThreatPenalty(threat) {
+    if (threat.type === 'cash') {
+        const loss = Math.floor(state.cash * threat.amount);
+        if (loss > 0) {
+            state.cash -= loss;
+            createParticle(window.innerWidth/2, window.innerHeight/2, `-${formatNumber(loss)} (Lawsuit!)`);
+        }
+    } else if (threat.type === 'mrr') {
+        // Temporary MRR dip? Or permanent? Let's do cash penalty based on MRR for simplicity
+        const loss = Math.floor(state.mrr * 60); // Lose 1 min of revenue
+        if (loss > 0) {
+            state.cash = Math.max(0, state.cash - loss);
+            createParticle(window.innerWidth/2, window.innerHeight/2, `-${formatNumber(loss)} (Server Crash!)`);
+        }
+    }
+    updateUI();
+}
+
 function buyUpgrade(upgradeId) {
     const upgrade = upgrades.find(u => u.id === upgradeId);
     const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
@@ -167,9 +279,13 @@ function buyUpgrade(upgradeId) {
         // Recalculate stats
         recalculateStats();
         
-        renderUpgrades();
+        renderInventory(); // Update inventory list
         updateUI();
         saveGame();
+        return true;
+    } else {
+        // Feedback for cant afford
+        return false;
     }
 }
 
@@ -303,59 +419,27 @@ function updateUI() {
     } else {
         els.prestigeBtn.classList.add('hidden');
     }
-
-    // Update upgrade buttons availability
-    upgrades.forEach(u => {
-        const btn = document.getElementById(`btn-${u.id}`);
-        if (btn) {
-            const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.count));
-            if (state.cash >= cost) {
-                btn.classList.remove('disabled');
-            } else {
-                btn.classList.add('disabled');
-            }
-        }
-    });
 }
 
-function filterUpgrades(type) {
-    currentFilter = type;
-    renderUpgrades();
+function renderInventory() {
+    if(!els.inventoryList) return;
+    els.inventoryList.innerHTML = '';
     
-    // Update active button state
-    const buttons = document.querySelectorAll('#tab-shop button');
-    buttons.forEach(b => {
-        if (b.innerText.toLowerCase().includes(type === 'click' ? 'upgrades' : type === 'passive' ? 'staff' : 'all')) {
-            b.classList.remove('bg-slate-700', 'text-gray-300');
-            b.classList.add('bg-blue-600', 'text-white');
-        } else {
-            b.classList.add('bg-slate-700', 'text-gray-300');
-            b.classList.remove('bg-blue-600', 'text-white');
-        }
-    });
-}
+    const owned = upgrades.filter(u => u.count > 0);
+    
+    if (owned.length === 0) {
+        els.inventoryList.innerHTML = '<div class="text-gray-600 italic">No assets acquired yet.</div>';
+        return;
+    }
 
-function renderUpgrades() {
-    if(!els.upgradeList) return;
-    els.upgradeList.innerHTML = '';
-    
-    const filtered = upgrades.filter(u => currentFilter === 'all' || u.type === currentFilter);
-    
-    filtered.forEach(u => {
-        const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.count));
+    owned.forEach(u => {
         const div = document.createElement('div');
-        div.className = `upgrade-item ${state.cash >= cost ? '' : 'disabled'}`;
-        div.id = `btn-${u.id}`;
-        div.onclick = () => buyUpgrade(u.id);
-        
+        div.className = 'flex justify-between items-center border-b border-slate-700 pb-1';
         div.innerHTML = `
-            <div class="upgrade-info">
-                <h4>${u.name} <span class="text-xs text-blue-400 ml-1">Lvl ${u.count}</span></h4>
-                <p>${u.description}</p>
-            </div>
-            <div class="upgrade-cost">$${formatNumber(cost)}</div>
+            <span class="text-gray-300">${u.name} <span class="text-blue-500">x${u.count}</span></span>
+            <span class="text-gray-500 text-[10px]">${u.type === 'click' ? '+' + u.power + ' Click' : '+$' + u.mrr + '/s'}</span>
         `;
-        els.upgradeList.appendChild(div);
+        els.inventoryList.appendChild(div);
     });
 }
 

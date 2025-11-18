@@ -51,7 +51,7 @@
         </header>
 
         <!-- Main Game Area -->
-        <div class="game-grid">
+        <div class="game-grid" style="grid-template-columns: 1fr 2fr;">
             
             <!-- Left Panel: Strategy / Info -->
             <div class="panel" id="tab-home">
@@ -64,6 +64,15 @@
                     <div class="bg-slate-800 p-3 rounded border border-slate-700">
                         <div class="text-xs text-gray-400">Valuation</div>
                         <div class="font-bold text-green-300">$<span id="valuation-display">0</span></div>
+                    </div>
+
+                    <!-- Inventory List (Replaces Shop List) -->
+                    <div class="mt-6">
+                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Active Assets</h4>
+                        <div id="inventory-list" class="space-y-2 text-xs">
+                            <!-- Injected by JS -->
+                            <div class="text-gray-600 italic">No assets acquired yet.</div>
+                        </div>
                     </div>
                     
                     <!-- Achievements Mini View -->
@@ -84,43 +93,29 @@
                 </div>
             </div>
 
-            <!-- Center Panel: The Grind -->
-            <div class="panel active" id="tab-work">
+            <!-- Center Panel: The Grind & Floating Events -->
+            <div class="panel active relative overflow-hidden" id="tab-work">
                 <div class="absolute top-4 left-4 text-gray-500 text-sm hidden lg:block">Office View</div>
                 
-                <div class="relative mx-auto" style="width: fit-content;">
-                    <button id="main-action-btn" class="main-btn group relative z-10">
+                <!-- Floating Items Container -->
+                <div id="floating-container" class="absolute inset-0 pointer-events-none z-20 overflow-hidden"></div>
+
+                <div class="relative mx-auto z-10 flex flex-col items-center justify-center h-full">
+                    <button id="main-action-btn" class="main-btn group relative">
                         <div>HUSTLE</div>
                         <span class="group-hover:text-white text-blue-200 text-xs">Click to Work</span>
                     </button>
-                    <!-- Particle container -->
-                    <div id="particles" class="absolute inset-0 pointer-events-none"></div>
+                    
+                    <div class="mt-8 text-center text-gray-400 text-sm max-w-xs italic" id="flavor-text">
+                        "Success is 1% inspiration, 99% perspiration."
+                    </div>
                 </div>
                 
-                <div class="mt-8 text-center text-gray-400 text-sm max-w-xs italic" id="flavor-text">
-                    "Success is 1% inspiration, 99% perspiration."
-                </div>
+                <!-- Particle container -->
+                <div id="particles" class="absolute inset-0 pointer-events-none z-30"></div>
             </div>
 
-            <!-- Right Panel: Upgrades -->
-            <div class="panel" id="tab-shop">
-                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2 shrink-0">
-                    <h3 class="text-xl font-bold text-gray-200">Marketplace</h3>
-                    <div class="text-xs text-gray-400">Spend Money to Make Money</div>
-                </div>
-                
-                <!-- Filter Tabs -->
-                <div class="flex space-x-2 mb-4 overflow-x-auto pb-2 shrink-0">
-                    <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded-full whitespace-nowrap" onclick="filterUpgrades('all')">All</button>
-                    <button class="px-3 py-1 bg-slate-700 text-gray-300 text-xs rounded-full whitespace-nowrap hover:bg-slate-600" onclick="filterUpgrades('click')">Upgrades</button>
-                    <button class="px-3 py-1 bg-slate-700 text-gray-300 text-xs rounded-full whitespace-nowrap hover:bg-slate-600" onclick="filterUpgrades('passive')">Staff & Tools</button>
-                </div>
-
-                <div class="overflow-y-auto flex-grow pr-2 custom-scrollbar" id="upgrade-list">
-                    <!-- Upgrades injected by JS -->
-                    <div class="text-center text-gray-500 mt-10">Loading Marketplace...</div>
-                </div>
-            </div>
+            <!-- Shop Panel Removed -->
         </div>
 
         <!-- Mobile Navigation -->
@@ -132,10 +127,6 @@
             <div class="mobile-nav-item active" onclick="switchTab('work')">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 Work
-            </div>
-            <div class="mobile-nav-item" onclick="switchTab('shop')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                Shop
             </div>
         </div>
 
@@ -180,7 +171,6 @@
             
             if(tabName === 'home') document.querySelectorAll('.mobile-nav-item')[0].classList.add('active');
             if(tabName === 'work') document.querySelectorAll('.mobile-nav-item')[1].classList.add('active');
-            if(tabName === 'shop') document.querySelectorAll('.mobile-nav-item')[2].classList.add('active');
         }
 
         // Set Copyright Year
