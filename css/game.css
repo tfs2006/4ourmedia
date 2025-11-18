@@ -3,17 +3,30 @@ body {
     background-color: #0f172a; /* Dark slate background */
     color: #e2e8f0;
     font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
+    overflow: hidden; /* Prevent body scroll, handle in containers */
+    height: 100vh;
+    width: 100vw;
     -webkit-tap-highlight-color: transparent;
 }
 
 .game-container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 20px;
-    height: 100vh;
+    padding: 16px;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+/* Grid Layout */
+.game-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 0; /* Crucial for nested scrolling */
+    width: 100%;
 }
 
 /* Dashboard Panels */
@@ -21,15 +34,108 @@ body {
     background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
 }
 
-.panel:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* Center Panel Specifics */
+#tab-work {
+    justify-content: center;
+    align-items: center;
+}
+
+/* Mobile Navigation Bar */
+.mobile-nav {
+    display: none;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 1024px) {
+    body {
+        overflow: hidden; /* Ensure no scroll on body */
+    }
+
+    .game-container {
+        padding: 12px;
+        padding-bottom: 80px; /* Space for bottom nav */
+    }
+
+    .game-grid {
+        display: block; /* Stack them (but we hide inactive ones) */
+        position: relative;
+    }
+
+    .panel {
+        display: none; /* Hide all by default */
+        height: 100%;
+        border-radius: 12px;
+    }
+
+    .panel.active {
+        display: flex; /* Show active */
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    /* Mobile Nav Bar */
+    .mobile-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        z-index: 100;
+        padding-bottom: env(safe-area-inset-bottom);
+        height: 64px;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #64748b;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.2s;
+    }
+
+    .mobile-nav-item.active {
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .mobile-nav-item svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
+    }
+    
+    /* Adjust button size for mobile */
+    .main-btn {
+        width: 180px;
+        height: 180px;
+        font-size: 1.5rem;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* The "Grind" Button */

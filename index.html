@@ -19,61 +19,12 @@
     
     <!-- Game Styles -->
     <link href="css/game.css" rel="stylesheet"/>
-    <style>
-        /* Mobile Tab Navigation */
-        .mobile-nav {
-            display: none;
-        }
-        @media (max-width: 1024px) {
-            .mobile-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: #1e293b;
-                border-top: 1px solid rgba(255,255,255,0.1);
-                z-index: 50;
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-            .mobile-nav-item {
-                flex: 1;
-                text-align: center;
-                padding: 12px;
-                color: #94a3b8;
-                font-size: 0.75rem;
-                cursor: pointer;
-                -webkit-tap-highlight-color: transparent;
-            }
-            .mobile-nav-item.active {
-                color: #3b82f6;
-                background: rgba(59, 130, 246, 0.1);
-            }
-            .panel-content {
-                display: none !important;
-            }
-            .panel-content.active {
-                display: flex !important;
-                flex-direction: column;
-            }
-            /* Hide desktop layout elements on mobile */
-            .desktop-only {
-                display: none !important;
-            }
-            .game-grid {
-                display: block !important;
-                height: calc(100vh - 140px); /* Adjust for header + nav */
-                overflow-y: auto;
-                padding-bottom: 80px;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="game-container relative">
+    <div class="game-container">
         <!-- Header / Stats Bar -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-4 panel sticky top-0 z-40">
-            <div class="flex items-center space-x-4 mb-2 md:mb-0">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-4 panel shrink-0" style="height: auto; min-height: 80px;">
+            <div class="flex items-center space-x-4 mb-2 md:mb-0 w-full md:w-auto justify-between md:justify-start">
                 <div>
                     <div class="text-2xl font-bold text-white leading-none">
                         <span class="text-blue-500">Unicorn</span>Founder
@@ -100,11 +51,11 @@
         </header>
 
         <!-- Main Game Area -->
-        <div class="game-grid grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
+        <div class="game-grid">
             
             <!-- Left Panel: Strategy / Info -->
-            <div class="panel flex flex-col panel-content active" id="tab-home">
-                <h3 class="text-xl font-bold mb-4 text-gray-200 border-b border-gray-700 pb-2">Company Status</h3>
+            <div class="panel" id="tab-home">
+                <h3 class="text-xl font-bold mb-4 text-gray-200 border-b border-gray-700 pb-2 shrink-0">Company Status</h3>
                 <div class="space-y-4 flex-grow overflow-y-auto custom-scrollbar">
                     <div class="bg-slate-800 p-3 rounded border border-slate-700">
                         <div class="text-xs text-gray-400">Current Phase</div>
@@ -134,7 +85,7 @@
             </div>
 
             <!-- Center Panel: The Grind -->
-            <div class="panel flex flex-col items-center justify-center relative panel-content" id="tab-work">
+            <div class="panel active" id="tab-work">
                 <div class="absolute top-4 left-4 text-gray-500 text-sm hidden lg:block">Office View</div>
                 
                 <div class="relative">
@@ -152,14 +103,14 @@
             </div>
 
             <!-- Right Panel: Upgrades -->
-            <div class="panel flex flex-col panel-content" id="tab-shop">
-                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+            <div class="panel" id="tab-shop">
+                <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2 shrink-0">
                     <h3 class="text-xl font-bold text-gray-200">Marketplace</h3>
                     <div class="text-xs text-gray-400">Spend Money to Make Money</div>
                 </div>
                 
                 <!-- Filter Tabs -->
-                <div class="flex space-x-2 mb-4 overflow-x-auto pb-2">
+                <div class="flex space-x-2 mb-4 overflow-x-auto pb-2 shrink-0">
                     <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded-full whitespace-nowrap" onclick="filterUpgrades('all')">All</button>
                     <button class="px-3 py-1 bg-slate-700 text-gray-300 text-xs rounded-full whitespace-nowrap hover:bg-slate-600" onclick="filterUpgrades('click')">Upgrades</button>
                     <button class="px-3 py-1 bg-slate-700 text-gray-300 text-xs rounded-full whitespace-nowrap hover:bg-slate-600" onclick="filterUpgrades('passive')">Staff & Tools</button>
@@ -174,22 +125,22 @@
 
         <!-- Mobile Navigation -->
         <div class="mobile-nav">
-            <div class="mobile-nav-item active" onclick="switchTab('home')">
-                <div class="text-xl mb-1">📊</div>
+            <div class="mobile-nav-item" onclick="switchTab('home')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 Stats
             </div>
-            <div class="mobile-nav-item" onclick="switchTab('work')">
-                <div class="text-xl mb-1">🔨</div>
+            <div class="mobile-nav-item active" onclick="switchTab('work')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 Work
             </div>
             <div class="mobile-nav-item" onclick="switchTab('shop')">
-                <div class="text-xl mb-1">🛒</div>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 Shop
             </div>
         </div>
 
         <!-- Footer / News Ticker -->
-        <div class="mt-4 mb-20 lg:mb-0">
+        <div class="mt-4 shrink-0 hidden lg:block">
             <div class="ticker-wrap rounded-lg mb-4">
                 <div class="ticker" id="news-content">
                     BREAKING: 4ourmedia launches new viral simulator game... Analysts predict productivity drop worldwide...
@@ -216,11 +167,8 @@
         // Mobile Tab Logic
         function switchTab(tabName) {
             // Hide all panels
-            document.querySelectorAll('.panel-content').forEach(el => {
+            document.querySelectorAll('.panel').forEach(el => {
                 el.classList.remove('active');
-                // On desktop, we want them all visible, so we only toggle 'active' which controls display:flex in mobile media query
-                // But wait, the media query handles the display property.
-                // We need to manually handle the 'active' class for the mobile view logic defined in CSS.
             });
             
             // Show selected panel
@@ -229,8 +177,7 @@
             
             // Update nav icons
             document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
-            // This is a simple implementation, assuming order matches. 
-            // Better to use IDs or data attributes, but for now:
+            
             if(tabName === 'home') document.querySelectorAll('.mobile-nav-item')[0].classList.add('active');
             if(tabName === 'work') document.querySelectorAll('.mobile-nav-item')[1].classList.add('active');
             if(tabName === 'shop') document.querySelectorAll('.mobile-nav-item')[2].classList.add('active');
