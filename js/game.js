@@ -1,15 +1,19 @@
 // Game State
 const state = {
-    cash: 100, // Start with some cash
+    cash: 100,
     users: 0,
     day: 1,
-    equity: 0,
-    valuation: 0,
     phase: "Garage Startup",
-    officeLevel: 1, // 1=Garage (2 slots), 2=Office (4), 3=Campus (8)
-    employees: [], // Array of { id, type, slotIndex, status, energy }
+    officeLevel: 1,
+    employees: [],
+    upgrades: [], // Array of owned upgrade IDs
     achievements: [],
-    startTime: Date.now()
+    startTime: Date.now(),
+    crunchMode: false,
+    viralCooldown: 0,
+    prestige: 0, // IPO count / Multiplier
+    selectedEmployeeId: null,
+    valuation: 0
 };
 
 // Configuration
@@ -17,16 +21,27 @@ const officeConfig = {
     1: { name: "Garage HQ", slots: 2, cost: 0 },
     2: { name: "Seed Office", slots: 4, cost: 1000 },
     3: { name: "Tech Park", slots: 8, cost: 10000 },
-    4: { name: "Skyscraper", slots: 16, cost: 100000 }
+    4: { name: "Skyscraper", slots: 16, cost: 100000 },
+    5: { name: "Moon Base", slots: 32, cost: 1000000 }
 };
 
 const employeeTypes = {
     'intern': { name: "Intern", cost: 50, output: 1, type: 'code', icon: '👶', energyDecay: 0.05, desc: "Cheap labor. Falls asleep often." },
-    'junior': { name: "Junior Dev", cost: 250, output: 5, type: 'code', icon: '💻', energyDecay: 0.02, desc: "Writes code. Creates bugs." },
+    'junior': { name: "Junior Dev", cost: 250, output: 5, type: 'code', icon: '💻', energyDecay: 0.03, desc: "Writes code. Creates bugs." },
     'senior': { name: "Senior Dev", cost: 1000, output: 20, type: 'code', icon: '🧙‍♂️', energyDecay: 0.01, desc: "Solid output. Reliable." },
     'sales': { name: "Sales Bro", cost: 500, output: 2, type: 'sales', icon: '🤝', energyDecay: 0.03, desc: "Converts Users to Cash." },
-    'manager': { name: "Manager", cost: 2000, output: 0, type: 'support', icon: '👔', energyDecay: 0.01, desc: "Auto-wakes nearby staff." }
+    'manager': { name: "Manager", cost: 2000, output: 0, type: 'support', icon: '👔', energyDecay: 0.01, desc: "Auto-wakes nearby staff." },
+    'ai': { name: "AI Bot", cost: 5000, output: 50, type: 'code', icon: '🤖', energyDecay: 0, desc: "Never sleeps. Expensive server costs." }
 };
+
+const UPGRADES = [
+    { id: 'coffee_1', name: 'Espresso Machine', cost: 500, desc: 'Energy decay reduced by 20%', icon: '☕' },
+    { id: 'chairs_1', name: 'Ergonomic Chairs', cost: 1200, desc: 'Bug chance reduced by 30%', icon: '🪑' },
+    { id: 'slack_1', name: 'Chat Pro', cost: 2500, desc: 'Managers work 2x faster', icon: '💬' },
+    { id: 'server_1', name: 'Cloud Credits', cost: 5000, desc: 'All output +25%', icon: '☁️' },
+    { id: 'gym_1', name: 'Office Gym', cost: 10000, desc: 'Max Energy +50%', icon: '🏋️' },
+    { id: 'nap_pods', name: 'Nap Pods', cost: 25000, desc: 'Sleep recovery is instant', icon: '🛌' }
+];
 
 // DOM Elements
 const els = {
@@ -37,8 +52,30 @@ const els = {
     slotsTotal: document.getElementById('slots-total'),
     officeGrid: document.getElementById('office-grid'),
     hireList: document.getElementById('hire-list'),
+    upgradesList: document.getElementById('upgrades-list'),
     expandBtn: document.getElementById('expand-btn'),
     founderBtn: document.getElementById('founder-work-btn'),
+    
+    // Tabs
+    btnTabHire: document.getElementById('btn-tab-hire'),
+    btnTabUpgrades: document.getElementById('btn-tab-upgrades'),
+    mgmtHire: document.getElementById('mgmt-hire'),
+    mgmtUpgrades: document.getElementById('mgmt-upgrades'),
+
+    // Employee Detail Overlay
+    viewEmployee: document.getElementById('view-employee'),
+    empDetailName: document.getElementById('emp-detail-name'),
+    empDetailRole: document.getElementById('emp-detail-role'),
+    empDetailStats: document.getElementById('emp-detail-stats'),
+    btnTrain: document.getElementById('btn-train'),
+    btnFire: document.getElementById('btn-fire'),
+    btnCloseDetail: document.getElementById('btn-close-detail'),
+
+    // Active Skills
+    btnViral: document.getElementById('btn-viral'),
+    btnCrunch: document.getElementById('btn-crunch'),
+    ipoBtn: document.getElementById('ipo-btn'),
+
     // Sequence Game
     seqOverlay: document.getElementById('sequence-overlay'),
     seqDisplay: document.getElementById('sequence-display'),
@@ -49,22 +86,39 @@ const els = {
 
 // Initialization
 function init() {
-    // Reset state for new version if needed (simple check)
-    if(!localStorage.getItem('unicornTycoonV1')) {
-        state.cash = 100;
-    } else {
+    if(localStorage.getItem('unicornTycoonV2')) {
         loadGame();
+    } else {
+        // Migration or new game
+        state.cash = 200;
     }
     
     renderHireList();
+    renderUpgrades();
     renderOffice();
     startGameLoop();
-    
-    // Listeners
+    setupEventListeners();
+}
+
+function setupEventListeners() {
     els.expandBtn.addEventListener('click', expandOffice);
     els.founderBtn.addEventListener('click', startSequenceGame);
     els.closeSeqBtn.addEventListener('click', closeSequenceGame);
     
+    // Tabs
+    els.btnTabHire.addEventListener('click', () => switchMgmtTab('hire'));
+    els.btnTabUpgrades.addEventListener('click', () => switchMgmtTab('upgrades'));
+
+    // Employee Detail
+    els.btnCloseDetail.addEventListener('click', closeEmployeeDetail);
+    els.btnTrain.addEventListener('click', trainSelectedEmployee);
+    els.btnFire.addEventListener('click', fireSelectedEmployee);
+
+    // Active Skills
+    els.btnViral.addEventListener('click', triggerViral);
+    els.btnCrunch.addEventListener('click', toggleCrunch);
+    els.ipoBtn.addEventListener('click', triggerIPO);
+
     // Sequence Game Buttons
     document.querySelectorAll('.seq-btn').forEach(btn => {
         btn.addEventListener('click', () => handleSeqInput(btn.dataset.color));
@@ -78,56 +132,100 @@ function startGameLoop() {
         updateUI();
     }, 100); // 10 ticks per second
     
-    setInterval(saveGame, 30000);
+    setInterval(saveGame, 10000);
 }
 
 function tick() {
-    // Process Employees
+    const prestigeMult = 1 + (state.prestige * 0.5); // 50% bonus per prestige level
+    const crunchMult = state.crunchMode ? 2 : 1;
+    const crunchDrain = state.crunchMode ? 3 : 1;
+
+    // Modifiers from Upgrades
+    const energyDecayMod = state.upgrades.includes('coffee_1') ? 0.8 : 1.0;
+    const bugChanceMod = state.upgrades.includes('chairs_1') ? 0.7 : 1.0;
+    const outputMod = state.upgrades.includes('server_1') ? 1.25 : 1.0;
+    const managerMod = state.upgrades.includes('slack_1') ? 2 : 1;
+
+    // Viral Cooldown
+    if (state.viralCooldown > 0) state.viralCooldown -= 100;
+
     state.employees.forEach(emp => {
         if (emp.status === 'sleeping') return;
         if (emp.status === 'bug') return;
 
+        const type = employeeTypes[emp.type];
+        const levelMult = 1 + (emp.level || 0) * 0.5;
+
         // Energy Decay
-        emp.energy -= employeeTypes[emp.type].energyDecay;
-        if (emp.energy <= 0) {
-            emp.status = 'sleeping';
-            renderOfficeSlot(emp.slotIndex);
-            return;
+        if (type.energyDecay > 0) {
+            emp.energy -= type.energyDecay * crunchDrain * energyDecayMod;
+            if (emp.energy <= 0) {
+                emp.status = 'sleeping';
+                renderOfficeSlot(emp.slotIndex);
+                return;
+            }
         }
 
         // Production
-        // 10% chance to produce per tick (simulates work speed)
-        if (Math.random() < 0.1) {
-            if (employeeTypes[emp.type].type === 'code') {
-                state.users += employeeTypes[emp.type].output;
-                // Chance for bug
-                if (Math.random() < 0.05 && emp.type !== 'senior') {
+        if (Math.random() < 0.1 * crunchMult) { // 10% chance per tick
+            if (type.type === 'code') {
+                const production = type.output * levelMult * outputMod * prestigeMult;
+                state.users += production;
+                
+                // Bug Chance
+                if (Math.random() < 0.05 * bugChanceMod && emp.type !== 'senior' && emp.type !== 'ai') {
                     emp.status = 'bug';
                     renderOfficeSlot(emp.slotIndex);
                 }
-            } else if (employeeTypes[emp.type].type === 'sales') {
+            } else if (type.type === 'sales') {
                 // Convert users to cash
                 if (state.users > 0) {
-                    const converted = Math.min(state.users, employeeTypes[emp.type].output);
+                    const capacity = type.output * levelMult * outputMod * prestigeMult;
+                    const converted = Math.min(state.users, capacity);
                     state.users -= converted;
-                    state.cash += converted * 2; // $2 per user
+                    state.cash += converted * 2 * prestigeMult;
                 }
             }
         }
         
-        // Manager Logic (Auto-wake)
-        if (emp.type === 'manager') {
-            // Find neighbors
-            // Simplified: Just wake random sleeping person
-            const sleeper = state.employees.find(e => e.status === 'sleeping');
-            if (sleeper && Math.random() < 0.05) {
-                wakeEmployee(sleeper);
+        // Manager Logic
+        if (type.type === 'support') {
+            // Wake up random sleeper
+            if (Math.random() < 0.05 * managerMod) {
+                const sleeper = state.employees.find(e => e.status === 'sleeping');
+                if (sleeper) wakeEmployee(sleeper);
             }
         }
     });
 }
 
-// Office Management
+// Management UI
+function switchMgmtTab(tab) {
+    if (tab === 'hire') {
+        els.mgmtHire.classList.remove('hidden');
+        els.mgmtUpgrades.classList.add('hidden');
+        
+        // Active Hire Tab
+        els.btnTabHire.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
+        els.btnTabHire.classList.remove('text-gray-400', 'hover:text-white');
+        
+        // Inactive Upgrades Tab
+        els.btnTabUpgrades.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
+        els.btnTabUpgrades.classList.add('text-gray-400', 'hover:text-white');
+    } else {
+        els.mgmtHire.classList.add('hidden');
+        els.mgmtUpgrades.classList.remove('hidden');
+        
+        // Inactive Hire Tab
+        els.btnTabHire.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
+        els.btnTabHire.classList.add('text-gray-400', 'hover:text-white');
+        
+        // Active Upgrades Tab
+        els.btnTabUpgrades.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
+        els.btnTabUpgrades.classList.remove('text-gray-400', 'hover:text-white');
+    }
+}
+
 function hireEmployee(typeKey) {
     const type = employeeTypes[typeKey];
     if (state.cash < type.cost) return;
@@ -150,23 +248,34 @@ function hireEmployee(typeKey) {
         type: typeKey,
         slotIndex: slotIndex,
         status: 'working',
-        energy: 100
+        energy: 100,
+        level: 0
     });
 
     renderOffice();
     updateUI();
 }
 
-function expandOffice() {
-    const nextLevel = state.officeLevel + 1;
-    const config = officeConfig[nextLevel];
-    if (!config) return;
-    
-    if (state.cash >= config.cost) {
-        state.cash -= config.cost;
-        state.officeLevel = nextLevel;
-        renderOffice();
-        updateUI();
+function buyUpgrade(id) {
+    if (state.upgrades.includes(id)) return;
+    const upgrade = UPGRADES.find(u => u.id === id);
+    if (state.cash < upgrade.cost) return;
+
+    state.cash -= upgrade.cost;
+    state.upgrades.push(id);
+    renderUpgrades();
+    updateUI();
+    createParticle(window.innerWidth/2, window.innerHeight/2, `${upgrade.name} Acquired!`);
+}
+
+// Employee Interaction
+function handleSlotClick(emp) {
+    if (emp.status === 'sleeping') {
+        wakeEmployee(emp);
+    } else if (emp.status === 'bug') {
+        fixBug(emp);
+    } else {
+        openEmployeeDetail(emp);
     }
 }
 
@@ -179,9 +288,103 @@ function wakeEmployee(emp) {
 
 function fixBug(emp) {
     emp.status = 'working';
-    state.cash += 50; // Bonus for fixing
+    state.cash += 50;
     createParticle(event?.clientX || window.innerWidth/2, event?.clientY || window.innerHeight/2, "Bug Fixed! +$50");
     renderOfficeSlot(emp.slotIndex);
+}
+
+function openEmployeeDetail(emp) {
+    state.selectedEmployeeId = emp.id;
+    const type = employeeTypes[emp.type];
+    
+    els.empDetailName.innerText = `${type.name} (Lvl ${emp.level || 0})`;
+    els.empDetailRole.innerText = type.desc;
+    
+    const trainCost = Math.floor(type.cost * (1 + (emp.level || 0)));
+    els.btnTrain.innerText = `Train ($${formatNumber(trainCost)})`;
+    
+    els.viewEmployee.classList.remove('hidden');
+}
+
+function closeEmployeeDetail() {
+    els.viewEmployee.classList.add('hidden');
+    state.selectedEmployeeId = null;
+}
+
+function trainSelectedEmployee() {
+    const emp = state.employees.find(e => e.id === state.selectedEmployeeId);
+    if (!emp) return;
+    
+    const type = employeeTypes[emp.type];
+    const trainCost = Math.floor(type.cost * (1 + (emp.level || 0)));
+    
+    if (state.cash >= trainCost) {
+        state.cash -= trainCost;
+        emp.level = (emp.level || 0) + 1;
+        createParticle(window.innerWidth/2, window.innerHeight/2, "Level Up!");
+        openEmployeeDetail(emp); // Refresh UI
+        renderOfficeSlot(emp.slotIndex);
+    }
+}
+
+function fireSelectedEmployee() {
+    const emp = state.employees.find(e => e.id === state.selectedEmployeeId);
+    if (!emp) return;
+    
+    if (confirm("Are you sure you want to fire this employee?")) {
+        state.employees = state.employees.filter(e => e.id !== emp.id);
+        closeEmployeeDetail();
+        renderOffice();
+    }
+}
+
+// Active Skills
+function toggleCrunch() {
+    state.crunchMode = !state.crunchMode;
+    if (state.crunchMode) {
+        document.body.classList.add('crunch-mode');
+        els.btnCrunch.classList.add('bg-red-600', 'animate-pulse');
+        els.btnCrunch.innerText = "STOP CRUNCH";
+    } else {
+        document.body.classList.remove('crunch-mode');
+        els.btnCrunch.classList.remove('bg-red-600', 'animate-pulse');
+        els.btnCrunch.innerText = "CRUNCH MODE";
+    }
+}
+
+function triggerViral() {
+    if (state.viralCooldown > 0) return;
+    
+    const cost = 1000 * (state.officeLevel);
+    if (state.cash >= cost) {
+        state.cash -= cost;
+        state.viralCooldown = 30000; // 30s cooldown
+        
+        const viralUsers = 1000 * state.officeLevel * (1 + state.prestige);
+        state.users += viralUsers;
+        createParticle(window.innerWidth/2, window.innerHeight/2, `VIRAL! +${formatNumber(viralUsers)} Users`);
+    }
+}
+
+function triggerIPO() {
+    if (state.valuation < 1000000) {
+        alert("Need $1M Valuation to IPO!");
+        return;
+    }
+    
+    if (confirm("IPO will reset your office, employees, and cash, but you will keep Prestige Multipliers. Do it?")) {
+        state.prestige++;
+        state.cash = 1000; // Seed money
+        state.users = 0;
+        state.officeLevel = 1;
+        state.employees = [];
+        state.upgrades = [];
+        state.day = 1;
+        state.valuation = 0;
+        
+        saveGame();
+        location.reload();
+    }
 }
 
 // Rendering
@@ -242,23 +445,28 @@ function renderEmployeeInSlot(slot, emp) {
     avatar.innerText = type.icon;
     slot.appendChild(avatar);
     
+    // Level Badge
+    if (emp.level > 0) {
+        const lvl = document.createElement('div');
+        lvl.className = 'absolute top-0 right-0 bg-yellow-500 text-black text-[10px] px-1 rounded-full font-bold';
+        lvl.innerText = `L${emp.level}`;
+        slot.appendChild(lvl);
+    }
+    
     // Status Icon
     if (emp.status === 'sleeping') {
         const badge = document.createElement('div');
         badge.className = 'status-indicator status-zzz';
         badge.innerText = '💤';
         slot.appendChild(badge);
-        slot.onclick = () => wakeEmployee(emp);
     } else if (emp.status === 'bug') {
         const badge = document.createElement('div');
         badge.className = 'status-indicator status-bug';
         badge.innerText = '🐛';
         slot.appendChild(badge);
-        slot.onclick = () => fixBug(emp);
-    } else {
-        // Normal click does nothing or shows info?
-        slot.onclick = null;
     }
+    
+    slot.onclick = () => handleSlotClick(emp);
 }
 
 function renderHireList() {
@@ -277,12 +485,47 @@ function renderHireList() {
             </div>
             <div class="text-right">
                 <div class="text-green-400 font-bold text-sm">$${type.cost}</div>
-                <div class="text-[10px] text-blue-400">Output: ${type.output}</div>
+                <div class="text-[10px] text-blue-400">Out: ${type.output}</div>
             </div>
         `;
         card.onclick = () => hireEmployee(key);
         els.hireList.appendChild(card);
     });
+}
+
+function renderUpgrades() {
+    els.upgradesList.innerHTML = '';
+    UPGRADES.forEach(upg => {
+        const card = document.createElement('div');
+        card.className = `upgrade-card ${state.upgrades.includes(upg.id) ? 'owned' : ''}`;
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">${upg.icon}</span>
+                    <span class="font-bold text-sm">${upg.name}</span>
+                </div>
+                <span class="text-green-400 text-xs font-bold">${state.upgrades.includes(upg.id) ? 'OWNED' : '$' + formatNumber(upg.cost)}</span>
+            </div>
+            <div class="text-[10px] text-gray-400">${upg.desc}</div>
+        `;
+        if (!state.upgrades.includes(upg.id)) {
+            card.onclick = () => buyUpgrade(upg.id);
+        }
+        els.upgradesList.appendChild(card);
+    });
+}
+
+function expandOffice() {
+    const nextLevel = state.officeLevel + 1;
+    const config = officeConfig[nextLevel];
+    if (!config) return;
+    
+    if (state.cash >= config.cost) {
+        state.cash -= config.cost;
+        state.officeLevel = nextLevel;
+        renderOffice();
+        updateUI();
+    }
 }
 
 // Sequence Mini-Game (Memory/Manual Work)
@@ -375,12 +618,43 @@ function updateUI() {
     if(els.cash) els.cash.innerText = formatNumber(state.cash);
     if(els.users) els.users.innerText = formatNumber(state.users);
     
+    // Valuation Logic
+    state.valuation = (state.users * 10) + (state.cash) + (state.employees.length * 1000);
+    
     // Update Hire Card States
     document.querySelectorAll('.hire-card').forEach(card => {
         const cost = parseInt(card.querySelector('.text-green-400').innerText.replace('$',''));
         if (state.cash < cost) card.classList.add('disabled');
         else card.classList.remove('disabled');
     });
+
+    // Update Upgrade Card States
+    document.querySelectorAll('.upgrade-card').forEach(card => {
+        if (card.classList.contains('owned')) return;
+        const costText = card.querySelector('.text-green-400').innerText;
+        const cost = parseInt(costText.replace('$','').replace(',',''));
+        if (state.cash < cost) card.classList.add('disabled');
+        else card.classList.remove('disabled');
+    });
+
+    // Viral Button
+    if (state.viralCooldown > 0) {
+        els.btnViral.disabled = true;
+        els.btnViral.innerText = `Viral (${Math.ceil(state.viralCooldown/1000)}s)`;
+        els.btnViral.classList.add('opacity-50');
+    } else {
+        els.btnViral.disabled = false;
+        els.btnViral.innerText = "GO VIRAL ($1k)";
+        els.btnViral.classList.remove('opacity-50');
+    }
+
+    // IPO Button
+    if (state.valuation >= 1000000) {
+        els.ipoBtn.classList.remove('hidden');
+        els.ipoBtn.innerText = `IPO (Val: $${formatNumber(state.valuation)})`;
+    } else {
+        els.ipoBtn.classList.add('hidden');
+    }
 }
 
 function createParticle(x, y, text) {
@@ -400,11 +674,11 @@ function formatNumber(num) {
 }
 
 function saveGame() {
-    localStorage.setItem('unicornTycoonV1', JSON.stringify(state));
+    localStorage.setItem('unicornTycoonV2', JSON.stringify(state));
 }
 
 function loadGame() {
-    const saved = localStorage.getItem('unicornTycoonV1');
+    const saved = localStorage.getItem('unicornTycoonV2');
     if (saved) Object.assign(state, JSON.parse(saved));
 }
 

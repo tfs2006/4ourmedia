@@ -55,10 +55,14 @@
             
             <!-- Left Panel: Hiring & Stats -->
             <div class="panel" id="tab-management">
-                <h3 class="text-xl font-bold mb-4 text-gray-200 border-b border-gray-700 pb-2">Management</h3>
-                
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-700 mb-4">
+                    <button class="flex-1 py-2 text-sm font-bold text-blue-400 border-b-2 border-blue-400" id="btn-tab-hire">Staff</button>
+                    <button class="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white" id="btn-tab-upgrades">Upgrades</button>
+                </div>
+
                 <!-- Stats -->
-                <div class="grid grid-cols-2 gap-2 mb-6">
+                <div class="grid grid-cols-2 gap-2 mb-4">
                     <div class="bg-slate-800 p-2 rounded border border-slate-700">
                         <div class="text-[10px] text-gray-400 uppercase">Cash</div>
                         <div class="font-bold text-green-400 text-lg">$<span id="cash-display">0</span></div>
@@ -69,18 +73,46 @@
                     </div>
                 </div>
 
-                <!-- Hiring Market -->
-                <div class="flex-grow overflow-y-auto custom-scrollbar">
-                    <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Hire Talent</h4>
-                    <div id="hire-list" class="space-y-2">
-                        <!-- Injected by JS -->
+                <!-- Content Area -->
+                <div class="flex-grow overflow-y-auto custom-scrollbar relative">
+                    
+                    <!-- Hire View -->
+                    <div id="mgmt-hire" class="space-y-2">
+                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Hire Talent</h4>
+                        <div id="hire-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Upgrades View -->
+                    <div id="mgmt-upgrades" class="space-y-2 hidden">
+                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Office Upgrades</h4>
+                        <div id="upgrades-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Employee Detail View (Overlay) -->
+                    <div id="view-employee" class="absolute inset-0 bg-slate-900 hidden flex flex-col z-20 p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-sm font-bold text-white uppercase">Employee Details</h4>
+                            <button id="btn-close-detail" class="text-gray-400 hover:text-white">✕</button>
+                        </div>
+                        <div class="mb-4 text-center">
+                            <div id="emp-detail-name" class="text-xl font-bold text-white mb-1">Name</div>
+                            <div id="emp-detail-role" class="text-sm text-blue-400 mb-2">Role</div>
+                            <div id="emp-detail-stats" class="text-xs text-gray-500"></div>
+                        </div>
+                        <div class="space-y-2 mt-auto">
+                            <button id="btn-train" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded">Train</button>
+                            <button id="btn-fire" class="w-full bg-red-900/50 hover:bg-red-900 text-red-400 font-bold py-2 rounded border border-red-900">Fire Employee</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Office Upgrade -->
-                <div class="mt-4 pt-4 border-t border-gray-700">
-                    <button id="expand-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                        Expand Office ($1,000)
+                <!-- Actions Footer -->
+                <div class="mt-4 pt-4 border-t border-gray-700 space-y-2">
+                    <button id="expand-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded text-sm transition-all disabled:opacity-50">
+                        Expand Office
+                    </button>
+                    <button id="ipo-btn" class="w-full bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 border border-yellow-600/50 py-2 rounded text-xs transition-all hidden">
+                        IPO (Prestige Reset)
                     </button>
                 </div>
             </div>
@@ -93,9 +125,14 @@
                         <span class="text-sm font-normal text-gray-500 ml-2">(<span id="slots-used">0</span>/<span id="slots-total">4</span> Desks)</span>
                     </h3>
                     
-                    <!-- Manual Work Mini-Game Trigger -->
+                    <!-- Active Abilities -->
                     <div class="flex items-center gap-2">
-                        <div class="text-xs text-gray-400 mr-2">Founder Action:</div>
+                        <button id="btn-viral" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded text-xs font-bold shadow active:scale-95" title="Buy 100 Users ($500)">
+                            Viral ($500)
+                        </button>
+                        <button id="btn-crunch" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-bold shadow active:scale-95" title="2x Speed, 2x Energy Drain">
+                            Crunch!
+                        </button>
                         <button id="founder-work-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded text-sm font-bold shadow-lg active:transform active:scale-95">
                             Code Feature
                         </button>
