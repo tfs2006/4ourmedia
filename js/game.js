@@ -75,6 +75,9 @@ const els = {
     btnViral: document.getElementById('btn-viral'),
     btnCrunch: document.getElementById('btn-crunch'),
     ipoBtn: document.getElementById('ipo-btn'),
+    
+    // Advisor
+    advisorMsg: document.getElementById('advisor-message'),
 
     // Sequence Game
     seqOverlay: document.getElementById('sequence-overlay'),
@@ -102,7 +105,7 @@ function init() {
 
 function setupEventListeners() {
     els.expandBtn.addEventListener('click', expandOffice);
-    els.founderBtn.addEventListener('click', startSequenceGame);
+    els.founderBtn.addEventListener('click', doFounderWork); // Changed from startSequenceGame
     els.closeSeqBtn.addEventListener('click', closeSequenceGame);
     
     // Tabs
@@ -183,7 +186,16 @@ function tick() {
                     const capacity = type.output * levelMult * outputMod * prestigeMult;
                     const converted = Math.min(state.users, capacity);
                     state.users -= converted;
-                    state.cash += converted * 2 * prestigeMult;
+                    state.cash += converted * 5 * prestigeMult; // Buffed from 2 to 5
+                    
+                    // Visual feedback for sales occasionally
+                    if (Math.random() < 0.05) {
+                        const slot = document.getElementById(`slot-${emp.slotIndex}`);
+                        if(slot) {
+                            const rect = slot.getBoundingClientRect();
+                            createParticle(rect.left + 20, rect.top, `+$${Math.floor(converted * 5)}`);
+                        }
+                    }
                 }
             }
         }
@@ -528,6 +540,25 @@ function expandOffice() {
     }
 }
 
+// Founder Actions
+function doFounderWork() {
+    // Base click value
+    const clickValue = 10 * (1 + state.prestige);
+    const userValue = 5 * (1 + state.prestige);
+    
+    state.cash += clickValue;
+    state.users += userValue;
+    
+    createParticle(event?.clientX, event?.clientY, `+$${clickValue}`);
+    
+    // 5% Chance to trigger "Major Feature" (Sequence Game)
+    if (Math.random() < 0.05 && !seqState.active) {
+        startSequenceGame();
+    }
+    
+    updateUI();
+}
+
 // Sequence Mini-Game (Memory/Manual Work)
 let seqState = {
     active: false,
@@ -655,6 +686,34 @@ function updateUI() {
     } else {
         els.ipoBtn.classList.add('hidden');
     }
+    
+    updateAdvisor();
+}
+
+function updateAdvisor() {
+    if (!els.advisorMsg) return;
+    
+    const sales = state.employees.filter(e => employeeTypes[e.type].type === 'sales').length;
+    const devs = state.employees.filter(e => employeeTypes[e.type].type === 'code').length;
+    const sleepers = state.employees.filter(e => e.status === 'sleeping').length;
+    
+    let msg = "Keep growing! Click 'Hustle' for quick cash.";
+    
+    if (state.cash < 50 && state.users < 100) {
+        msg = "Click 'HUSTLE' to earn your first dollars!";
+    } else if (state.users > 500 && sales === 0) {
+        msg = "⚠️ We have Users but no Revenue! Hire Sales Bros!";
+    } else if (state.cash > 1000 && state.officeLevel === 1) {
+        msg = "We're rich! Expand the office to hire more staff.";
+    } else if (sleepers > 2) {
+        msg = "Everyone is asleep! Hire a Manager or click them to wake up.";
+    } else if (state.users > 10000 && state.valuation < 50000) {
+        msg = "Monetize! We need more Sales staff to convert these users.";
+    } else if (state.crunchMode) {
+        msg = "🔥 CRUNCH MODE ACTIVE! Watch energy levels!";
+    }
+    
+    els.advisorMsg.innerText = msg;
 }
 
 function createParticle(x, y, text) {
