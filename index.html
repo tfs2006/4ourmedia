@@ -43,25 +43,28 @@
                 color: #94a3b8;
                 font-size: 0.75rem;
                 cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
             }
             .mobile-nav-item.active {
                 color: #3b82f6;
                 background: rgba(59, 130, 246, 0.1);
             }
             .panel-content {
-                display: none;
+                display: none !important;
             }
             .panel-content.active {
-                display: flex;
+                display: flex !important;
+                flex-direction: column;
             }
             /* Hide desktop layout elements on mobile */
             .desktop-only {
                 display: none !important;
             }
             .game-grid {
-                display: block;
+                display: block !important;
                 height: calc(100vh - 140px); /* Adjust for header + nav */
                 overflow-y: auto;
+                padding-bottom: 80px;
             }
         }
     </style>
