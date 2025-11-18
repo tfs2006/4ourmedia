@@ -15,216 +15,59 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Courier+New:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
     
     <!-- Game Styles -->
     <link href="css/game.css" rel="stylesheet"/>
 </head>
-<body>
-    <div class="game-container">
-        <!-- Header / Stats Bar -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-4 panel shrink-0" style="height: auto; min-height: 80px;">
-            <div class="flex items-center space-x-4 mb-2 md:mb-0 w-full md:w-auto justify-between md:justify-start">
-                <div>
-                    <div class="text-2xl font-bold text-white leading-none">
-                        <span class="text-blue-500">Unicorn</span>Founder
-                    </div>
-                    <div class="text-[10px] text-gray-500 uppercase tracking-widest">A 4ourmedia Game</div>
-                </div>
-                <div class="text-sm text-gray-400 bg-slate-800 px-2 py-1 rounded">Day <span id="day-display" class="text-white font-mono">1</span></div>
-            </div>
-
-            <!-- Advisor Message (New) -->
-            <div id="advisor-container" class="hidden md:flex flex-1 mx-4 bg-slate-800/50 border border-slate-700 rounded px-3 py-2 items-center justify-center text-center">
-                <span class="text-xl mr-2">💡</span>
-                <span id="advisor-message" class="text-sm text-yellow-200 font-mono">Welcome, Founder! Click 'Hustle' to earn cash, or hire staff to automate.</span>
-            </div>
+<body class="retro-body">
+    <div class="crt-frame">
+        <div class="screen-content">
+            <canvas id="game-canvas" width="640" height="480"></canvas>
             
-            <div class="flex space-x-4 md:space-x-8 w-full md:w-auto justify-between md:justify-end">
-                <div class="text-center">
-                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">Cash</div>
-                    <div class="text-xl md:text-2xl resource-value text-green-400">$<span id="cash-display">0</span></div>
-                </div>
-                <div class="text-center">
-                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">MRR</div>
-                    <div class="text-xl md:text-2xl resource-value text-blue-400">$<span id="mrr-display">0</span>/s</div>
-                </div>
-                <div class="text-center hidden md:block">
-                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">Equity</div>
-                    <div class="text-xl md:text-2xl resource-value text-yellow-400"><span id="equity-display">0</span>%</div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Game Area -->
-        <div class="game-grid" style="grid-template-columns: 300px 1fr;">
-            
-            <!-- Left Panel: Hiring & Stats -->
-            <div class="panel" id="tab-management">
-                <!-- Tabs -->
-                <div class="flex border-b border-gray-700 mb-4">
-                    <button class="flex-1 py-2 text-sm font-bold text-blue-400 border-b-2 border-blue-400" id="btn-tab-hire">Staff</button>
-                    <button class="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white" id="btn-tab-upgrades">Upgrades</button>
-                </div>
-
-                <!-- Stats -->
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <div class="bg-slate-800 p-2 rounded border border-slate-700">
-                        <div class="text-[10px] text-gray-400 uppercase">Cash</div>
-                        <div class="font-bold text-green-400 text-lg">$<span id="cash-display">0</span></div>
+            <!-- Retro UI Overlay -->
+            <div id="retro-ui" class="retro-ui">
+                <div class="stats-bar">
+                    <div class="stat-box">
+                        <span class="label">CASH</span>
+                        <span class="value" id="cash-display">$0</span>
                     </div>
-                    <div class="bg-slate-800 p-2 rounded border border-slate-700">
-                        <div class="text-[10px] text-gray-400 uppercase">Users</div>
-                        <div class="font-bold text-blue-400 text-lg"><span id="users-display">0</span></div>
+                    <div class="stat-box">
+                        <span class="label">USERS</span>
+                        <span class="value" id="users-display">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">DAY</span>
+                        <span class="value" id="day-display">1</span>
                     </div>
                 </div>
-
-                <!-- Content Area -->
-                <div class="flex-grow overflow-y-auto custom-scrollbar relative">
-                    
-                    <!-- Hire View -->
-                    <div id="mgmt-hire" class="space-y-2">
-                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Hire Talent</h4>
-                        <div id="hire-list" class="space-y-2"></div>
-                    </div>
-
-                    <!-- Upgrades View -->
-                    <div id="mgmt-upgrades" class="space-y-2 hidden">
-                        <h4 class="text-sm font-bold text-gray-400 mb-2 uppercase">Office Upgrades</h4>
-                        <div id="upgrades-list" class="space-y-2"></div>
-                    </div>
-
-                    <!-- Employee Detail View (Overlay) -->
-                    <div id="view-employee" class="absolute inset-0 bg-slate-900 hidden flex flex-col z-20 p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-sm font-bold text-white uppercase">Employee Details</h4>
-                            <button id="btn-close-detail" class="text-gray-400 hover:text-white">✕</button>
-                        </div>
-                        <div class="mb-4 text-center">
-                            <div id="emp-detail-name" class="text-xl font-bold text-white mb-1">Name</div>
-                            <div id="emp-detail-role" class="text-sm text-blue-400 mb-2">Role</div>
-                            <div id="emp-detail-stats" class="text-xs text-gray-500"></div>
-                        </div>
-                        <div class="space-y-2 mt-auto">
-                            <button id="btn-train" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded">Train</button>
-                            <button id="btn-fire" class="w-full bg-red-900/50 hover:bg-red-900 text-red-400 font-bold py-2 rounded border border-red-900">Fire Employee</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actions Footer -->
-                <div class="mt-4 pt-4 border-t border-gray-700 space-y-2">
-                    <button id="expand-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded text-sm transition-all disabled:opacity-50">
-                        Expand Office
-                    </button>
-                    <button id="ipo-btn" class="w-full bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 border border-yellow-600/50 py-2 rounded text-xs transition-all hidden">
-                        IPO (Prestige Reset)
-                    </button>
-                </div>
-            </div>
-
-            <!-- Center Panel: The Office Grid -->
-            <div class="panel active relative" id="tab-office">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-200">
-                        <span id="office-name">Garage HQ</span> 
-                        <span class="text-sm font-normal text-gray-500 ml-2">(<span id="slots-used">0</span>/<span id="slots-total">4</span> Desks)</span>
-                    </h3>
-                    
-                    <!-- Active Abilities -->
-                    <div class="flex items-center gap-2">
-                        <button id="btn-viral" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded text-xs font-bold shadow active:scale-95" title="Buy 100 Users ($500)">
-                            Viral ($500)
-                        </button>
-                        <button id="btn-crunch" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-bold shadow active:scale-95" title="2x Speed, 2x Energy Drain">
-                            Crunch!
-                        </button>
-                        <button id="founder-work-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded text-sm font-bold shadow-lg active:transform active:scale-95 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 transition-all">
-                            HUSTLE (Click!)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- The Grid -->
-                <div id="office-grid" class="grid grid-cols-2 gap-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700 min-h-[400px] content-start transition-all duration-500">
-                    <!-- Slots injected by JS -->
-                </div>
-
-                <!-- Founder Sequence Overlay (Memory Game) -->
-                <div id="sequence-overlay" class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center">
-                    <h3 class="text-2xl font-bold text-white mb-4">SHIP FEATURE</h3>
-                    <div class="text-gray-400 mb-8 text-sm">Memorize & Repeat the Sequence</div>
-                    
-                    <div class="flex gap-4 mb-8" id="sequence-display">
-                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-red-500 bg-red-500/20 cursor-pointer hover:bg-red-500/40 transition-all" data-color="red"></div>
-                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-blue-500 bg-blue-500/20 cursor-pointer hover:bg-blue-500/40 transition-all" data-color="blue"></div>
-                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-green-500 bg-green-500/20 cursor-pointer hover:bg-green-500/40 transition-all" data-color="green"></div>
-                        <div class="seq-btn w-16 h-16 rounded-full border-4 border-yellow-500 bg-yellow-500/20 cursor-pointer hover:bg-yellow-500/40 transition-all" data-color="yellow"></div>
-                    </div>
-
-                    <div id="sequence-status" class="h-8 text-lg font-bold text-white">Ready...</div>
-                    <button id="close-sequence-btn" class="mt-8 text-gray-500 hover:text-white text-sm underline">Cancel</button>
+                
+                <!-- Dialog Box (Hidden by default) -->
+                <div id="dialog-box" class="dialog-box hidden">
+                    <div id="dialog-text">Welcome to Silicon Valley! Press ARROW KEYS to move. Z to Interact.</div>
+                    <div id="dialog-options" class="dialog-options"></div>
+                    <div class="dialog-arrow">▼</div>
                 </div>
             </div>
         </div>
+        <div class="scanlines"></div>
+    </div>
 
-        <!-- Mobile Navigation -->
-        <div class="mobile-nav">
-            <div class="mobile-nav-item" onclick="switchTab('home')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2 7 7 7-7 2 2-9 9-9-9z"></path></svg>
-                <span class="text-xs">Status</span>
-            </div>
-            <div class="mobile-nav-item active" onclick="switchTab('work')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2 7 7 7-7 2 2-9 9-9-9z"></path></svg>
-                <span class="text-xs">Work</span>
-            </div>
-            <div class="mobile-nav-item" onclick="openShop()">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2 7 7 7-7 2 2-9 9-9-9z"></path></svg>
-                <span class="text-xs">Shop</span>
-            </div>
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+        <div class="d-pad">
+            <div class="d-up" data-key="ArrowUp"></div>
+            <div class="d-left" data-key="ArrowLeft"></div>
+            <div class="d-right" data-key="ArrowRight"></div>
+            <div class="d-down" data-key="ArrowDown"></div>
         </div>
-        
-        <footer class="text-center text-xs text-gray-500 py-4 border-t border-gray-800">
-            <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-6">
-                <span>&copy; <span id="copyright-year">2025</span> 4ourmedia. All rights reserved.</span>
-                <a href="mailto:hq@4ourmedia.com" class="hover:text-blue-400 transition">hq@4ourmedia.com</a>
-                <a href="https://davidjwoodbury.com" target="_blank" class="hover:text-blue-400 transition">Created by David J. Woodbury</a>
-            </div>
-            <div class="mt-2 space-x-4">
-                <a href="privacy.html" class="hover:text-gray-300">Privacy Policy</a>
-                <a href="terms.html" class="hover:text-gray-300">Terms of Service</a>
-            </div>
-        </footer>
+        <div class="action-btns">
+            <div class="btn-b" data-key="x">B</div>
+            <div class="btn-a" data-key="z">A</div>
+        </div>
     </div>
 
     <!-- Game Logic -->
     <script src="js/game.js"></script>
-    <script>
-        // Mobile Tab Logic
-        function switchTab(tabName) {
-            // Hide all panels
-            document.querySelectorAll('.panel').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            // Show selected panel
-            const selected = document.getElementById(`tab-${tabName}`);
-            if(selected) selected.classList.add('active');
-            
-            // Update nav icons
-            document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
-            
-            if(tabName === 'home') document.querySelectorAll('.mobile-nav-item')[0].classList.add('active');
-            if(tabName === 'work') document.querySelectorAll('.mobile-nav-item')[1].classList.add('active');
-        }
-
-        // Set Copyright Year
-        document.getElementById('copyright-year').innerText = new Date().getFullYear();
-        
-        // Initialize Mobile View (Default to Work tab on mobile)
-        if (window.innerWidth <= 1024) {
-            switchTab('work');
-        }
-    </script>
 </body>
 </html>
