@@ -65,17 +65,20 @@ body {
     }
 
     .game-container {
-        padding: 12px;
+        padding: 10px;
         padding-bottom: 80px; /* Space for bottom nav */
         height: 100%;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .game-grid {
         display: block; /* Stack them (but we hide inactive ones) */
         position: relative;
-        height: 100%;
+        flex: 1;
         overflow: hidden;
+        min-height: 0;
     }
 
     .panel {
@@ -84,6 +87,18 @@ body {
         border-radius: 12px;
         flex-direction: column;
         overflow: hidden; /* Container is hidden, children scroll */
+        padding: 1rem; /* Reduced padding for mobile */
+        margin-bottom: 0; /* Remove margin since we only show one */
+    }
+
+    /* Header specific adjustments for mobile */
+    header.panel {
+        display: flex !important; /* Always show header */
+        height: auto !important;
+        min-height: auto !important;
+        flex-shrink: 0;
+        margin-bottom: 10px;
+        padding: 0.75rem;
     }
 
     .panel.active {
@@ -145,9 +160,9 @@ body {
     
     /* Adjust button size for mobile */
     .main-btn {
-        width: 180px;
-        height: 180px;
-        font-size: 1.5rem;
+        width: 160px;
+        height: 160px;
+        font-size: 1.4rem;
     }
 }
 
@@ -334,24 +349,5 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
-}
-
-/* Mobile Optimizations */
-@media (max-width: 1024px) {
-    .game-container {
-        padding: 10px;
-        height: auto;
-        min-height: 100vh;
-    }
-    
-    .panel {
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .main-btn {
-        width: 180px;
-        height: 180px;
-    }
 }
 

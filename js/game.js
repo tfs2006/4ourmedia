@@ -132,9 +132,18 @@ function handleMainClick(e) {
     state.lifetimeCash += cashEarned;
     
     // Visual Feedback
-    // Get coordinates relative to the button or viewport
-    const x = e.clientX || (e.target.getBoundingClientRect().left + e.target.getBoundingClientRect().width / 2);
-    const y = e.clientY || (e.target.getBoundingClientRect().top + e.target.getBoundingClientRect().height / 2);
+    // Get coordinates relative to the particle container
+    const containerRect = els.particles.getBoundingClientRect();
+    let x, y;
+    
+    if (e && e.clientX !== undefined) {
+        x = e.clientX - containerRect.left;
+        y = e.clientY - containerRect.top;
+    } else {
+        // Center of container fallback
+        x = containerRect.width / 2;
+        y = containerRect.height / 2;
+    }
     
     createParticle(x, y, `+$${formatNumber(cashEarned)}`);
     
