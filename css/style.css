@@ -506,6 +506,67 @@ article p {
     font-size: 1.1rem;
 }
 
+/* Extended SEO Section */
+.seo-extended {
+    padding: 60px 0;
+    background: var(--bg-dark);
+}
+
+.seo-extended h2 {
+    font-size: 2rem;
+    margin-top: 60px;
+    margin-bottom: 30px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+}
+
+.seo-extended h2:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.seo-extended article {
+    margin-bottom: 20px;
+}
+
+/* FAQ Section */
+.faq-section {
+    padding: 80px 0;
+    background: #0f0f16;
+}
+
+.faq-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.faq-item {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+}
+
+.faq-item h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+.faq-item p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
 /* Footer */
 footer {
     padding: 60px 0 20px;
