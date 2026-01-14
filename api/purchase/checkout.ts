@@ -1,0 +1,72 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import Stripe from 'stripe';
+
+const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCents: number; isSubscription?: boolean }> = {
+  starter: { name: 'Starter Pack', credits: 25, priceInCents: 900 },
+  pro: { name: 'Pro Pack', credits: 100, priceInCents: 2900 },
+  agency: { name: 'Agency Pack', credits: 500, priceInCents: 9900 },
+  unlimited: { name: 'Unlimited Monthly', credits: -1, priceInCents: 1900, isSubscription: true }
+};
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.status(503).json({ error: 'Payment system not configured' });
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const { successUrl, cancelUrl, planId = 'pro', userId, userEmail } = req.body;
+    const tier = PRICING_TIERS[planId];
+    
+    if (!tier) {
+      return res.status(400).json({ error: 'Invalid plan selected' });
+    }
+
+    const origin = req.headers.origin || req.headers.referer || 'https://www.4ourmedia.com';
+    
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `PromoGen - ${tier.name}`,
+            description: tier.credits === -1 
+              ? 'Unlimited AI promo generations per month' 
+              : `${tier.credits} AI promo generation credits`,
+          },
+          unit_amount: tier.priceInCents,
+          ...(tier.isSubscription ? { recurring: { interval: 'month' as const } } : {})
+        },
+        quantity: 1,
+      }],
+      mode: tier.isSubscription ? 'subscription' : 'payment',
+      success_url: successUrl || `${origin}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${origin}/#pricing`,
+      customer_email: userEmail || undefined,
+      metadata: { 
+        planId, 
+        credits: String(tier.credits),
+        userId: userId || '',
+        userEmail: userEmail || ''
+      }
+    });
+
+    res.json({ url: session.url, sessionId: session.id });
+  } catch (error: any) {
+    console.error('Checkout error:', error);
+    res.status(500).json({ error: error.message || 'Failed to create checkout' });
+  }
+}
