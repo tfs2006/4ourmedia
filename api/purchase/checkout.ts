@@ -1,3 +1,7 @@
+import dns from 'node:dns';
+// Force IPv4 to avoid Vercel/AWS IPv6 timeout issues
+dns.setDefaultResultOrder('ipv4first');
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 
