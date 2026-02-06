@@ -43,6 +43,9 @@ export const analyzeProductUrl = async (url: string): Promise<ProductAnalysis> =
     if (error.needsSetup) {
       throw new Error('Please configure your API key first.');
     }
+    if (error.requiresAuth) {
+      throw new Error('Please sign in to use the demo.');
+    }
     if (error.demoLimitReached) {
       throw new Error('Demo limit reached. Purchase the full version to continue.');
     }
@@ -90,6 +93,9 @@ export const generatePromoBackground = async (imagePrompt: string): Promise<stri
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     if (error.needsSetup) {
       throw new Error('Please configure your API key first.');
+    }
+    if (error.requiresAuth) {
+      throw new Error('Please sign in to use the demo.');
     }
     if (error.demoLimitReached) {
       throw new Error('Demo limit reached. Purchase the full version to continue.');

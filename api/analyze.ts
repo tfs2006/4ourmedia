@@ -74,6 +74,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({ error: `Rate limit exceeded. Try again in ${rateCheck.retryAfter} seconds.` });
   }
 
+  // Require login for demo mode
+  if (process.env.DEMO_MODE === 'true') {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ error: 'Please sign in to use the demo.', requiresAuth: true });
+    }
+  }
+
   try {
     const { url } = req.body;
     

@@ -60,6 +60,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const sessionId = req.headers['x-session-id'] as string;
 
+  // Require login for demo mode
+  if (process.env.DEMO_MODE === 'true') {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ error: 'Please sign in to use the demo.', requiresAuth: true });
+    }
+  }
+
   try {
     const { imagePrompt } = req.body;
 

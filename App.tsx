@@ -9,7 +9,7 @@ import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/Bra
 import HistoryPanel, { addToHistory } from './components/HistoryPanel';
 import AuthModal from './components/AuthModal';
 import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './components/LegalPages';
-import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X } from 'lucide-react';
+import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock } from 'lucide-react';
 import { 
   AuthUser, 
   getCurrentUser, 
@@ -241,6 +241,10 @@ export default function App() {
     await loadUserCreditsFromSupabase(authUser.id);
     await checkDailyCreditSupabase(authUser.id);
     setShowAuthModal(false);
+    // After login, take user to the app view so they can start using it
+    if (viewState === 'landing') {
+      setViewState('app');
+    }
   };
   
   const openAuth = (mode: 'signin' | 'signup') => {
@@ -386,6 +390,12 @@ export default function App() {
     
     // Prevent double-click / concurrent generation
     if (state !== AppState.IDLE && state !== AppState.COMPLETE && state !== AppState.ERROR) return;
+    
+    // Require login before using demo
+    if (!user) {
+      openAuth('signup');
+      return;
+    }
     
     // Check credits
     if (creditsRemaining <= 0) {
@@ -580,7 +590,7 @@ export default function App() {
             </div>
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setViewState('app')}
+                onClick={() => user ? setViewState('app') : openAuth('signup')}
                 className="px-4 py-2 text-slate-300 hover:text-white transition-colors font-medium"
               >
                 Try Free
@@ -597,7 +607,7 @@ export default function App() {
         </header>
         
         <LandingPage 
-          onGetStarted={() => setViewState('app')}
+          onGetStarted={() => user ? setViewState('app') : openAuth('signup')}
           onPurchase={(planId: string) => {
             setSelectedPlan(planId);
             setShowPurchaseModal(true);
@@ -950,13 +960,31 @@ export default function App() {
                  )}
               </div>
 
+              {/* Login required notice */}
+              {!user && (
+                <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 flex items-center gap-3">
+                  <Lock className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm text-indigo-200 font-medium">Sign in to use free demo</p>
+                    <p className="text-xs text-indigo-300/60 mt-0.5">Create a free account to get 3 demo generations</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => openAuth('signup')}
+                    className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-bold rounded-lg transition-all flex-shrink-0"
+                  >
+                    Sign Up Free
+                  </button>
+                </div>
+              )}
+
               <button
                 type="submit"
-                disabled={creditsRemaining <= 0}
+                disabled={creditsRemaining <= 0 || !user}
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold text-lg shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all flex items-center justify-center gap-2 group"
               >
                 <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                {creditsRemaining <= 0 ? 'Get Credits to Continue' : 'Generate Promo'}
+                {!user ? 'Sign In to Generate' : creditsRemaining <= 0 ? 'Get Credits to Continue' : 'Generate Promo'}
               </button>
               
               {/* Example URLs */}
