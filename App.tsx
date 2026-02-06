@@ -634,7 +634,7 @@ export default function App() {
               <div>
                 <h4 className="font-bold mb-4">Product</h4>
                 <ul className="space-y-2 text-slate-400 text-sm">
-                  <li><button onClick={() => setViewState('app')} className="hover:text-white transition-colors">Try Free</button></li>
+                  <li><button onClick={() => user ? setViewState('app') : openAuth('signup')} className="hover:text-white transition-colors">Try Free</button></li>
                   <li><button onClick={() => setShowPurchaseModal(true)} className="hover:text-white transition-colors">Get Credits</button></li>
                 </ul>
               </div>
@@ -664,6 +664,14 @@ export default function App() {
             </div>
           </div>
         </footer>
+        
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+          initialMode={authMode}
+        />
         
         {/* Purchase Modal */}
         <PurchaseModal 
