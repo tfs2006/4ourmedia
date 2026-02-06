@@ -1,3 +1,8 @@
+# Environment variables - NEVER commit secrets
+.env
+.env.*
+!.env.example
+
 # Config folder - contains sensitive API keys
 config/
 
