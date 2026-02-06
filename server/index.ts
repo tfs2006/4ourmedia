@@ -4,22 +4,22 @@ import cors from 'cors';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
 import { getConfig, saveConfig, isConfigured } from './config';
-import { 
-  DEMO_CONFIG, 
-  canUseDemo, 
-  incrementDemoUsage, 
-  getDemoUsage, 
+import {
+  DEMO_CONFIG,
+  canUseDemo,
+  incrementDemoUsage,
+  getDemoUsage,
   generateSessionId,
   checkDailyLimit,
   incrementDailyUsage,
   getDailyLimitStatus
 } from './demo';
-import { 
-  stripe, 
-  PRODUCT_CONFIG, 
-  createCheckoutSession, 
-  handleWebhook, 
-  validateLicense, 
+import {
+  stripe,
+  PRODUCT_CONFIG,
+  createCheckoutSession,
+  handleWebhook,
+  validateLicense,
   incrementDownload,
   createLicense
 } from './stripe';
@@ -74,13 +74,13 @@ function getAIClient(apiKey?: string) {
 // Get demo status
 app.get('/api/demo/status', (req, res) => {
   const sessionId = req.headers['x-session-id'] as string || '';
-  
+
   if (!IS_DEMO_SERVER) {
     return res.json({ demoMode: false });
   }
 
   const demoStatus = sessionId ? canUseDemo(sessionId) : { allowed: true, remaining: DEMO_CONFIG.maxGenerations };
-  
+
   res.json({
     demoMode: true,
     enabled: DEMO_CONFIG.enabled,
@@ -119,8 +119,18 @@ app.post('/api/purchase/checkout', async (req, res) => {
 
     res.json({ url: session.url, sessionId: session.id });
   } catch (error: any) {
-    console.error('Checkout error:', error);
-    res.status(500).json({ error: error.message || 'Failed to create checkout' });
+    console.error('Checkout error:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      stack: error.stack
+    });
+
+    // Send safe error to client but log full details
+    res.status(500).json({
+      error: 'Payment system error',
+      details: error.message // Safe to share message usually, but avoid specific account info
+    });
   }
 });
 
@@ -129,7 +139,7 @@ app.post('/api/stripe/webhook', async (req, res) => {
   try {
     const signature = req.headers['stripe-signature'] as string;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
-    
+
     if (!webhookSecret) {
       console.error('Stripe webhook secret not configured');
       return res.status(500).json({ error: 'Webhook not configured' });
@@ -147,20 +157,20 @@ app.post('/api/stripe/webhook', async (req, res) => {
 app.post('/api/purchase/verify', async (req, res) => {
   try {
     const { sessionId } = req.body;
-    
+
     if (!stripe || !sessionId) {
       return res.status(400).json({ error: 'Invalid request' });
     }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    
+
     if (session.payment_status === 'paid') {
       // Create license if not exists
       const email = session.customer_details?.email || 'customer@email.com';
       const license = createLicense(email, sessionId);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         license: {
           key: license.key,
           email: license.email
@@ -179,7 +189,7 @@ app.post('/api/purchase/verify', async (req, res) => {
 app.post('/api/license/validate', (req, res) => {
   const { licenseKey } = req.body;
   const license = validateLicense(licenseKey);
-  
+
   if (license) {
     res.json({ valid: true, email: license.email });
   } else {
@@ -191,7 +201,7 @@ app.post('/api/license/validate', (req, res) => {
 app.get('/api/download/:licenseKey', (req, res) => {
   const { licenseKey } = req.params;
   const license = validateLicense(licenseKey);
-  
+
   if (!license) {
     return res.status(403).json({ error: 'Invalid license key' });
   }
@@ -218,7 +228,7 @@ app.get('/api/download/:licenseKey', (req, res) => {
 // Check if app is configured
 app.get('/api/setup/status', (_req, res) => {
   const config = getConfig();
-  res.json({ 
+  res.json({
     configured: IS_DEMO_SERVER ? false : isConfigured(),
     hasApiKey: IS_DEMO_SERVER ? false : !!config.geminiApiKey,
     demoMode: IS_DEMO_SERVER
@@ -229,14 +239,14 @@ app.get('/api/setup/status', (_req, res) => {
 app.post('/api/setup/configure', async (req, res) => {
   try {
     const { apiKey } = req.body;
-    
+
     if (!apiKey || typeof apiKey !== 'string') {
       return res.status(400).json({ error: 'API key is required' });
     }
 
     // Test the API key with a simple request
     const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
-    
+
     try {
       await ai.models.generateContent({
         model: 'gemini-2.0-flash',
@@ -244,16 +254,16 @@ app.post('/api/setup/configure', async (req, res) => {
       });
     } catch (apiError: any) {
       console.error('API key validation failed:', apiError.message);
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Invalid API key. Please check your key and try again.',
         details: apiError.message
       });
     }
 
     // Save the valid API key
-    saveConfig({ 
-      geminiApiKey: apiKey.trim(), 
-      setupComplete: true 
+    saveConfig({
+      geminiApiKey: apiKey.trim(),
+      setupComplete: true
     });
 
     res.json({ success: true, message: 'API key configured successfully!' });
@@ -281,7 +291,7 @@ const requireSetup = (req: express.Request, res: express.Response, next: express
     }
     const demoCheck = canUseDemo(sessionId);
     if (!demoCheck.allowed) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Demo limit reached',
         demoLimitReached: true,
         remaining: 0
@@ -289,12 +299,12 @@ const requireSetup = (req: express.Request, res: express.Response, next: express
     }
     return next();
   }
-  
+
   // Normal mode - require API key setup
   if (!isConfigured()) {
-    return res.status(403).json({ 
-      error: 'App not configured', 
-      needsSetup: true 
+    return res.status(403).json({
+      error: 'App not configured',
+      needsSetup: true
     });
   }
   next();
@@ -319,7 +329,7 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
   try {
     const { url } = req.body;
     const sessionId = req.headers['x-session-id'] as string;
-    
+
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
     }
@@ -334,7 +344,7 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
     if (IS_DEMO_SERVER) {
       const dailyCheck = checkDailyLimit();
       if (!dailyCheck.allowed) {
-        return res.status(429).json({ 
+        return res.status(429).json({
           error: 'Demo limit reached for today. Please try again tomorrow or purchase a license for unlimited access.',
           dailyLimitReached: true,
           reason: dailyCheck.reason
@@ -343,7 +353,7 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
     }
 
     // Use demo API key in demo mode
-    const ai = IS_DEMO_SERVER 
+    const ai = IS_DEMO_SERVER
       ? getAIClient(DEMO_CONFIG.demoApiKey)
       : getAIClient();
 
@@ -465,15 +475,15 @@ Return this EXACT JSON structure:
     }
 
     const result = JSON.parse(text);
-    
+
     // Cache the result to avoid duplicate API calls
     setCachedAnalysis(url, result);
-    
+
     // Track daily usage for cost control (analysis is cheap but still counts)
     if (IS_DEMO_SERVER) {
       incrementDailyUsage('analysis');
     }
-    
+
     // Don't increment demo usage here - do it after successful image generation
     res.json(result);
   } catch (error: any) {
@@ -496,7 +506,7 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
     if (IS_DEMO_SERVER) {
       const dailyCheck = checkDailyLimit();
       if (!dailyCheck.allowed) {
-        return res.status(429).json({ 
+        return res.status(429).json({
           error: 'Demo limit reached for today. Please try again tomorrow or purchase a license for unlimited access.',
           dailyLimitReached: true,
           reason: dailyCheck.reason
@@ -505,7 +515,7 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
     }
 
     // Use demo API key in demo mode
-    const ai = IS_DEMO_SERVER 
+    const ai = IS_DEMO_SERVER
       ? getAIClient(DEMO_CONFIG.demoApiKey)
       : getAIClient();
 
