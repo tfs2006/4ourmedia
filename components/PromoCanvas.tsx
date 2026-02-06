@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ProductAnalysis, LogoPosition } from '../types';
+import { ProductAnalysis, LogoPosition, AspectRatio, ASPECT_RATIO_DIMENSIONS } from '../types';
 
 interface PromoCanvasProps {
   imageBase64: string;
@@ -8,6 +8,7 @@ interface PromoCanvasProps {
   logoPosition?: LogoPosition;
   logoSize?: number; // 10 to 100 (percentage of width)
   displayUrl?: string;
+  aspectRatio?: AspectRatio;
   onCompositionComplete: (dataUrl: string) => void;
 }
 
@@ -18,6 +19,7 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
   logoPosition = 'top-center',
   logoSize = 30,
   displayUrl = '4ourmedia.com',
+  aspectRatio = '9:16',
   onCompositionComplete 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,11 +55,17 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
     };
 
     loadImages().then(({ bgImg, logoImg }) => {
-      // Dimensions for 9:16
-      const width = 1080;
-      const height = 1920;
+      // Dynamic dimensions based on aspect ratio
+      const dims = ASPECT_RATIO_DIMENSIONS[aspectRatio] || ASPECT_RATIO_DIMENSIONS['9:16'];
+      const width = dims.width;
+      const height = dims.height;
       canvas.width = width;
       canvas.height = height;
+
+      // Scale factor relative to the 9:16 baseline (1080x1920)
+      const scaleFactor = Math.min(width / 1080, height / 1920);
+      const isLandscape = width > height;
+      const isSquare = width === height;
 
       // 1. Draw Background Image
       const scale = Math.max(width / bgImg.width, height / bgImg.height);
@@ -137,16 +145,17 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       const ctaText = analysis.callToAction || 'GET YOURS NOW';
       const primaryColor = analysis.colors?.[0] || '#ef4444';
       
-      // CTA Banner
+      // CTA Banner - scaled for aspect ratio
       ctx.fillStyle = primaryColor;
-      const bannerHeight = 70;
-      const bannerY = 180;
+      const bannerHeight = Math.round(70 * (isLandscape ? 1 : scaleFactor > 0.7 ? 1 : scaleFactor * 1.3));
+      const bannerY = isLandscape ? Math.round(height * 0.08) : isSquare ? Math.round(height * 0.12) : 180;
       ctx.beginPath();
-      ctx.roundRect(width * 0.15, bannerY, width * 0.7, bannerHeight, 35);
+      ctx.roundRect(width * 0.15, bannerY, width * 0.7, bannerHeight, bannerHeight / 2);
       ctx.fill();
       
       ctx.fillStyle = '#ffffff';
-      const ctaFontSize = fitFontSize(ctaText.toUpperCase(), 'bold', '"Inter"', 32, 18, width * 0.62);
+      const ctaMaxSize = isLandscape ? 28 : 32;
+      const ctaFontSize = fitFontSize(ctaText.toUpperCase(), 'bold', '"Inter"', ctaMaxSize, 16, width * 0.62);
       ctx.font = `bold ${ctaFontSize}px "Inter"`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -158,8 +167,10 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       
       const productText = analysis.productName.toUpperCase();
       const productMaxW = width * 0.88;
+      const productMaxFont = isLandscape ? 72 : isSquare ? 80 : 95;
+      const productMinFont = isLandscape ? 36 : isSquare ? 40 : 48;
       const { lines: productLines, fontSize: productFontSize } = wrapText(
-        productText, '900', '"Montserrat"', 95, 48, productMaxW, 2
+        productText, '900', '"Montserrat"', productMaxFont, productMinFont, productMaxW, 2
       );
       
       ctx.fillStyle = '#ffffff';
@@ -172,7 +183,8 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       
       const productLineHeight = productFontSize * 1.15;
       const productBlockHeight = productLines.length * productLineHeight;
-      const productNameY = height * 0.68 - (productBlockHeight - productLineHeight) / 2;
+      const productYBase = isLandscape ? 0.55 : isSquare ? 0.58 : 0.68;
+      const productNameY = height * productYBase - (productBlockHeight - productLineHeight) / 2;
       
       productLines.forEach((line, i) => {
         ctx.fillText(line, width / 2, productNameY + i * productLineHeight);
@@ -185,32 +197,37 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       // 5. Draw Headline (desire-driven hook, auto-shrink & wrap)
       const headlineText = analysis.headline.toUpperCase();
       const headlineMaxW = width * 0.88;
+      const headlineMaxFont = isLandscape ? 38 : isSquare ? 42 : 52;
+      const headlineMinFont = isLandscape ? 22 : isSquare ? 24 : 30;
       const { lines: headlineLines, fontSize: headlineFontSize } = wrapText(
-        headlineText, 'bold', '"Inter"', 52, 30, headlineMaxW, 2
+        headlineText, 'bold', '"Inter"', headlineMaxFont, headlineMinFont, headlineMaxW, 2
       );
       
       ctx.fillStyle = primaryColor;
       ctx.font = `bold ${headlineFontSize}px "Inter"`;
       
       const headlineLineHeight = headlineFontSize * 1.2;
-      const headlineStartY = productNameY + (productLines.length - 1) * productLineHeight + 90;
+      const headlineGap = isLandscape ? 50 : isSquare ? 60 : 90;
+      const headlineStartY = productNameY + (productLines.length - 1) * productLineHeight + headlineGap;
       
       headlineLines.forEach((line, i) => {
         ctx.fillText(line, width / 2, headlineStartY + i * headlineLineHeight);
       });
 
       // 6. Draw Subheadline (pain → solution)
+      const subFontSize = isLandscape ? 28 : isSquare ? 32 : 40;
       ctx.fillStyle = '#cbd5e1'; // slate-300
-      ctx.font = '400 40px "Inter"';
+      ctx.font = `400 ${subFontSize}px "Inter"`;
       
       const subheadline = analysis.subheadline || '';
-      const subheadlineY = headlineStartY + (headlineLines.length - 1) * headlineLineHeight + 70;
+      const subGap = isLandscape ? 40 : isSquare ? 50 : 70;
+      const subheadlineY = headlineStartY + (headlineLines.length - 1) * headlineLineHeight + subGap;
       
       // Word wrap for subheadline
       const words = subheadline.split(' ');
       let line = '';
       let lineY = subheadlineY;
-      const lineHeight = 50;
+      const lineHeight = Math.round(subFontSize * 1.25);
       const maxWidth = width * 0.85;
 
       for(let n = 0; n < words.length; n++) {
@@ -228,17 +245,21 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
 
       // 7. Draw Social Proof / Urgency Line
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '300 28px "Inter"';
-      const proofY = lineY + 80;
+      const proofFontSize = isLandscape ? 22 : isSquare ? 24 : 28;
+      ctx.font = `300 ${proofFontSize}px "Inter"`;
+      const proofGap = isLandscape ? 45 : isSquare ? 55 : 80;
+      const proofY = lineY + proofGap;
       ctx.fillText('★★★★★  Trusted by thousands', width / 2, proofY);
 
       // 8. Draw Branding URL at bottom
       if (displayUrl) {
         ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = 'bold 36px "Inter"';
+        const urlFontSize = isLandscape ? 28 : isSquare ? 30 : 36;
+        ctx.font = `bold ${urlFontSize}px "Inter"`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText(displayUrl.toUpperCase(), width / 2, height - 80);
+        const urlBottomPad = isLandscape ? 40 : isSquare ? 50 : 80;
+        ctx.fillText(displayUrl.toUpperCase(), width / 2, height - urlBottomPad);
       }
 
       // 9. Draw Custom Logo if exists
@@ -293,7 +314,7 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       onCompositionComplete(canvas.toDataURL('image/png'));
     });
 
-  }, [imageBase64, analysis, fontLoaded, onCompositionComplete, customLogo, logoPosition, logoSize, displayUrl]);
+  }, [imageBase64, analysis, fontLoaded, onCompositionComplete, customLogo, logoPosition, logoSize, displayUrl, aspectRatio]);
 
   return <canvas ref={canvasRef} style={{ display: 'none' }} />;
 };

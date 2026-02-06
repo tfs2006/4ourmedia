@@ -44,6 +44,15 @@ export enum AppState {
 
 export type LogoPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
+export type AspectRatio = '9:16' | '1:1' | '16:9' | '4:5';
+
+export const ASPECT_RATIO_DIMENSIONS: Record<AspectRatio, { width: number; height: number; label: string }> = {
+  '9:16': { width: 1080, height: 1920, label: 'Story / Reel' },
+  '1:1': { width: 1080, height: 1080, label: 'Square Post' },
+  '16:9': { width: 1920, height: 1080, label: 'YouTube / Banner' },
+  '4:5': { width: 1080, height: 1350, label: 'Instagram Post' },
+};
+
 // Brand Kit - saved branding settings
 export interface BrandKit {
   id: string;
