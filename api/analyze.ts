@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 
 // Simple in-memory cache
 const analysisCache = new Map<string, { data: any; timestamp: number }>();
@@ -219,44 +219,6 @@ QUALITY CHECK BEFORE RESPONDING:
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            productName: { type: Type.STRING },
-            headline: { type: Type.STRING },
-            subheadline: { type: Type.STRING },
-            callToAction: { type: Type.STRING },
-            emotionalTrigger: { type: Type.STRING },
-            imagePrompt: { type: Type.STRING },
-            colors: { type: Type.ARRAY, items: { type: Type.STRING } },
-            audienceProfile: {
-              type: Type.OBJECT,
-              properties: {
-                demographics: { type: Type.STRING },
-                psychographics: { type: Type.STRING },
-                painPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
-                desires: { type: Type.ARRAY, items: { type: Type.STRING } },
-                buyingTriggers: { type: Type.ARRAY, items: { type: Type.STRING } },
-                competitorWeaknesses: { type: Type.STRING },
-                bestPlatforms: { type: Type.ARRAY, items: { type: Type.STRING } },
-                toneOfVoice: { type: Type.STRING }
-              }
-            },
-            copyVariations: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  headline: { type: Type.STRING },
-                  subheadline: { type: Type.STRING },
-                  style: { type: Type.STRING }
-                }
-              }
-            }
-          },
-          required: ['productName', 'headline', 'subheadline', 'callToAction', 'emotionalTrigger', 'imagePrompt', 'colors']
-        }
       }
     });
 
@@ -265,7 +227,14 @@ QUALITY CHECK BEFORE RESPONDING:
       return res.status(500).json({ error: 'No analysis returned from Gemini' });
     }
 
-    const result = JSON.parse(text);
+    // Extract JSON from the response (may be wrapped in markdown code fences)
+    let jsonStr = text;
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    }
+
+    const result = JSON.parse(jsonStr);
     setCache(url, result);
     
     res.json(result);
