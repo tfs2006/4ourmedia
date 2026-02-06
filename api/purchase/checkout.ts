@@ -12,13 +12,26 @@ const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCent
   unlimited: { name: 'Unlimited Monthly', credits: -1, priceInCents: 1900, isSubscription: true }
 };
 
+import https from 'https';
+
 // Initialize Stripe once at module level (avoids cold-start overhead per request)
 let stripe: Stripe | null = null;
 function getStripe(): Stripe {
   if (!stripe) {
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-    stripe = new Stripe(key);
+
+    // DEBUG: Log DNS resolution for Stripe API
+    dns.lookup('api.stripe.com', (err, address, family) => {
+      console.log('DNS Lookup for api.stripe.com:', { err, address, family });
+    });
+
+    // Vercel/AWS Lambda Fix: Disable keep-alive to prevent frozen sockets
+    const agent = new https.Agent({ keepAlive: false });
+
+    stripe = new Stripe(key, {
+      httpAgent: agent,
+    });
   }
   return stripe;
 }

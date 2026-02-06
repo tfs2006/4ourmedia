@@ -3,9 +3,15 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
+import https from 'https';
+
 // Initialize Stripe - set your secret key in environment
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
-export const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
+// Vercel/AWS Lambda Fix: Disable keep-alive
+const agent = new https.Agent({ keepAlive: false });
+export const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
+  httpAgent: agent
+}) : null;
 
 // Product configuration with multiple plans
 export const PRICING_PLANS: Record<string, {
