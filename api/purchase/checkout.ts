@@ -1,9 +1,8 @@
-import dns from 'node:dns';
-// Force IPv4 to avoid Vercel/AWS IPv6 timeout issues
-dns.setDefaultResultOrder('ipv4first');
-
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
+
+// Initialize Stripe once at module level (avoids cold-start overhead per request)
+let stripe: Stripe | null = null;
 
 const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCents: number; isSubscription?: boolean }> = {
   starter: { name: 'Starter Pack', credits: 25, priceInCents: 900 },
@@ -12,28 +11,14 @@ const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCent
   unlimited: { name: 'Unlimited Monthly', credits: -1, priceInCents: 1900, isSubscription: true }
 };
 
-import https from 'https';
-
-// Initialize Stripe once at module level (avoids cold-start overhead per request)
-let stripe: Stripe | null = null;
 function getStripe(): Stripe {
   if (!stripe) {
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
 
-    // DEBUG: Log DNS resolution for Stripe API
-    dns.lookup('api.stripe.com', (err, address, family) => {
-      console.log('DNS Lookup for api.stripe.com:', { err, address, family });
-    });
-
-    // Vercel/AWS Lambda Fix: Disable keep-alive and FORCE IPv4
-    const agent = new https.Agent({
-      keepAlive: false,
-      family: 4 // Strict IPv4 enforcement
-    });
-
+    // Vercel/AWS Lambda Fix: Use Fetch API (bypasses Node https/socket issues)
     stripe = new Stripe(key, {
-      httpAgent: agent,
+      httpClient: Stripe.createFetchHttpClient(),
     });
   }
   return stripe;
