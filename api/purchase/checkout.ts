@@ -26,8 +26,11 @@ function getStripe(): Stripe {
       console.log('DNS Lookup for api.stripe.com:', { err, address, family });
     });
 
-    // Vercel/AWS Lambda Fix: Disable keep-alive to prevent frozen sockets
-    const agent = new https.Agent({ keepAlive: false });
+    // Vercel/AWS Lambda Fix: Disable keep-alive and FORCE IPv4
+    const agent = new https.Agent({
+      keepAlive: false,
+      family: 4 // Strict IPv4 enforcement
+    });
 
     stripe = new Stripe(key, {
       httpAgent: agent,
