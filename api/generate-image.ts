@@ -71,9 +71,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (process.env.DEMO_MODE === 'true' && sessionId) {
       const usage = sessionUsage.get(sessionId) || { generationsUsed: 0 };
       if (usage.generationsUsed >= MAX_DEMO_GENERATIONS) {
-        await logApiUsage('generate-image', ip, userId, false, { 
-          reason: 'Demo limit reached' 
-        });
         return res.status(403).json({ 
           error: 'Demo limit reached. Purchase credits for unlimited access!',
           demoLimitReached: true,

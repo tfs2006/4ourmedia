@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus } from './types';
 import { analyzeProductUrl, generatePromoBackground } from './services/geminiService';
 import PromoCanvas from './components/PromoCanvas';
@@ -9,7 +9,7 @@ import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/Bra
 import HistoryPanel, { addToHistory } from './components/HistoryPanel';
 import AuthModal from './components/AuthModal';
 import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './components/LegalPages';
-import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut } from 'lucide-react';
+import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X } from 'lucide-react';
 import { 
   AuthUser, 
   getCurrentUser, 
@@ -127,12 +127,37 @@ export default function App() {
   const [logoPosition, setLogoPosition] = useState<LogoPosition>('top-center');
   const [logoSize, setLogoSize] = useState<number>(30); // 30% width
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
 
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
+  const [purchaseCelebration, setPurchaseCelebration] = useState<{ credits: number; planId: string } | null>(null);
   const [analysis, setAnalysis] = useState<ProductAnalysis | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [finalImage, setFinalImage] = useState<string | null>(null);
+  
+  // Copy variation state: -1 = original, 0/1/2 = variation index
+  const [activeCopyVariation, setActiveCopyVariation] = useState<number>(-1);
+  
+  // Computed analysis that reflects the selected copy variation
+  const effectiveAnalysis = useMemo(() => {
+    if (!analysis) return null;
+    if (activeCopyVariation < 0 || !analysis.copyVariations?.length) return analysis;
+    const variation = analysis.copyVariations[activeCopyVariation];
+    if (!variation) return analysis;
+    return {
+      ...analysis,
+      headline: variation.headline,
+      subheadline: variation.subheadline,
+    };
+  }, [analysis, activeCopyVariation]);
+
+  // Auto-dismiss purchase celebration toast after 6 seconds
+  useEffect(() => {
+    if (!purchaseCelebration) return;
+    const timer = setTimeout(() => setPurchaseCelebration(null), 6000);
+    return () => clearTimeout(timer);
+  }, [purchaseCelebration]);
 
   // Check auth status on mount
   useEffect(() => {
@@ -342,7 +367,8 @@ export default function App() {
           setMaxCredits(credits.total);
           setHasPurchased(true);
           
-          // Show success and go to app
+          // Show success celebration and go to app
+          setPurchaseCelebration({ credits: data.license.credits, planId: data.license.planId });
           setViewState('app');
         }
       } catch (err) {
@@ -358,6 +384,9 @@ export default function App() {
     e.preventDefault();
     if (!url) return;
     
+    // Prevent double-click / concurrent generation
+    if (state !== AppState.IDLE && state !== AppState.COMPLETE && state !== AppState.ERROR) return;
+    
     // Check credits
     if (creditsRemaining <= 0) {
       setShowPurchaseModal(true);
@@ -369,6 +398,7 @@ export default function App() {
     setAnalysis(null);
     setImageBase64(null);
     setFinalImage(null);
+    setActiveCopyVariation(-1);
     setState(AppState.ANALYZING);
 
     try {
@@ -1029,34 +1059,171 @@ export default function App() {
                   <div className="space-y-3">
                     <div>
                       <span className="text-[10px] uppercase tracking-wider text-indigo-400 font-bold">Product Name</span>
-                      <p className="font-bold text-lg md:text-xl leading-tight mt-0.5">{analysis.productName}</p>
+                      <p className="font-bold text-lg md:text-xl leading-tight mt-0.5">{effectiveAnalysis?.productName}</p>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div>
                         <span className="text-[10px] uppercase tracking-wider text-green-400 font-bold">Headline</span>
-                        <p className="text-slate-200 font-medium mt-0.5 text-sm md:text-base">"{analysis.headline}"</p>
+                        <p className="text-slate-200 font-medium mt-0.5 text-sm md:text-base">"{effectiveAnalysis?.headline}"</p>
                       </div>
                       <div>
                         <span className="text-[10px] uppercase tracking-wider text-amber-400 font-bold">CTA</span>
-                        <p className="text-slate-200 font-medium mt-0.5 text-sm md:text-base">{analysis.callToAction || 'Get Yours Now'}</p>
+                        <p className="text-slate-200 font-medium mt-0.5 text-sm md:text-base">{effectiveAnalysis?.callToAction || 'Get Yours Now'}</p>
                       </div>
                     </div>
                     
-                    {analysis.subheadline && (
+                    {effectiveAnalysis?.subheadline && (
                       <div>
                         <span className="text-[10px] uppercase tracking-wider text-purple-400 font-bold">Subheadline</span>
-                        <p className="text-slate-300 text-sm mt-0.5 italic">"{analysis.subheadline}"</p>
+                        <p className="text-slate-300 text-sm mt-0.5 italic">"{effectiveAnalysis.subheadline}"</p>
                       </div>
                     )}
                     
-                    {analysis.emotionalTrigger && (
+                    {effectiveAnalysis?.emotionalTrigger && (
                       <div className="pt-2 border-t border-slate-700">
                         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Psychology Target</span>
-                        <p className="text-slate-400 text-xs mt-0.5 capitalize">{analysis.emotionalTrigger.replace(/_/g, ' ')}</p>
+                        <p className="text-slate-400 text-xs mt-0.5 capitalize">{effectiveAnalysis.emotionalTrigger.replace(/_/g, ' ')}</p>
                       </div>
                     )}
                   </div>
+                  
+                  {/* Copy Variations Selector */}
+                  {analysis?.copyVariations && analysis.copyVariations.length > 0 && (
+                    <div className="pt-3 border-t border-slate-700 space-y-2">
+                      <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Copy Variations — click to apply</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button
+                          onClick={() => setActiveCopyVariation(-1)}
+                          className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                            activeCopyVariation === -1
+                              ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+                              : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500'
+                          }`}
+                        >
+                          Original
+                        </button>
+                        {analysis.copyVariations.map((variation, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setActiveCopyVariation(index)}
+                            className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-all ${
+                              activeCopyVariation === index
+                                ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50'
+                                : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-500'
+                            }`}
+                          >
+                            {variation.style}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Audience Insights Panel */}
+              {analysis?.audienceProfile && (
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                  <button
+                    onClick={() => setShowInsights(!showInsights)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-slate-700/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-pink-400" />
+                      <h4 className="font-bold text-sm text-slate-200">Audience Insights</h4>
+                      <span className="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full">AI</span>
+                    </div>
+                    {showInsights ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+
+                  {showInsights && (
+                    <div className="px-4 pb-4 space-y-4">
+                      {/* Demographics & Psychographics */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-slate-900/50 rounded-lg p-3">
+                          <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Demographics</p>
+                          <p className="text-xs text-slate-300">{analysis.audienceProfile.demographics}</p>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-lg p-3">
+                          <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Psychographics</p>
+                          <p className="text-xs text-slate-300">{analysis.audienceProfile.psychographics}</p>
+                        </div>
+                      </div>
+
+                      {/* Pain Points & Desires */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-slate-900/50 rounded-lg p-3">
+                          <p className="text-[10px] uppercase tracking-wider text-red-400/80 mb-2">Pain Points</p>
+                          <ul className="space-y-1">
+                            {analysis.audienceProfile.painPoints?.map((point: string, i: number) => (
+                              <li key={i} className="text-xs text-slate-400 flex items-start gap-1.5">
+                                <span className="text-red-400 mt-0.5">•</span> {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-lg p-3">
+                          <p className="text-[10px] uppercase tracking-wider text-green-400/80 mb-2">Desires</p>
+                          <ul className="space-y-1">
+                            {analysis.audienceProfile.desires?.map((desire: string, i: number) => (
+                              <li key={i} className="text-xs text-slate-400 flex items-start gap-1.5">
+                                <span className="text-green-400 mt-0.5">•</span> {desire}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Buying Triggers */}
+                      {analysis.audienceProfile.buyingTriggers?.length > 0 && (
+                        <div className="bg-slate-900/50 rounded-lg p-3">
+                          <p className="text-[10px] uppercase tracking-wider text-amber-400/80 mb-2">Buying Triggers</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {analysis.audienceProfile.buyingTriggers.map((trigger: string, i: number) => (
+                              <span key={i} className="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-1 rounded-full">
+                                {trigger}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Competitor Weaknesses */}
+                      {analysis.audienceProfile.competitorWeaknesses && (
+                        <div className="bg-slate-900/50 rounded-lg p-3">
+                          <p className="text-[10px] uppercase tracking-wider text-purple-400/80 mb-1">Competitor Weaknesses</p>
+                          <p className="text-xs text-slate-400">{analysis.audienceProfile.competitorWeaknesses}</p>
+                        </div>
+                      )}
+
+                      {/* Best Platforms & Tone */}
+                      <div className="grid grid-cols-2 gap-3">
+                        {analysis.audienceProfile.bestPlatforms?.length > 0 && (
+                          <div className="bg-slate-900/50 rounded-lg p-3">
+                            <p className="text-[10px] uppercase tracking-wider text-blue-400/80 mb-2">Best Platforms</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {analysis.audienceProfile.bestPlatforms.map((platform: string, i: number) => (
+                                <span key={i} className="text-[10px] bg-blue-500/10 text-blue-300 border border-blue-500/20 px-2 py-1 rounded-full">
+                                  {platform}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {analysis.audienceProfile.toneOfVoice && (
+                          <div className="bg-slate-900/50 rounded-lg p-3">
+                            <p className="text-[10px] uppercase tracking-wider text-indigo-400/80 mb-1">Recommended Tone</p>
+                            <p className="text-xs text-slate-300 italic">"{analysis.audienceProfile.toneOfVoice}"</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1163,10 +1330,10 @@ export default function App() {
         )}
 
         {/* Hidden Canvas Logic */}
-        {imageBase64 && analysis && (
+        {imageBase64 && effectiveAnalysis && (
           <PromoCanvas 
             imageBase64={imageBase64} 
-            analysis={analysis}
+            analysis={effectiveAnalysis}
             customLogo={customLogo}
             logoPosition={logoPosition}
             logoSize={logoSize}
@@ -1176,6 +1343,42 @@ export default function App() {
         )}
 
       </main>
+
+      {/* Purchase Success Celebration Toast */}
+      {purchaseCelebration && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 pointer-events-none">
+          <div 
+            className="pointer-events-auto bg-gradient-to-br from-emerald-500/95 to-teal-600/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl shadow-emerald-500/20 border border-emerald-400/30 max-w-sm w-full mx-4 animate-bounce-in"
+            style={{ animation: 'toast-slide-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}
+          >
+            <button
+              onClick={() => setPurchaseCelebration(null)}
+              className="absolute top-3 right-3 text-white/60 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="flex items-start gap-4">
+              <div className="bg-white/20 rounded-xl p-3 flex-shrink-0">
+                <PartyPopper className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg">Purchase Successful!</h3>
+                <p className="text-emerald-100 text-sm mt-1">
+                  <span className="font-bold text-white text-lg">{purchaseCelebration.credits}</span> credits have been added to your account.
+                </p>
+                <p className="text-emerald-200/70 text-xs mt-2">Start creating amazing promos now ✨</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes toast-slide-in {
+          0% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
 
       {/* Footer */}
       <footer className="p-6 text-center text-slate-500 text-sm">

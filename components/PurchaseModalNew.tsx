@@ -109,17 +109,19 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in overflow-y-auto">
-      <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl border border-slate-700 max-w-lg w-full overflow-hidden shadow-2xl my-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 overflow-y-auto animate-fade-in">
+      <div className="min-h-full flex items-center justify-center p-4 py-8">
+        <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl border border-slate-700 max-w-lg w-full overflow-hidden shadow-2xl relative">
         
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-center">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Header */}
+          <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 pt-8 text-center">
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 p-2 hover:bg-white/20 rounded-lg transition-colors z-10"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
           
           <div className="w-16 h-16 mx-auto bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm">
             <Sparkles className="w-8 h-8" />
@@ -249,6 +251,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
             </span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

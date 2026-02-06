@@ -206,65 +206,36 @@ export async function getUserCredits(userId: string): Promise<UserCredits> {
 }
 
 export async function useCredit(userId: string): Promise<{ success: boolean; remaining: number }> {
-  // First get current credits and total_used
-  const { data: user, error: fetchError } = await supabase
-    .from('users')
-    .select('credits, total_used')
-    .eq('id', userId)
+  // Use the atomic DB function with row-level locking to prevent race conditions
+  const { data, error } = await supabase
+    .rpc('use_credit', { user_uuid: userId })
     .single();
 
-  if (fetchError || !user || user.credits <= 0) {
-    console.error('Error fetching user for credit use:', fetchError);
+  if (error) {
+    console.error('Error using credit (atomic):', error);
+    // Fallback: fetch current credits to return a meaningful remaining count
+    const { data: user } = await supabase
+      .from('users')
+      .select('credits')
+      .eq('id', userId)
+      .single();
     return { success: false, remaining: user?.credits || 0 };
   }
 
-  // Decrement credits and increment total_used
-  const { data, error } = await supabase
-    .from('users')
-    .update({ 
-      credits: user.credits - 1,
-      total_used: (user.total_used || 0) + 1
-    })
-    .eq('id', userId)
-    .select('credits')
-    .single();
-
-  if (error) {
-    console.error('Error using credit:', error);
-    return { success: false, remaining: user.credits };
-  }
-
-  return { success: true, remaining: data?.credits || 0 };
+  return { success: data?.success ?? false, remaining: data?.remaining ?? 0 };
 }
 
 export async function addCredits(userId: string, amount: number, stripeSessionId?: string): Promise<boolean> {
-  // Get current credits
-  const { data: user, error: fetchError } = await supabase
-    .from('users')
-    .select('credits, total_purchased')
-    .eq('id', userId)
-    .single();
-
-  if (fetchError) {
-    console.error('Error fetching user:', fetchError);
-    return false;
-  }
-
-  // Update credits
-  const { error } = await supabase
-    .from('users')
-    .update({ 
-      credits: (user?.credits || 0) + amount,
-      total_purchased: (user?.total_purchased || 0) + amount
-    })
-    .eq('id', userId);
+  // Use the atomic DB function to safely add credits
+  const { data: newCredits, error } = await supabase
+    .rpc('add_credits', { user_uuid: userId, amount });
 
   if (error) {
-    console.error('Error adding credits:', error);
+    console.error('Error adding credits (atomic):', error);
     return false;
   }
 
-  // Record purchase
+  // Record purchase for audit trail
   if (stripeSessionId) {
     await supabase
       .from('purchases')

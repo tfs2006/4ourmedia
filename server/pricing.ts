@@ -272,7 +272,7 @@ export function checkCredits(email: string): { hasCredits: boolean; credits: num
 export function calculateSavings(planId: string): number {
   const basePrice = PRICING_PLANS.starter.pricePerCredit;
   const plan = PRICING_PLANS[planId as keyof typeof PRICING_PLANS];
-  if (!plan || plan.id === 'starter' || plan.id === 'unlimited') return 0;
+  if (!plan || plan.id === 'starter' || plan.id === 'unlimited' || !('pricePerCredit' in plan)) return 0;
   
   return Math.round((1 - (plan.pricePerCredit / basePrice)) * 100);
 }

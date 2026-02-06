@@ -81,6 +81,58 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
+      // --- Text helpers ---
+      // Auto-shrink: find the largest font size that fits within maxWidth
+      const fitFontSize = (
+        text: string,
+        fontWeight: string,
+        fontFamily: string,
+        maxSize: number,
+        minSize: number,
+        maxW: number
+      ): number => {
+        let size = maxSize;
+        while (size > minSize) {
+          ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+          if (ctx.measureText(text).width <= maxW) break;
+          size -= 2;
+        }
+        return size;
+      };
+
+      // Word-wrap: split text into lines that fit within maxW, auto-shrinking if needed
+      const wrapText = (
+        text: string,
+        fontWeight: string,
+        fontFamily: string,
+        maxSize: number,
+        minSize: number,
+        maxW: number,
+        maxLines: number = 3
+      ): { lines: string[]; fontSize: number } => {
+        let size = maxSize;
+        let lines: string[] = [];
+        while (size >= minSize) {
+          ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+          const words = text.split(' ');
+          lines = [];
+          let currentLine = '';
+          for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+            if (ctx.measureText(testLine).width > maxW && currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+          if (lines.length <= maxLines) break;
+          size -= 2;
+        }
+        return { lines, fontSize: size };
+      };
+
       // 3. Draw Call to Action Badge (top banner for urgency)
       const ctaText = analysis.callToAction || 'GET YOURS NOW';
       const primaryColor = analysis.colors?.[0] || '#ef4444';
@@ -94,42 +146,65 @@ const PromoCanvas: React.FC<PromoCanvasProps> = ({
       ctx.fill();
       
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 32px "Inter"';
+      const ctaFontSize = fitFontSize(ctaText.toUpperCase(), 'bold', '"Inter"', 32, 18, width * 0.62);
+      ctx.font = `bold ${ctaFontSize}px "Inter"`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(ctaText.toUpperCase(), width / 2, bannerY + bannerHeight / 2);
 
-      // 4. Draw Product Name (main focus - large and bold)
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 95px "Montserrat"';
+      // 4. Draw Product Name (main focus - large and bold, auto-shrink & wrap)
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      
+      const productText = analysis.productName.toUpperCase();
+      const productMaxW = width * 0.88;
+      const { lines: productLines, fontSize: productFontSize } = wrapText(
+        productText, '900', '"Montserrat"', 95, 48, productMaxW, 2
+      );
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${productFontSize}px "Montserrat"`;
       
       // Add glow effect for product name
       ctx.shadowColor = primaryColor;
       ctx.shadowBlur = 40;
       ctx.shadowOffsetY = 0;
       
-      const productNameY = height * 0.68;
-      ctx.fillText(analysis.productName.toUpperCase(), width / 2, productNameY);
+      const productLineHeight = productFontSize * 1.15;
+      const productBlockHeight = productLines.length * productLineHeight;
+      const productNameY = height * 0.68 - (productBlockHeight - productLineHeight) / 2;
+      
+      productLines.forEach((line, i) => {
+        ctx.fillText(line, width / 2, productNameY + i * productLineHeight);
+      });
 
       // Reset shadow
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
 
-      // 5. Draw Headline (desire-driven hook)
-      ctx.fillStyle = primaryColor;
-      ctx.font = 'bold 52px "Inter"';
+      // 5. Draw Headline (desire-driven hook, auto-shrink & wrap)
+      const headlineText = analysis.headline.toUpperCase();
+      const headlineMaxW = width * 0.88;
+      const { lines: headlineLines, fontSize: headlineFontSize } = wrapText(
+        headlineText, 'bold', '"Inter"', 52, 30, headlineMaxW, 2
+      );
       
-      const headlineY = productNameY + 90;
-      ctx.fillText(analysis.headline.toUpperCase(), width / 2, headlineY);
+      ctx.fillStyle = primaryColor;
+      ctx.font = `bold ${headlineFontSize}px "Inter"`;
+      
+      const headlineLineHeight = headlineFontSize * 1.2;
+      const headlineStartY = productNameY + (productLines.length - 1) * productLineHeight + 90;
+      
+      headlineLines.forEach((line, i) => {
+        ctx.fillText(line, width / 2, headlineStartY + i * headlineLineHeight);
+      });
 
       // 6. Draw Subheadline (pain → solution)
       ctx.fillStyle = '#cbd5e1'; // slate-300
       ctx.font = '400 40px "Inter"';
       
       const subheadline = analysis.subheadline || '';
-      const subheadlineY = headlineY + 70;
+      const subheadlineY = headlineStartY + (headlineLines.length - 1) * headlineLineHeight + 70;
       
       // Word wrap for subheadline
       const words = subheadline.split(' ');
