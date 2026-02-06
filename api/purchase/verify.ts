@@ -95,7 +95,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Invalid request' });
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      httpClient: Stripe.createNodeHttpClient(),
+      maxNetworkRetries: 3,
+      timeout: 30000,
+    });
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     
     if (session.payment_status === 'paid') {

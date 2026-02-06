@@ -8,6 +8,21 @@ const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCent
   unlimited: { name: 'Unlimited Monthly', credits: -1, priceInCents: 1900, isSubscription: true }
 };
 
+// Initialize Stripe once at module level (avoids cold-start overhead per request)
+let stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+    stripe = new Stripe(key, {
+      maxNetworkRetries: 3,
+      timeout: 30000,
+      httpClient: Stripe.createNodeHttpClient(),
+    });
+  }
+  return stripe;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -26,8 +41,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(503).json({ error: 'Payment system not configured' });
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-    const { successUrl, cancelUrl, planId = 'pro', userId, userEmail } = req.body;
+    const stripeClient = getStripe();
+    const { successUrl, cancelUrl, planId = 'pro', userId, userEmail } = req.body || {};
     const tier = PRICING_TIERS[planId];
     
     if (!tier) {
@@ -36,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const origin = req.headers.origin || req.headers.referer || 'https://www.4ourmedia.com';
     
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
@@ -66,7 +81,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     res.json({ url: session.url, sessionId: session.id });
   } catch (error: any) {
-    console.error('Checkout error:', error);
-    res.status(500).json({ error: error.message || 'Failed to create checkout' });
+    console.error('Checkout error:', {
+      message: error.message,
+      type: error.type || error.constructor?.name,
+      code: error.code,
+      statusCode: error.statusCode,
+    });
+    res.status(500).json({ 
+      error: error.message || 'Failed to create checkout',
+      errorType: error.type || error.constructor?.name || 'Unknown',
+    });
   }
 }
