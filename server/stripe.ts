@@ -5,11 +5,7 @@ import path from 'path';
 
 // Initialize Stripe - set your secret key in environment
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
-export const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
-  httpClient: Stripe.createNodeHttpClient(),
-  maxNetworkRetries: 3,
-  timeout: 30000,
-}) : null;
+export const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
 // Product configuration with multiple plans
 export const PRICING_PLANS: Record<string, {
@@ -99,7 +95,7 @@ export function generateLicenseKey(): string {
 export function createLicense(email: string, stripeSessionId: string, planId: string = 'pro'): License {
   const licenses = getLicenses();
   const plan = PRICING_PLANS[planId] || PRICING_PLANS.pro;
-  
+
   const license: License = {
     key: generateLicenseKey(),
     email,
@@ -110,17 +106,17 @@ export function createLicense(email: string, stripeSessionId: string, planId: st
     credits: plan.credits,
     isUnlimited: plan.credits === -1
   };
-  
+
   // For subscriptions, set expiry
   if (plan.mode === 'subscription') {
     const expiry = new Date();
     expiry.setMonth(expiry.getMonth() + 1);
     license.subscriptionExpiry = expiry.toISOString();
   }
-  
+
   licenses[license.key] = license;
   saveLicenses(licenses);
-  
+
   return license;
 }
 
@@ -132,7 +128,7 @@ export function validateLicense(key: string): License | null {
 export function incrementDownload(key: string): boolean {
   const licenses = getLicenses();
   if (!licenses[key]) return false;
-  
+
   licenses[key].downloadCount += 1;
   saveLicenses(licenses);
   return true;
@@ -184,22 +180,22 @@ export async function handleWebhook(payload: Buffer, signature: string, webhookS
   }
 
   const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
-  
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const email = session.customer_details?.email || 'unknown@email.com';
     const planId = session.metadata?.planId || 'pro';
-    
+
     // Create license for the customer
     const license = createLicense(email, session.id, planId);
     return { type: 'purchase_complete', license, planId };
   }
-  
+
   // Handle subscription events
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
     // Handle subscription cancellation/changes
     return { type: event.type };
   }
-  
+
   return { type: event.type };
 }

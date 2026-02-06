@@ -25,26 +25,26 @@ async function getRawBody(req: VercelRequest): Promise<Buffer> {
 async function addCreditsToUser(userId: string, credits: number, stripeSessionId: string, planId: string, amountCents: number) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
+
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Supabase not configured');
     return false;
   }
-  
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  
+
   // Get current user credits
   const { data: user, error: fetchError } = await supabase
     .from('users')
     .select('credits, total_purchased')
     .eq('id', userId)
     .single();
-  
+
   if (fetchError) {
     console.error('Error fetching user:', fetchError);
     return false;
   }
-  
+
   // Update credits
   const { error: updateError } = await supabase
     .from('users')
@@ -53,12 +53,12 @@ async function addCreditsToUser(userId: string, credits: number, stripeSessionId
       total_purchased: (user?.total_purchased || 0) + credits
     })
     .eq('id', userId);
-  
+
   if (updateError) {
     console.error('Error updating credits:', updateError);
     return false;
   }
-  
+
   // Record purchase
   const { error: purchaseError } = await supabase
     .from('purchases')
@@ -70,12 +70,12 @@ async function addCreditsToUser(userId: string, credits: number, stripeSessionId
       amount_cents: amountCents,
       status: 'completed'
     });
-  
+
   if (purchaseError) {
     console.error('Error recording purchase:', purchaseError);
     // Don't fail - credits were added
   }
-  
+
   return true;
 }
 
@@ -94,11 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Webhook not configured' });
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      httpClient: Stripe.createNodeHttpClient(),
-      maxNetworkRetries: 3,
-      timeout: 30000,
-    });
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     const rawBody = await getRawBody(req);
     const signature = req.headers['stripe-signature'] as string;
 
@@ -115,22 +111,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         console.log('✅ Payment successful:', session.id);
-        
+
         // Get user ID and plan from metadata
         const userId = session.metadata?.userId;
         const planId = session.metadata?.planId || 'pro';
         const credits = PLAN_CREDITS[planId] || 100;
-        
+
         if (userId) {
           // Add credits to Supabase
           const success = await addCreditsToUser(
-            userId, 
-            credits, 
-            session.id, 
+            userId,
+            credits,
+            session.id,
             planId,
             session.amount_total || 0
           );
-          
+
           if (success) {
             console.log(`✅ Added ${credits} credits to user ${userId}`);
           } else {
