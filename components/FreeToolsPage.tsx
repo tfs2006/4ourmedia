@@ -53,7 +53,7 @@ const tools = [
     icon: TrendingUp,
     label: null,
     name: 'Channel Growth Tracker',
-    tagline: 'Know who's rising before your competitor does',
+    tagline: "Know who's rising before your competitor does",
     description:
       "Analyze any channel's upload frequency, posting schedule, and subscriber momentum over time. Lock in the right creator partnership at exactly the right moment in their growth curve.",
     bullets: [],
