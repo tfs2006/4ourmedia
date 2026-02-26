@@ -929,6 +929,175 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         </div>
       </section>
 
+      {/* SEO Article Section */}
+      <section className="py-20 px-4 bg-slate-900/50">
+        <div className="container mx-auto max-w-4xl">
+          <header className="text-center mb-14">
+            <span className="inline-block px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-300 text-sm font-medium mb-4">
+              Complete Guide
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4 leading-tight">
+              The Marketer's Guide to AI Promo Generators in 2026
+            </h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Why scroll-stopping visuals matter more than ever, and how AI is making professional-grade promo creation instant and affordable for everyone.
+            </p>
+          </header>
+
+          <div className="space-y-12 text-slate-300 leading-relaxed">
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                What is an AI Promo Image Generator?
+              </h3>
+              <p className="mb-4">
+                An <strong className="text-white">AI promo image generator</strong> is a tool that uses artificial intelligence to automatically create promotional visuals for products, services, or brands — without requiring any design skills, expensive software, or hours of manual work. You provide a product URL or description, and the AI handles everything else: analyzing the product, writing persuasive copy, selecting a suitable visual style, and composing a finished ad-ready image.
+              </p>
+              <p>
+                PromoGen by 4ourMedia takes this a step further by combining <strong className="text-white">AI copywriting</strong> with <strong className="text-white">psychology-driven visual design</strong>. Every promo it generates includes a conversion-tested headline, an emotion trigger subheading, a clear call-to-action, and a cinematic AI-generated background — all matched to your specific product and target audience.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Why Product Marketers and E-Commerce Sellers Are Switching to AI Ad Makers
+              </h3>
+              <p className="mb-4">
+                The average social media user scrolls through hundreds of posts per day. Research consistently shows you have <strong className="text-white">less than 1.7 seconds</strong> to stop someone's scroll. That window is won or lost entirely by your visual — not your product quality, not your price, not your reviews.
+              </p>
+              <p className="mb-4">
+                Traditional graphic design workflows — hiring a freelancer, using complex tools like Photoshop or Canva, writing copy from scratch — take hours and cost money. For most solo sellers, e-commerce entrepreneurs, and small marketing teams, producing professional promotional content consistently is simply not feasible.
+              </p>
+              <p>
+                AI ad creators like PromoGen collapse that workflow from hours to seconds. Whether you're promoting a product on <strong className="text-white">Amazon, Shopify, Etsy, eBay</strong>, or your own website, an AI promo generator can produce a campaign-ready image faster than you can open a design app.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                How PromoGen Combines AI Copywriting and AI Image Generation
+              </h3>
+              <p className="mb-4">
+                Most AI marketing tools do one thing: either generate images OR write copy. PromoGen does both simultaneously and makes them work together. Here's the pipeline behind every generation:
+              </p>
+              <ol className="space-y-3 list-none">
+                {[
+                  ['Product Analysis', 'PromoGen fetches your product URL and uses Google Gemini AI to extract the product name, category, key benefits, target audience, price point, and emotional selling angles.'],
+                  ['Psychology-Driven Copywriting', 'Four distinct copy variants are generated, each using a different psychological trigger — urgency, social proof, desire, or curiosity — matched to your product type and buyer persona.'],
+                  ['Visual Concept Generation', 'The AI determines the ideal visual mood (aspirational, problem-solving, lifestyle, luxury, etc.) and generates a cinematic background image using leading image generation models.'],
+                  ['Composition & Export', 'The headline, subheading, CTA, and product details are composited onto the background in your chosen template and aspect ratio, then exported as a high-resolution PNG ready for any platform.'],
+                ].map(([title, text], i) => (
+                  <li key={i} className="flex gap-4">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300 font-bold text-sm">{i + 1}</span>
+                    <div>
+                      <span className="font-semibold text-white">{title}: </span>
+                      <span>{text}</span>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Best Use Cases: Who Uses AI Promotional Image Generators?
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {[
+                  { title: 'E-Commerce Sellers', text: 'Amazon, Shopify, and Etsy sellers use PromoGen to quickly generate platform-optimized product images for listing photos, social proof ads, and promotional campaigns.' },
+                  { title: 'Social Media Marketers', text: 'Content creators and social managers use it to produce a week\'s worth of promotional content in minutes, maintaining consistent posting schedules without creative burnout.' },
+                  { title: 'Digital Product Creators', text: 'Course creators, SaaS founders, and app developers use PromoGen to build launch assets, webinar promos, and affiliate marketing materials at scale.' },
+                  { title: 'Marketing Agencies', text: 'The Agency Pack enables bulk generation for multiple clients simultaneously, cutting creative production time from days to hours and dramatically improving margins.' },
+                  { title: 'Local Businesses', text: 'Restaurants, salons, gyms, and retail shops use PromoGen to create professional-looking promotional images for sales events, new products, and seasonal campaigns.' },
+                  { title: 'Affiliate Marketers', text: 'Affiliates generate custom promo images for products they\'re promoting, giving reviews and landing pages a polished, high-conversion look without any design work.' },
+                ].map((item, i) => (
+                  <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                    <h4 className="font-bold text-white mb-2">{item.title}</h4>
+                    <p className="text-slate-400 text-sm leading-relaxed">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                AI Promo Generator vs Canva vs Hiring a Designer: A Real Comparison
+              </h3>
+              <div className="overflow-x-auto rounded-xl border border-slate-700/50">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-800/80">
+                      <th className="text-left p-4 text-white font-semibold">Factor</th>
+                      <th className="text-center p-4 text-indigo-300 font-semibold">PromoGen AI</th>
+                      <th className="text-center p-4 text-slate-400 font-semibold">Canva</th>
+                      <th className="text-center p-4 text-slate-400 font-semibold">Freelance Designer</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/50">
+                    {[
+                      ['Time to first promo', '~10 seconds', '30–60 minutes', '1–3 days'],
+                      ['Design skills needed', 'None', 'Moderate', 'None (you hire it out)'],
+                      ['Copywriting included', '✓ AI-written, psych-driven', '✗ You write it', 'Sometimes (+$$)'],
+                      ['Cost per promo', '~$0.20–$0.36', '$0 (but your time)', '$50–$200+'],
+                      ['Custom AI visuals', '✓ Unique per product', '✗ Stock templates', 'Varies'],
+                      ['Bulk generation', '✓ Up to 10 at once', '✗', '✗ (slow & expensive)'],
+                      ['Psychology optimization', '✓ Built-in', '✗', 'Depends on skill'],
+                    ].map(([factor, pg, canva, designer], i) => (
+                      <tr key={i} className={i % 2 === 0 ? 'bg-slate-800/20' : ''}>
+                        <td className="p-4 text-slate-300 font-medium">{factor}</td>
+                        <td className="p-4 text-center text-indigo-300 font-medium">{pg}</td>
+                        <td className="p-4 text-center text-slate-400">{canva}</td>
+                        <td className="p-4 text-center text-slate-400">{designer}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Free AI Marketing Tools: What 4ourMedia Offers Beyond PromoGen
+              </h3>
+              <p className="mb-4">
+                Beyond PromoGen, 4ourMedia operates a completely free suite of <strong className="text-white">YouTube intelligence and sponsorship research tools</strong> at <a href="https://promofinder.4ourmedia.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">promofinder.4ourmedia.com</a>. These nine free tools help creators, brands, and marketers understand the YouTube sponsorship landscape:
+              </p>
+              <ul className="space-y-2 text-slate-400">
+                {[
+                  'YouTube Promo Finder — discover which channels are currently being sponsored and by whom',
+                  'Domain Search — find sponsor websites linked in video descriptions at scale',
+                  'Unlisted Video Finder — surface hidden promotional content that standard tools miss',
+                  'Channel Growth Tracker — identify fast-growing channels before they become expensive to sponsor',
+                  'Collaboration Finder — discover creator collaboration networks and cross-promotion opportunities',
+                  'Compare Sponsors — benchmark competing brands\' influencer strategies side by side',
+                  'Sponsorship Rate Estimator — estimate fair market rates before you negotiate',
+                  'Viral Video Detector — catch trending content early for timely sponsorship deals',
+                  'Sponsor Saturation Score — measure how over-sponsored a niche is before you enter it',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-indigo-400 mt-1 flex-shrink-0">▸</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4">
+                All tools are free to use with no account required — a resource for anyone doing YouTube marketing research.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-indigo-950/40 border border-indigo-500/20">
+              <h3 className="text-xl font-bold text-white mb-3">
+                Key Takeaway: The Best AI Promo Generator Is the One You'll Actually Use
+              </h3>
+              <p className="text-slate-400">
+                The most sophisticated design tool in the world is useless if the learning curve stops you from shipping content. PromoGen is built around one principle: <strong className="text-white">zero friction from idea to published promo</strong>. Paste a URL, get a promo. No tutorials, no templates to edit, no copy to agonize over. Just results — in the time it takes to make a coffee.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-24 px-4">
         <div className="container mx-auto max-w-4xl text-center">
