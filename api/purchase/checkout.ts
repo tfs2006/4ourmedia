@@ -1,9 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 
-// Initialize Stripe once at module level (avoids cold-start overhead per request)
-let stripe: Stripe | null = null;
-
 const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCents: number; isSubscription?: boolean }> = {
   starter: { name: 'Starter Pack', credits: 25, priceInCents: 900 },
   pro: { name: 'Pro Pack', credits: 100, priceInCents: 2900 },
@@ -11,14 +8,16 @@ const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCent
   unlimited: { name: 'Unlimited Monthly', credits: -1, priceInCents: 1900, isSubscription: true }
 };
 
+// Initialize Stripe once at module level (avoids cold-start overhead per request)
+let stripe: Stripe | null = null;
 function getStripe(): Stripe {
   if (!stripe) {
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
-
-    // Vercel/AWS Lambda Fix: Use Fetch API (bypasses Node https/socket issues)
     stripe = new Stripe(key, {
-      httpClient: Stripe.createFetchHttpClient(),
+      maxNetworkRetries: 3,
+      timeout: 30000,
+      httpClient: Stripe.createNodeHttpClient(),
     });
   }
   return stripe;
@@ -28,11 +27,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+  
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -45,13 +44,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const stripeClient = getStripe();
     const { successUrl, cancelUrl, planId = 'pro', userId, userEmail } = req.body || {};
     const tier = PRICING_TIERS[planId];
-
+    
     if (!tier) {
       return res.status(400).json({ error: 'Invalid plan selected' });
     }
 
     const origin = req.headers.origin || req.headers.referer || 'https://www.4ourmedia.com';
-
+    
     const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -59,8 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           currency: 'usd',
           product_data: {
             name: `PromoGen - ${tier.name}`,
-            description: tier.credits === -1
-              ? 'Unlimited AI promo generations per month'
+            description: tier.credits === -1 
+              ? 'Unlimited AI promo generations per month' 
               : `${tier.credits} AI promo generation credits`,
           },
           unit_amount: tier.priceInCents,
@@ -72,8 +71,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success_url: successUrl || `${origin}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${origin}/#pricing`,
       customer_email: userEmail || undefined,
-      metadata: {
-        planId,
+      metadata: { 
+        planId, 
         credits: String(tier.credits),
         userId: userId || '',
         userEmail: userEmail || ''
@@ -87,12 +86,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       type: error.type || error.constructor?.name,
       code: error.code,
       statusCode: error.statusCode,
-      stack: error.stack
     });
-    res.status(500).json({
+    res.status(500).json({ 
       error: error.message || 'Failed to create checkout',
       errorType: error.type || error.constructor?.name || 'Unknown',
-      details: 'Please check server logs for more information'
     });
   }
 }
