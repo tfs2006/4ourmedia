@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Check, Loader2, Download, Copy, ExternalLink, Sparkles, Shield, Zap, Star, Gift } from 'lucide-react';
+import { CelebrationIcon } from './Icons';
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -70,7 +71,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, demoRema
               {purchased ? <Check className="w-8 h-8" /> : <Sparkles className="w-8 h-8" />}
             </div>
             <h2 className="text-2xl font-bold">
-              {purchased ? '🎉 Purchase Complete!' : 'Unlock Unlimited Promos'}
+              {purchased ? <><CelebrationIcon size={18} className="inline-block mr-2 text-yellow-300" /> Purchase Complete!</> : 'Unlock Unlimited Promos'}
             </h2>
             {!purchased && (
               <p className="text-white/80 text-sm mt-2">One payment. Lifetime access. No subscriptions.</p>

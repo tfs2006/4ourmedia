@@ -12,6 +12,7 @@ import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './comp
 import FreeToolsPage from './components/FreeToolsPage';
 import PerplexityPage from './components/PerplexityPage';
 import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal } from 'lucide-react';
+import { FlameIcon, SparklesIcon } from './components/Icons';
 import { 
   AuthUser, 
   getCurrentUser, 
@@ -760,13 +761,13 @@ export default function App() {
               Welcome back! Claim your free daily credit.
               {streakDays > 0 && (
                 <span className="block text-sm mt-1">
-                  🔥 {streakDays} day streak! Keep it up!
+                  <FlameIcon size={14} className="inline-block text-orange-400 mr-1" /> {streakDays} day streak! Keep it up!
                 </span>
               )}
             </p>
             {streakDays === 6 && (
-              <p className="text-yellow-300 text-sm mb-4 font-semibold">
-                ✨ 1 more day for 2 BONUS credits!
+              <p className="text-yellow-300 text-sm mb-4 font-semibold flex items-center justify-center gap-1">
+                <SparklesIcon size={14} className="text-yellow-300" /> 1 more day for 2 BONUS credits!
               </p>
             )}
             <button
@@ -937,8 +938,8 @@ export default function App() {
               <h2 className="text-3xl md:text-4xl font-bold font-display leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-300">
                 Create Your Promo
               </h2>
-              <p className="text-slate-400">
-                Paste any product URL and watch the magic happen ✨
+              <p className="text-slate-400 flex items-center justify-center gap-1">
+                Paste any product URL and watch the magic happen <SparklesIcon size={14} className="text-violet-400" />
               </p>
             </div>
             

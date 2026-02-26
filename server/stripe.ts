@@ -6,9 +6,7 @@ import path from 'path';
 // Initialize Stripe - set your secret key in environment
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 export const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
-  httpClient: Stripe.createNodeHttpClient(),
-  maxNetworkRetries: 3,
-  timeout: 30000,
+  httpClient: Stripe.createFetchHttpClient(),
 }) : null;
 
 // Product configuration with multiple plans

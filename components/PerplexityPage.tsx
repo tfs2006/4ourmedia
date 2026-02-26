@@ -3,6 +3,7 @@ import {
   ArrowLeft, CheckCircle, ExternalLink, Zap, Shield,
   Globe, Brain, BarChart3, Search, ArrowRight
 } from 'lucide-react';
+import { SparklesIcon } from './Icons';
 
 interface PerplexityPageProps {
   onBack: () => void;
@@ -125,7 +126,7 @@ const PerplexityPage: React.FC<PerplexityPageProps> = ({ onBack }) => {
             {/* Left */}
             <div className="flex-1 space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/20 rounded-full border border-indigo-500/30 text-indigo-300 text-sm font-medium">
-                ✨ Exclusive Free Access via 4ourMedia
+                <SparklesIcon size={14} className="text-indigo-400" /> Exclusive Free Access via 4ourMedia
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-200">

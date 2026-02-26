@@ -1,5 +1,6 @@
 import React from 'react';
 import { Loader2, Search, Palette, Layers, CheckCircle, Sparkles, Brain, Wand2 } from 'lucide-react';
+import { LightbulbIcon } from './Icons';
 import { AppState } from '../types';
 
 interface LoadingStepProps {
@@ -129,8 +130,8 @@ const LoadingStep: React.FC<LoadingStepProps> = ({ currentStep }) => {
       </div>
       
       {/* Fun Fact */}
-      <div className="text-center text-slate-500 text-xs">
-        💡 Pro tip: The AI uses psychology principles to write copy that converts
+      <div className="text-center text-slate-500 text-xs flex items-center justify-center gap-1.5">
+        <LightbulbIcon size={14} className="text-amber-400" /> Pro tip: The AI uses psychology principles to write copy that converts
       </div>
     </div>
   );

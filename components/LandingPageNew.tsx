@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Zap, Clock, Target, Shield, TrendingUp, 
   CheckCircle, Star, ArrowRight, Play, Users, Award,
@@ -6,6 +6,15 @@ import {
   Layers, Image, Package, Infinity, Timer, Gift,
   AlertTriangle, ChevronDown, X, CreditCard, Lock
 } from 'lucide-react';
+import {
+  MagicWandIcon, RocketIcon, SpeedIcon, AIBrainIcon, SparklesIcon,
+  TrophyIcon, TemplateIcon, ImageIcon as PGImageIcon, ShieldIcon,
+  CheckCircleIcon, TimerIcon, PaletteIcon, TrendingUpIcon, CrownIcon,
+  GiftIcon, LockIcon, SadFaceIcon, CelebrationIcon, LightbulbIcon,
+  ROIIcon, MobileIcon, GlobeIcon, AvatarArtistIcon, AvatarMarketerIcon,
+  AvatarFounderIcon, PackageIcon, CloseIcon, ArrowRightIcon, StarIcon,
+  CommunityIcon, DownloadIcon, CardIcon
+} from './Icons';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -155,40 +164,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: 'var(--color-bg-deep)' }}>
+      <div className="pg-bg" />
       
       {/* Urgency Banner */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-2 px-4 text-center text-sm font-medium">
-        <div className="flex items-center justify-center gap-4 flex-wrap">
+      <div className="relative overflow-hidden bg-gradient-to-r from-violet-700 via-indigo-700 to-violet-700 text-white py-2 px-4 text-center text-sm font-semibold">
+        <div className="absolute inset-0 shimmer opacity-20" />
+        <div className="relative flex items-center justify-center gap-4 flex-wrap">
           <span className="flex items-center gap-2">
-            <Timer className="w-4 h-4 animate-pulse" />
-            Launch Week Special Ends In:
+            <TimerIcon size={14} className="text-yellow-300 animate-pulse" />
+            Launch Week Ends In:
           </span>
-          <span className="font-mono font-bold">
+          <span className="font-mono font-bold tracking-widest text-yellow-200">
             {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
           </span>
-          <span className="hidden sm:inline">|</span>
-          <span className="flex items-center gap-1 text-yellow-200">
-            <Users className="w-4 h-4" />
-            {visitorCount} people viewing right now
+          <span className="hidden sm:inline opacity-40">â”‚</span>
+          <span className="flex items-center gap-1 text-yellow-200 live-badge">
+            {visitorCount} live visitors
           </span>
         </div>
       </div>
 
       {/* Hero Section */}
       <section className="relative py-16 lg:py-28 px-4 overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/50 via-purple-900/30 to-slate-900"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
+        {/* Background orbs */}
+        <div className="glow-orb-violet" style={{ width: '600px', height: '600px', top: '-10%', left: '-10%', opacity: 0.6 }} />
+        <div className="glow-orb-blue"   style={{ width: '500px', height: '500px', bottom: '0%', right: '-5%', opacity: 0.5 }} />
+        <div className="glow-orb-gold"   style={{ width: '300px', height: '300px', top: '30%', left: '50%', opacity: 0.4 }} />
         
         <div className="relative container mx-auto max-w-6xl">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             
             {/* Left: Copy */}
             <div className="flex-1 text-center lg:text-left space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full border border-green-500/30 text-green-300 text-sm font-medium">
-                <Gift className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/15 rounded-full border border-emerald-500/30 text-emerald-300 text-sm font-medium">
+                <GiftIcon size={14} className="text-emerald-400" />
                 Launch Week: Extra 20% Credits FREE
               </div>
               
@@ -210,19 +220,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
 
               <p className="text-base text-slate-400 max-w-lg">
                 No Photoshop. No copywriter. No waiting 3 days for a freelancer. 
-                Just paste, click, and post — while your competitors are still drafting briefs.
+                Just paste, click, and post â€” while your competitors are still drafting briefs.
               </p>
 
               {/* Value Props */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {[
-                  { icon: Zap, text: '10-second generation' },
-                  { icon: Brain, text: 'Psychology-driven copy' },
-                  { icon: Layers, text: '12 pro templates' },
-                  { icon: Image, text: '4 export sizes' }
+                  { Icon: SpeedIcon,    text: '10-second generation' },
+                  { Icon: AIBrainIcon,  text: 'Psychology-driven copy' },
+                  { Icon: TemplateIcon, text: '12 pro templates' },
+                  { Icon: PGImageIcon,  text: '4 export sizes' }
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-slate-300">
-                    <item.icon className="w-4 h-4 text-indigo-400" />
+                  <div key={i} className="flex items-center gap-2 text-slate-300 glass-card px-3 py-2">
+                    <item.Icon size={16} className="text-violet-400 flex-shrink-0" />
                     {item.text}
                   </div>
                 ))}
@@ -231,14 +241,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={onGetStarted}
-                  className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all flex items-center justify-center gap-2 group"
+                  className="btn-primary text-lg px-8 py-4 group"
                 >
                   Create My First Promo Free
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
                   onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl border border-white/20 transition-all flex items-center justify-center gap-2"
+                  className="btn-ghost text-lg px-8 py-4"
                 >
                   View Pricing
                   <ChevronDown className="w-5 h-5" />
@@ -247,11 +257,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               
               <div className="flex items-center gap-6 pt-2 text-sm text-slate-400">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircleIcon size={16} className="text-emerald-400" />
                   No credit card needed
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircleIcon size={16} className="text-emerald-400" />
                   3 free generations
                 </div>
               </div>
@@ -260,42 +270,57 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             {/* Right: Hero Image Preview */}
             <div className="flex-1 relative">
               <div className="relative w-full max-w-sm mx-auto">
+                {/* Floating glow rings */}
+                <div className="absolute -inset-8 bg-gradient-to-br from-violet-500/10 to-blue-500/10 rounded-3xl blur-2xl" />
                 {/* Before/After comparison */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Before */}
+                <div className="relative grid grid-cols-2 gap-4">
+                  {/* Before card */}
                   <div className="space-y-2">
-                    <p className="text-xs text-slate-500 text-center">BEFORE</p>
-                    <div className="aspect-[9/16] bg-slate-800 rounded-xl p-4 border border-slate-700 flex items-center justify-center">
+                    <p className="text-xs text-slate-500 text-center font-semibold tracking-widest">BEFORE</p>
+                    <div className="aspect-[9/16] bg-slate-800/80 rounded-2xl p-4 border border-slate-700 flex items-center justify-center backdrop-blur-sm">
                       <div className="text-center text-slate-500">
-                        <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mx-auto mb-2 opacity-40">
+                          <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5"/>
+                          <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                          <path d="M3 15l5-4 4 3 4-4 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
                         <p className="text-xs">Boring product photo</p>
                         <p className="text-[10px] mt-1 text-slate-600">Gets scrolled past</p>
                       </div>
                     </div>
-                    <p className="text-xs text-red-400 text-center">0 engagement 😢</p>
+                    <p className="text-xs text-rose-400 text-center flex items-center justify-center gap-1">
+                      <SadFaceIcon size={14} className="text-rose-400" /> 0 engagement
+                    </p>
                   </div>
                   
-                  {/* After */}
+                  {/* After card */}
                   <div className="space-y-2">
-                    <p className="text-xs text-emerald-400 text-center font-bold">AFTER ✨</p>
-                    <div className="aspect-[9/16] bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 rounded-xl p-3 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20 overflow-hidden flex flex-col justify-end">
-                      <div className="space-y-2">
-                        <div className="w-16 h-5 bg-emerald-500 rounded-full mx-auto"></div>
-                        <div className="w-full h-6 bg-white/90 rounded"></div>
-                        <div className="w-3/4 h-3 bg-indigo-400/60 rounded mx-auto"></div>
-                        <div className="flex justify-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-2 h-2 text-yellow-400 fill-yellow-400" />
+                    <p className="text-xs text-emerald-400 text-center font-bold flex items-center justify-center gap-1">
+                      <SparklesIcon size={12} className="text-emerald-400" /> AFTER
+                    </p>
+                    <div className="aspect-[9/16] bg-gradient-to-br from-violet-900 via-indigo-900 to-slate-900 rounded-2xl p-3 border-2 border-emerald-500/60 shadow-lg shadow-emerald-500/25 overflow-hidden flex flex-col justify-end relative">
+                      {/* Simulated AI canvas */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-violet-700/30 via-transparent to-slate-900/90" />
+                      <div className="relative space-y-2">
+                        <div className="w-16 h-4 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full mx-auto"></div>
+                        <div className="w-full h-5 bg-white/90 rounded-lg"></div>
+                        <div className="w-3/4 h-3 bg-indigo-300/50 rounded-lg mx-auto"></div>
+                        <div className="flex justify-center gap-0.5">
+                          {[...Array(5)].map((_, j) => (
+                            <StarIcon key={j} size={8} color="#FBBF24" />
                           ))}
                         </div>
                       </div>
                     </div>
-                    <p className="text-xs text-emerald-400 text-center font-bold">10x more clicks! 🚀</p>
+                    <p className="text-xs text-emerald-400 text-center font-bold flex items-center justify-center gap-1">
+                      <RocketIcon size={12} className="text-emerald-400" /> 10x more clicks!
+                    </p>
                   </div>
                 </div>
                 
-                {/* Floating badges */}
-                <div className="absolute -top-4 -right-4 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full animate-bounce">
+                {/* Floating badge */}
+                <div className="absolute -top-3 -right-3 pg-badge pg-badge-gold animate-float">
+                  <SparklesIcon size={10} />
                   AI-Powered
                 </div>
               </div>
@@ -305,20 +330,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       </section>
 
       {/* Social Proof Bar */}
-      <section className="py-8 px-4 bg-slate-800/50 border-y border-slate-700">
+      <section className="py-8 px-4" style={{ background: 'rgba(14,19,34,0.7)', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-wrap items-center justify-center gap-8 text-slate-400">
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-indigo-400" />
+              <CommunityIcon size={20} className="text-violet-400" />
               <span><strong className="text-white">2,847</strong> marketers using PromoGen</span>
             </div>
             <div className="flex items-center gap-2">
-              <Image className="w-5 h-5 text-indigo-400" />
+              <PGImageIcon size={20} className="text-violet-400" />
               <span><strong className="text-white">48,293</strong> promos generated</span>
             </div>
             <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              {[...Array(5)].map((_, j) => (
+                <StarIcon key={j} size={16} color="#FBBF24" />
               ))}
               <span className="ml-2"><strong className="text-white">4.9</strong> average rating</span>
             </div>
@@ -335,8 +360,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           </h2>
           <p className="text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
             You spent hours finding the perfect product. You know it could change lives. 
-            But when you post that plain product photo with a basic caption… <strong className="text-slate-200">crickets</strong>. 
-            Meanwhile, that other seller — selling the <em>same exact product</em> — is 
+            But when you post that plain product photo with a basic captionâ€¦ <strong className="text-slate-200">crickets</strong>. 
+            Meanwhile, that other seller â€” selling the <em>same exact product</em> â€” is 
             getting thousands of clicks because their visuals <em>demand</em> attention.
           </p>
           <p className="text-lg text-indigo-300 font-medium">
@@ -361,7 +386,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             {/* Problem */}
             <div className="bg-red-950/30 rounded-2xl p-8 border border-red-900/50">
               <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
-                <X className="w-5 h-5" /> What Most Sellers Do (And Why They Struggle)
+                <CloseIcon size={20} className="text-red-500" /> What Most Sellers Do (And Why They Struggle)
               </h3>
               <ul className="space-y-4 text-slate-300">
                 {[
@@ -372,37 +397,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   'Wonder why engagement is dead and sales feel impossible'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <CloseIcon size={18} className="text-rose-500 flex-shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <p className="mt-6 text-red-300/70 text-sm italic">
-                Sound familiar? You're not alone — 89% of sellers say creating promotional content is their #1 bottleneck.
+                Sound familiar? You're not alone â€” 89% of sellers say creating promotional content is their #1 bottleneck.
               </p>
             </div>
             
             {/* Solution */}
             <div className="bg-emerald-950/30 rounded-2xl p-8 border border-emerald-900/50">
               <h3 className="text-emerald-400 font-bold text-lg mb-4 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5" /> What Smart Marketers Do Instead
+                <CheckCircleIcon size={20} className="text-emerald-500" /> What Smart Marketers Do Instead
               </h3>
               <ul className="space-y-4 text-slate-300">
                 {[
-                  'Paste a URL → Get a stunning promo in 10 seconds',
+                  'Paste a URL â†’ Get a stunning promo in 10 seconds',
                   'AI writes headlines using proven psychology triggers',
-                  'Pay $0.20-0.36 per promo — less than a cup of coffee',
+                  'Pay $0.20-0.36 per promo â€” less than a cup of coffee',
                   'Choose from 4 sizes: Story, Square, Landscape, Instagram',
                   'Post confidently knowing the copy was built to convert'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <CheckCircleIcon size={18} className="text-emerald-500 flex-shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <p className="mt-6 text-emerald-300/70 text-sm italic">
-                "I made back my entire Pro Pack investment on my first sale from a PromoGen ad." — Sarah M.
+                "I made back my entire Pro Pack investment on my first sale from a PromoGen ad." â€” Sarah M.
               </p>
             </div>
           </div>
@@ -424,28 +449,42 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                emoji: '🛒',
+                Icon: PackageIcon,
+                iconColor: 'text-blue-400',
+                bg: 'from-blue-900/40 to-blue-900/20',
+                border: 'border-blue-700/40 hover:border-blue-500/60',
                 title: 'E-Commerce Sellers',
-                description: 'Amazon FBA, Shopify, Etsy, eBay — turn any product listing into a conversion machine.',
+                description: 'Amazon FBA, Shopify, Etsy, eBay â€” turn any product listing into a conversion machine.',
               },
               {
-                emoji: '📱',
+                Icon: MobileIcon,
+                iconColor: 'text-violet-400',
+                bg: 'from-violet-900/40 to-violet-900/20',
+                border: 'border-violet-700/40 hover:border-violet-500/60',
                 title: 'Social Media Marketers',
                 description: 'Create thumb-stopping Instagram, TikTok, and Facebook ads without touching Photoshop.',
               },
               {
-                emoji: '🏢',
+                Icon: TrophyIcon,
+                iconColor: 'text-amber-400',
+                bg: 'from-amber-900/30 to-amber-900/10',
+                border: 'border-amber-700/40 hover:border-amber-500/60',
                 title: 'Agencies & Freelancers',
                 description: 'Deliver client creatives in minutes, not days. White-label, bulk generate, and scale.',
               },
               {
-                emoji: '🚀',
+                Icon: RocketIcon,
+                iconColor: 'text-emerald-400',
+                bg: 'from-emerald-900/30 to-emerald-900/10',
+                border: 'border-emerald-700/40 hover:border-emerald-500/60',
                 title: 'Founders & Solopreneurs',
                 description: 'You wear 10 hats already. Let AI handle design so you can focus on selling.',
               },
             ].map((item, i) => (
-              <div key={i} className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 hover:border-indigo-500/50 transition-all group text-center">
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{item.emoji}</div>
+              <div key={i} className={`bg-gradient-to-br ${item.bg} rounded-2xl p-6 border ${item.border} transition-all group text-center pg-card card-beam`}>
+                <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl bg-slate-800/60 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <item.Icon size={28} className={item.iconColor} />
+                </div>
                 <h3 className="text-lg font-bold mb-2">{item.title}</h3>
                 <p className="text-slate-400 text-sm">{item.description}</p>
               </div>
@@ -470,35 +509,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             {[
               {
                 step: '01',
-                icon: Globe,
+                Icon: GlobeIcon,
                 title: 'Paste Your Link',
-                description: 'Drop any product URL—Amazon, Shopify, your website. Our AI fetches all the details.',
-                color: 'from-blue-500 to-cyan-500'
+                description: 'Drop any product URL â€” Amazon, Shopify, your website. Our AI fetches all the details automatically.',
+                color: 'from-blue-600 to-cyan-500',
+                glow: 'rgba(59,130,246,0.3)'
               },
               {
                 step: '02',
-                icon: Brain,
+                Icon: AIBrainIcon,
                 title: 'AI Does the Work',
-                description: 'Psychology-driven headlines, emotion-matched colors, and stunning AI-generated backgrounds.',
-                color: 'from-purple-500 to-pink-500'
+                description: 'Psychology-driven headlines, emotion-matched colors, and stunning AI-generated backgrounds â€” zero effort.',
+                color: 'from-violet-600 to-pink-500',
+                glow: 'rgba(124,58,237,0.3)'
               },
               {
                 step: '03',
-                icon: Download,
+                Icon: DownloadIcon,
                 title: 'Download & Post',
-                description: 'Get ready-to-post images in 6 sizes. Add your logo, download, and watch engagement soar.',
-                color: 'from-green-500 to-emerald-500'
+                description: 'Ready-to-post images in 6 sizes. Add your logo, download, and watch engagement soar.',
+                color: 'from-emerald-500 to-teal-400',
+                glow: 'rgba(16,185,129,0.3)'
               }
             ].map((item, i) => (
-              <div key={i} className="relative bg-slate-800/50 rounded-2xl p-8 border border-slate-700 hover:border-slate-600 transition-colors group">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl flex items-center justify-center text-sm font-bold text-slate-400 border border-slate-600">
-                  {item.step}
-                </div>
-                <div className={`w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                  <item.icon className="w-8 h-8 text-white" />
+              <div key={i} className="pg-card card-beam relative p-8 group">
+                <div className="step-number mb-6">{item.step}</div>
+                <div
+                  className={`w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                  style={{ boxShadow: `0 8px 32px ${item.glow}` }}
+                >
+                  <item.Icon size={32} color="#fff" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                <p className="text-slate-400">{item.description}</p>
+                <p className="text-slate-400 leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -519,30 +562,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[
-              { name: 'Classic', emoji: '🎯', tier: 'Free' },
-              { name: 'Minimal', emoji: '✨', tier: 'Free' },
-              { name: 'Flash Sale', emoji: '⚡', tier: 'Pro', locked: true },
-              { name: 'Luxury', emoji: '👑', tier: 'Pro', locked: true },
-              { name: 'Launch', emoji: '🚀', tier: 'Pro', locked: true },
-              { name: 'Social Proof', emoji: '⭐', tier: 'Pro', locked: true },
-              { name: 'Black Friday', emoji: '🖤', tier: 'Pro', locked: true },
-              { name: 'Tech Modern', emoji: '💻', tier: 'Agency', locked: true },
-              { name: 'Beauty Glow', emoji: '💄', tier: 'Agency', locked: true },
-              { name: 'Fitness', emoji: '💪', tier: 'Agency', locked: true },
-              { name: 'White Label', emoji: '⬜', tier: 'Agency', locked: true },
-              { name: '+More', emoji: '🎁', tier: 'Coming', locked: true }
+              { name: 'Classic',      bg: 'from-blue-900/60 to-indigo-900/60',    border: 'border-blue-500/50',   tier: 'Free', TierIcon: null, locked: false },
+              { name: 'Minimal',      bg: 'from-violet-900/60 to-slate-900/60',   border: 'border-violet-500/50', tier: 'Free', TierIcon: null, locked: false },
+              { name: 'Flash Sale',   bg: 'from-rose-900/40 to-slate-900/60',     border: 'border-slate-700',     tier: 'Pro',  TierIcon: SpeedIcon, locked: true },
+              { name: 'Luxury',       bg: 'from-amber-900/40 to-slate-900/60',    border: 'border-slate-700',     tier: 'Pro',  TierIcon: CrownIcon, locked: true },
+              { name: 'Launch',       bg: 'from-green-900/40 to-slate-900/60',    border: 'border-slate-700',     tier: 'Pro',  TierIcon: RocketIcon, locked: true },
+              { name: 'Social Proof', bg: 'from-yellow-900/40 to-slate-900/60',   border: 'border-slate-700',     tier: 'Pro',  TierIcon: StarIcon, locked: true },
+              { name: 'Black Friday', bg: 'from-slate-900 to-slate-800/60',       border: 'border-slate-700',     tier: 'Pro',  TierIcon: SpeedIcon, locked: true },
+              { name: 'Tech Modern',  bg: 'from-cyan-900/40 to-slate-900/60',     border: 'border-slate-700',     tier: 'Agency', TierIcon: AIBrainIcon, locked: true },
+              { name: 'Beauty Glow',  bg: 'from-pink-900/40 to-slate-900/60',     border: 'border-slate-700',     tier: 'Agency', TierIcon: SparklesIcon, locked: true },
+              { name: 'Fitness',      bg: 'from-orange-900/40 to-slate-900/60',   border: 'border-slate-700',     tier: 'Agency', TierIcon: SpeedIcon, locked: true },
+              { name: 'White Label',  bg: 'from-neutral-900 to-slate-800/60',     border: 'border-slate-700',     tier: 'Agency', TierIcon: ShieldIcon, locked: true },
+              { name: '+More',        bg: 'from-indigo-900/40 to-slate-900/60',   border: 'border-slate-700',     tier: 'Coming', TierIcon: GiftIcon, locked: true }
             ].map((template, i) => (
-              <div key={i} className={`relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center p-4 border transition-all ${
-                template.locked 
-                  ? 'bg-slate-800/30 border-slate-700 opacity-75' 
-                  : 'bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border-indigo-500/50 hover:scale-105'
+              <div key={i} className={`relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center p-3 border transition-all bg-gradient-to-br ${template.bg} ${template.border} ${
+                template.locked ? 'opacity-70' : 'hover:scale-105 hover:opacity-100 shadow-lg'
               }`}>
                 {template.locked && (
-                  <Lock className="absolute top-2 right-2 w-4 h-4 text-slate-500" />
+                  <LockIcon size={14} className="absolute top-2 right-2 text-slate-500" />
                 )}
-                <span className="text-4xl mb-2">{template.emoji}</span>
-                <span className="text-sm font-medium text-center">{template.name}</span>
-                <span className={`text-xs mt-1 ${
+                {template.TierIcon && (
+                  <template.TierIcon size={28} className={`mb-2 ${
+                    template.tier === 'Pro' ? 'text-indigo-400' :
+                    template.tier === 'Agency' ? 'text-amber-400' :
+                    template.tier === 'Coming' ? 'text-purple-400' : 'text-emerald-400'
+                  }`} />
+                )}
+                {!template.TierIcon && (
+                  <SparklesIcon size={28} className="mb-2 text-emerald-400" />
+                )}
+                <span className="text-xs font-medium text-center">{template.name}</span>
+                <span className={`text-[10px] mt-1 font-bold ${
                   template.tier === 'Free' ? 'text-green-400' : 
                   template.tier === 'Pro' ? 'text-indigo-400' : 
                   template.tier === 'Agency' ? 'text-amber-400' : 'text-slate-500'
@@ -568,38 +618,52 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: Brain,
+                Icon: AIBrainIcon,
+                color: 'text-violet-400',
+                bg: 'bg-violet-500/10',
                 title: 'Headlines That Hijack Attention',
-                description: 'The AI uses FOMO, social proof, urgency, and desire triggers — the same psychology used by billion-dollar brands — to write copy that makes people stop scrolling.'
+                description: 'The AI uses FOMO, social proof, urgency, and desire triggers â€” the same psychology used by billion-dollar brands â€” to write copy that makes people stop scrolling.'
               },
               {
-                icon: Palette,
+                Icon: PaletteIcon,
+                color: 'text-pink-400',
+                bg: 'bg-pink-500/10',
                 title: 'Colors That Trigger Buying',
-                description: 'Red for urgency. Gold for premium. Blue for trust. The AI matches colors to the emotional tone of your product — because color alone can boost conversions by 80%.'
+                description: 'Red for urgency. Gold for premium. Blue for trust. The AI matches colors to the emotional tone of your product â€” because color alone can boost conversions by 80%.'
               },
               {
-                icon: Layers,
+                Icon: TemplateIcon,
+                color: 'text-indigo-400',
+                bg: 'bg-indigo-500/10',
                 title: 'Templates Designed to Convert',
-                description: 'Every template was built by studying top-performing ads. From flash sales to luxury launches — pick the one that fits your campaign and let the AI do the rest.'
+                description: 'Every template was built by studying top-performing ads. From flash sales to luxury launches â€” pick the one that fits your campaign and let the AI do the rest.'
               },
               {
-                icon: Image,
+                Icon: PGImageIcon,
+                color: 'text-cyan-400',
+                bg: 'bg-cyan-500/10',
                 title: '4 Sizes, One Click',
-                description: 'Story (9:16), Square (1:1), Landscape (16:9), Instagram (4:5) — generate the perfect size for any platform without cropping, stretching, or redesigning.'
+                description: 'Story (9:16), Square (1:1), Landscape (16:9), Instagram (4:5) â€” generate the perfect size for any platform without cropping, stretching, or redesigning.'
               },
               {
-                icon: Zap,
+                Icon: SpeedIcon,
+                color: 'text-amber-400',
+                bg: 'bg-amber-500/10',
                 title: 'Faster Than Your Competition',
-                description: 'While they\'re spending 2 hours per creative, you\'re generating 10 promos in 2 minutes. Speed is a competitive advantage — and now it\'s yours.'
+                description: 'While they\'re spending 2 hours per creative, you\'re generating 10 promos in 2 minutes. Speed is a competitive advantage â€” and now it\'s yours.'
               },
               {
-                icon: Target,
+                Icon: CommunityIcon,
+                color: 'text-emerald-400',
+                bg: 'bg-emerald-500/10',
                 title: 'AI Audience Insights',
                 description: 'Get instant breakdowns of your ideal buyer: demographics, pain points, desires, and buying triggers. Know your customer better than they know themselves.'
               }
             ].map((feature, i) => (
-              <div key={i} className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 hover:border-indigo-500/50 transition-colors group">
-                <feature.icon className="w-10 h-10 text-indigo-400 mb-4 group-hover:scale-110 transition-transform" />
+              <div key={i} className="pg-card card-beam p-6 group">
+                <div className={`w-12 h-12 rounded-xl ${feature.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <feature.Icon size={24} className={feature.color} />
+                </div>
                 <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
               </div>
@@ -618,14 +682,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             </h2>
             <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
               That's what happens when you combine cinematic AI visuals with copy written by an AI 
-              trained on the psychology of persuasion. Your products don't just get seen — they get <em>desired</em>.
+              trained on the psychology of persuasion. Your products don't just get seen â€” they get <em>desired</em>.
             </p>
             <button
               onClick={onGetStarted}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-indigo-600/30 transition-all inline-flex items-center gap-2 group"
+              className="btn-primary text-lg px-8 py-4 inline-flex group"
             >
-              Try It Free — No Card Required
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Try It Free â€” No Card Required
+              <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
@@ -639,7 +703,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               Real Results from Real Marketers
             </h2>
             <p className="text-lg text-slate-400">
-              Don't take our word for it — see what happens when people start using PromoGen.
+              Don't take our word for it â€” see what happens when people start using PromoGen.
             </p>
           </div>
           
@@ -648,42 +712,43 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               {
                 name: 'Sarah M.',
                 role: 'Etsy Seller',
-                avatar: '👩‍💼',
+                AvatarComp: AvatarArtistIcon,
                 quote: 'I used to spend 2 hours per promo in Canva. Now I generate 10 in the time it takes to drink my coffee. My click-through rate went up 340%!',
-                highlight: '+340% CTR'
+                highlight: '+340% CTR',
+                highlightColor: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
               },
               {
                 name: 'Mike R.',
                 role: 'Amazon FBA',
-                avatar: '👨‍💻',
+                AvatarComp: AvatarMarketerIcon,
                 quote: 'The AI understands conversion psychology better than most marketers. The headlines it writes are genuinely compelling. Worth every penny.',
-                highlight: '5x ROI in week 1'
+                highlight: '5x ROI in week 1',
+                highlightColor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
               },
               {
                 name: 'Jessica T.',
                 role: 'Marketing Agency',
-                avatar: '👩‍🎨',
+                AvatarComp: AvatarFounderIcon,
                 quote: 'We use the Agency pack for client work. The white-label option and bulk generation save us 20+ hours per week. Clients love the results.',
-                highlight: '20 hrs/week saved'
+                highlight: '20 hrs/week saved',
+                highlightColor: 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
               }
             ].map((testimonial, i) => (
-              <div key={i} className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+              <div key={i} className="testimonial-card">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-2xl">
-                    {testimonial.avatar}
-                  </div>
+                  <testimonial.AvatarComp size={48} />
                   <div>
                     <p className="font-bold">{testimonial.name}</p>
                     <p className="text-slate-400 text-sm">{testimonial.role}</p>
                   </div>
                 </div>
                 <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  {[...Array(5)].map((_, j) => (
+                    <StarIcon key={j} size={14} color="#FBBF24" />
                   ))}
                 </div>
                 <p className="text-slate-300 mb-4">"{testimonial.quote}"</p>
-                <div className="inline-block px-3 py-1 bg-green-500/20 text-green-400 text-sm font-bold rounded-full">
+                <div className={`inline-block px-3 py-1 text-sm font-bold rounded-full ${testimonial.highlightColor}`}>
                   {testimonial.highlight}
                 </div>
               </div>
@@ -697,8 +762,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30 text-amber-300 text-sm font-medium mb-4">
-              <Timer className="w-4 h-4" />
-              Launch Week: Extra 20% Credits on Pro & Agency packs
+              <TimerIcon size={16} className="text-amber-400" />
+              Launch Week: Extra 20% Credits on Pro &amp; Agency packs
             </div>
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
               Simple, Transparent Pricing
@@ -710,7 +775,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
 
           {/* Pricing comparison note */}
           <div className="text-center mb-8 text-slate-400 text-sm">
-            <p>💡 Compare: Hiring a designer costs $50-200 per promo. PromoGen = <strong className="text-green-400">$0.20-0.36</strong></p>
+            <p className="flex items-center justify-center gap-2">
+              <LightbulbIcon size={16} className="text-amber-400" />
+              Compare: Hiring a designer costs $50-200 per promo. PromoGen = <strong className="text-green-400">$0.20-0.36</strong>
+            </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -754,7 +822,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                      <CheckCircleIcon size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="text-slate-300">{feature}</span>
                     </li>
                   ))}
@@ -768,7 +836,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                       : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                   }`}
                 >
-                  <CreditCard className="w-4 h-4" />
+                  <CardIcon size={16} />
                   {plan.interval ? 'Subscribe' : 'Buy Now'}
                 </button>
               </div>
@@ -778,19 +846,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           {/* Trust Badges */}
           <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-slate-500 text-sm">
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
+              <ShieldIcon size={16} className="text-slate-400" />
               Secure Stripe Checkout
             </div>
             <div className="flex items-center gap-2">
-              <Award className="w-4 h-4" />
+              <TrophyIcon size={16} className="text-slate-400" />
               30-Day Money-Back Guarantee
             </div>
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4" />
+              <SpeedIcon size={16} className="text-slate-400" />
               Instant Delivery
             </div>
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4" />
+              <LockIcon size={16} className="text-slate-400" />
               Credits Never Expire
             </div>
           </div>
@@ -801,7 +869,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 rounded-2xl p-8 border border-green-700/50">
-            <h3 className="text-2xl font-bold text-center mb-6">💰 Your ROI Calculator</h3>
+            <h3 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-3">
+              <ROIIcon size={28} className="text-emerald-400" />
+              Your ROI Calculator
+            </h3>
             
             <div className="grid md:grid-cols-3 gap-6 text-center">
               <div>
@@ -820,8 +891,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             </div>
             
             <div className="text-center mt-8">
-              <p className="text-2xl font-bold text-green-400">
-                Save $497-1,997 per week 🎉
+              <p className="text-2xl font-bold text-green-400 flex items-center justify-center gap-2">
+                <CelebrationIcon size={24} className="text-green-400" />
+                Save $497-1,997 per week
               </p>
               <p className="text-slate-400 mt-2">That's up to $103,844 per year in savings</p>
             </div>
@@ -846,11 +918,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               },
               {
                 q: 'Do credits expire?',
-                a: 'No! Credit packs never expire. Use them whenever you want—today, next month, or next year. Only the Unlimited subscription requires monthly renewal.'
+                a: 'No! Credit packs never expire. Use them whenever you wantâ€”today, next month, or next year. Only the Unlimited subscription requires monthly renewal.'
               },
               {
                 q: 'What\'s a Gemini API key and is it free?',
-                a: 'Google Gemini is the AI that powers generation. You can get a free API key from Google AI Studio in 2 minutes. The API cost is minimal (about $0.002 per promo)—far less than our credit price, which covers our service, templates, and support.'
+                a: 'Google Gemini is the AI that powers generation. You can get a free API key from Google AI Studio in 2 minutes. The API cost is minimal (about $0.002 per promo)â€”far less than our credit price, which covers our service, templates, and support.'
               },
               {
                 q: 'Can I use this for client work?',
@@ -858,7 +930,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               },
               {
                 q: 'What\'s the difference between Pro and Agency?',
-                a: 'Pro is perfect for individual marketers (100 credits, 8 templates, all sizes). Agency adds bulk generation (10 at once), white-label export, and exclusive templates—ideal for teams creating high volume.'
+                a: 'Pro is perfect for individual marketers (100 credits, 8 templates, all sizes). Agency adds bulk generation (10 at once), white-label export, and exclusive templatesâ€”ideal for teams creating high volume.'
               },
               {
                 q: 'What if I\'m not satisfied?',
@@ -904,23 +976,34 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                emoji: '🎯',
+                Icon: GlobeIcon,
+                iconColor: 'text-blue-400',
+                bg: 'from-blue-900/30 to-slate-900',
+                border: 'border-blue-700/30',
                 title: 'Works With Any URL',
                 text: 'Amazon, Shopify, Etsy, eBay, your own website, even a Notion page. If it has a URL, PromoGen can turn it into a promo.'
               },
               {
-                emoji: '🧠',
+                Icon: AIBrainIcon,
+                iconColor: 'text-violet-400',
+                bg: 'from-violet-900/30 to-slate-900',
+                border: 'border-violet-700/30',
                 title: 'AI Adapts to Your Product',
-                text: 'It researches your actual product, understands the audience, and writes copy specifically tailored. No generic templates — every promo is unique.'
+                text: "It researches your actual product, understands the audience, and writes copy specifically tailored. No generic templates \u2014 every promo is unique."
               },
               {
-                emoji: '💰',
+                Icon: ROIIcon,
+                iconColor: 'text-emerald-400',
+                bg: 'from-emerald-900/30 to-slate-900',
+                border: 'border-emerald-700/30',
                 title: 'Risk-Free to Try',
                 text: '3 free generations. No credit card. Try it right now and see if the results blow your mind. We think they will.'
               }
             ].map((item, i) => (
-              <div key={i} className="text-center space-y-3 p-6">
-                <div className="text-4xl">{item.emoji}</div>
+              <div key={i} className={`text-center space-y-4 p-7 rounded-2xl bg-gradient-to-br ${item.bg} border ${item.border}`}>
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-800/60 flex items-center justify-center">
+                  <item.Icon size={28} className={item.iconColor} />
+                </div>
                 <h3 className="font-bold text-lg">{item.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">{item.text}</p>
               </div>
@@ -951,10 +1034,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 What is an AI Promo Image Generator?
               </h3>
               <p className="mb-4">
-                An <strong className="text-white">AI promo image generator</strong> is a tool that uses artificial intelligence to automatically create promotional visuals for products, services, or brands — without requiring any design skills, expensive software, or hours of manual work. You provide a product URL or description, and the AI handles everything else: analyzing the product, writing persuasive copy, selecting a suitable visual style, and composing a finished ad-ready image.
+                An <strong className="text-white">AI promo image generator</strong> is a tool that uses artificial intelligence to automatically create promotional visuals for products, services, or brands â€” without requiring any design skills, expensive software, or hours of manual work. You provide a product URL or description, and the AI handles everything else: analyzing the product, writing persuasive copy, selecting a suitable visual style, and composing a finished ad-ready image.
               </p>
               <p>
-                PromoGen by 4ourMedia takes this a step further by combining <strong className="text-white">AI copywriting</strong> with <strong className="text-white">psychology-driven visual design</strong>. Every promo it generates includes a conversion-tested headline, an emotion trigger subheading, a clear call-to-action, and a cinematic AI-generated background — all matched to your specific product and target audience.
+                PromoGen by 4ourMedia takes this a step further by combining <strong className="text-white">AI copywriting</strong> with <strong className="text-white">psychology-driven visual design</strong>. Every promo it generates includes a conversion-tested headline, an emotion trigger subheading, a clear call-to-action, and a cinematic AI-generated background â€” all matched to your specific product and target audience.
               </p>
             </div>
 
@@ -963,10 +1046,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 Why Product Marketers and E-Commerce Sellers Are Switching to AI Ad Makers
               </h3>
               <p className="mb-4">
-                The average social media user scrolls through hundreds of posts per day. Research consistently shows you have <strong className="text-white">less than 1.7 seconds</strong> to stop someone's scroll. That window is won or lost entirely by your visual — not your product quality, not your price, not your reviews.
+                The average social media user scrolls through hundreds of posts per day. Research consistently shows you have <strong className="text-white">less than 1.7 seconds</strong> to stop someone's scroll. That window is won or lost entirely by your visual â€” not your product quality, not your price, not your reviews.
               </p>
               <p className="mb-4">
-                Traditional graphic design workflows — hiring a freelancer, using complex tools like Photoshop or Canva, writing copy from scratch — take hours and cost money. For most solo sellers, e-commerce entrepreneurs, and small marketing teams, producing professional promotional content consistently is simply not feasible.
+                Traditional graphic design workflows â€” hiring a freelancer, using complex tools like Photoshop or Canva, writing copy from scratch â€” take hours and cost money. For most solo sellers, e-commerce entrepreneurs, and small marketing teams, producing professional promotional content consistently is simply not feasible.
               </p>
               <p>
                 AI ad creators like PromoGen collapse that workflow from hours to seconds. Whether you're promoting a product on <strong className="text-white">Amazon, Shopify, Etsy, eBay</strong>, or your own website, an AI promo generator can produce a campaign-ready image faster than you can open a design app.
@@ -983,7 +1066,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               <ol className="space-y-3 list-none">
                 {[
                   ['Product Analysis', 'PromoGen fetches your product URL and uses Google Gemini AI to extract the product name, category, key benefits, target audience, price point, and emotional selling angles.'],
-                  ['Psychology-Driven Copywriting', 'Four distinct copy variants are generated, each using a different psychological trigger — urgency, social proof, desire, or curiosity — matched to your product type and buyer persona.'],
+                  ['Psychology-Driven Copywriting', 'Four distinct copy variants are generated, each using a different psychological trigger â€” urgency, social proof, desire, or curiosity â€” matched to your product type and buyer persona.'],
                   ['Visual Concept Generation', 'The AI determines the ideal visual mood (aspirational, problem-solving, lifestyle, luxury, etc.) and generates a cinematic background image using leading image generation models.'],
                   ['Composition & Export', 'The headline, subheading, CTA, and product details are composited onto the background in your chosen template and aspect ratio, then exported as a high-resolution PNG ready for any platform.'],
                 ].map(([title, text], i) => (
@@ -1035,13 +1118,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   </thead>
                   <tbody className="divide-y divide-slate-700/50">
                     {[
-                      ['Time to first promo', '~10 seconds', '30–60 minutes', '1–3 days'],
+                      ['Time to first promo', '~10 seconds', '30â€“60 minutes', '1â€“3 days'],
                       ['Design skills needed', 'None', 'Moderate', 'None (you hire it out)'],
-                      ['Copywriting included', '✓ AI-written, psych-driven', '✗ You write it', 'Sometimes (+$$)'],
-                      ['Cost per promo', '~$0.20–$0.36', '$0 (but your time)', '$50–$200+'],
-                      ['Custom AI visuals', '✓ Unique per product', '✗ Stock templates', 'Varies'],
-                      ['Bulk generation', '✓ Up to 10 at once', '✗', '✗ (slow & expensive)'],
-                      ['Psychology optimization', '✓ Built-in', '✗', 'Depends on skill'],
+                      ['Copywriting included', 'âœ“ AI-written, psych-driven', 'âœ— You write it', 'Sometimes (+$$)'],
+                      ['Cost per promo', '~$0.20â€“$0.36', '$0 (but your time)', '$50â€“$200+'],
+                      ['Custom AI visuals', 'âœ“ Unique per product', 'âœ— Stock templates', 'Varies'],
+                      ['Bulk generation', 'âœ“ Up to 10 at once', 'âœ—', 'âœ— (slow & expensive)'],
+                      ['Psychology optimization', 'âœ“ Built-in', 'âœ—', 'Depends on skill'],
                     ].map(([factor, pg, canva, designer], i) => (
                       <tr key={i} className={i % 2 === 0 ? 'bg-slate-800/20' : ''}>
                         <td className="p-4 text-slate-300 font-medium">{factor}</td>
@@ -1064,24 +1147,24 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </p>
               <ul className="space-y-2 text-slate-400">
                 {[
-                  'YouTube Promo Finder — discover which channels are currently being sponsored and by whom',
-                  'Domain Search — find sponsor websites linked in video descriptions at scale',
-                  'Unlisted Video Finder — surface hidden promotional content that standard tools miss',
-                  'Channel Growth Tracker — identify fast-growing channels before they become expensive to sponsor',
-                  'Collaboration Finder — discover creator collaboration networks and cross-promotion opportunities',
-                  'Compare Sponsors — benchmark competing brands\' influencer strategies side by side',
-                  'Sponsorship Rate Estimator — estimate fair market rates before you negotiate',
-                  'Viral Video Detector — catch trending content early for timely sponsorship deals',
-                  'Sponsor Saturation Score — measure how over-sponsored a niche is before you enter it',
+                  'YouTube Promo Finder â€” discover which channels are currently being sponsored and by whom',
+                  'Domain Search â€” find sponsor websites linked in video descriptions at scale',
+                  'Unlisted Video Finder â€” surface hidden promotional content that standard tools miss',
+                  'Channel Growth Tracker â€” identify fast-growing channels before they become expensive to sponsor',
+                  'Collaboration Finder â€” discover creator collaboration networks and cross-promotion opportunities',
+                  'Compare Sponsors â€” benchmark competing brands\' influencer strategies side by side',
+                  'Sponsorship Rate Estimator â€” estimate fair market rates before you negotiate',
+                  'Viral Video Detector â€” catch trending content early for timely sponsorship deals',
+                  'Sponsor Saturation Score â€” measure how over-sponsored a niche is before you enter it',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-indigo-400 mt-1 flex-shrink-0">▸</span>
+                    <span className="text-indigo-400 mt-1 flex-shrink-0">â–¸</span>
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <p className="mt-4">
-                All tools are free to use with no account required — a resource for anyone doing YouTube marketing research.
+                All tools are free to use with no account required â€” a resource for anyone doing YouTube marketing research.
               </p>
             </div>
 
@@ -1090,7 +1173,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 Key Takeaway: The Best AI Promo Generator Is the One You'll Actually Use
               </h3>
               <p className="text-slate-400">
-                The most sophisticated design tool in the world is useless if the learning curve stops you from shipping content. PromoGen is built around one principle: <strong className="text-white">zero friction from idea to published promo</strong>. Paste a URL, get a promo. No tutorials, no templates to edit, no copy to agonize over. Just results — in the time it takes to make a coffee.
+                The most sophisticated design tool in the world is useless if the learning curve stops you from shipping content. PromoGen is built around one principle: <strong className="text-white">zero friction from idea to published promo</strong>. Paste a URL, get a promo. No tutorials, no templates to edit, no copy to agonize over. Just results â€” in the time it takes to make a coffee.
               </p>
             </div>
 
@@ -1102,7 +1185,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       <section className="py-24 px-4">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-full border border-red-500/30 text-red-300 text-sm font-medium mb-6">
-            <Timer className="w-4 h-4 animate-pulse" />
+            <TimerIcon size={16} className="animate-pulse text-rose-400" />
             Launch Week ends in {timeLeft.hours}h {timeLeft.minutes}m
           </div>
           
@@ -1123,21 +1206,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={onGetStarted}
-              className="px-10 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xl rounded-2xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all flex items-center justify-center gap-3"
+              className="btn-primary text-xl px-10 py-5 inline-flex group"
             >
-              <Sparkles className="w-6 h-6" />
+              <SparklesIcon size={24} />
               Create My First Promo Free
             </button>
             <button
               onClick={() => onPurchase('pro')}
-              className="px-10 py-5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold text-xl rounded-2xl shadow-lg shadow-green-600/30 hover:shadow-green-600/50 transition-all"
+              className="btn-gold text-xl px-10 py-5 font-bold inline-flex"
             >
-              Go Pro — $29 for 100 Promos
+              Go Pro â€” $29 for 100 Promos
             </button>
           </div>
           
           <p className="text-slate-500 text-sm mt-6">
-            No credit card required • 30-day money-back guarantee • Credits never expire
+            No credit card required â€¢ 30-day money-back guarantee â€¢ Credits never expire
           </p>
         </div>
       </section>
@@ -1147,7 +1230,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-500">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <SparklesIcon size={20} className="text-indigo-400" />
               <span className="font-bold text-white">4ourMedia PromoGen</span>
             </div>
             <div className="flex flex-wrap gap-4">
@@ -1165,7 +1248,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </button>
             </div>
             <div>
-              © {new Date().getFullYear()} 4ourMedia. All rights reserved.
+              Â© {new Date().getFullYear()} 4ourMedia. All rights reserved.
             </div>
           </div>
         </div>
@@ -1177,13 +1260,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="bg-slate-800 rounded-2xl p-8 max-w-md w-full relative border border-slate-700">
             <button 
               onClick={() => setShowExitIntent(false)}
-              className="absolute top-4 right-4 text-slate-500 hover:text-white"
+              className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
             >
-              <X className="w-6 h-6" />
+              <CloseIcon size={24} />
             </button>
             
             <div className="text-center">
-              <div className="text-6xl mb-4">🎁</div>
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center">
+                  <GiftIcon size={36} className="text-emerald-400" />
+                </div>
+              </div>
               <h3 className="text-2xl font-bold mb-2">Wait! Special Offer</h3>
               <p className="text-slate-400 mb-6">
                 Get <span className="text-green-400 font-bold">5 extra credits FREE</span> when you purchase any pack in the next 10 minutes!
@@ -1214,3 +1301,4 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
 };
 
 export default LandingPage;
+
