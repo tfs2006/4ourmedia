@@ -9,6 +9,8 @@ import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/Bra
 import HistoryPanel, { addToHistory } from './components/HistoryPanel';
 import AuthModal from './components/AuthModal';
 import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './components/LegalPages';
+import FreeToolsPage from './components/FreeToolsPage';
+import PerplexityPage from './components/PerplexityPage';
 import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal } from 'lucide-react';
 import { 
   AuthUser, 
@@ -25,7 +27,7 @@ import {
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
 
-type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact';
+type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity';
 
 // Daily credit helper functions (localStorage fallback for non-authenticated users)
 function getDailyCreditStatus(): DailyCreditStatus {
@@ -559,6 +561,14 @@ export default function App() {
     }
   };
 
+  // Extra Pages
+  if (viewState === 'free-tools') {
+    return <FreeToolsPage onBack={() => setViewState('landing')} />;
+  }
+  if (viewState === 'perplexity') {
+    return <PerplexityPage onBack={() => setViewState('landing')} />;
+  }
+
   // Legal Pages
   if (viewState === 'privacy') {
     return <PrivacyPolicy onBack={() => setViewState('landing')} />;
@@ -589,7 +599,19 @@ export default function App() {
                 <p className="text-xs text-slate-400">by 4ourMedia</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
+              <button
+                onClick={() => setViewState('free-tools')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                🎬 Free Tools
+              </button>
+              <button
+                onClick={() => setViewState('perplexity')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                ☄️ Perplexity AI
+              </button>
               <button
                 onClick={() => user ? setViewState('app') : openAuth('signup')}
                 className="px-4 py-2 text-slate-300 hover:text-white transition-colors font-medium"
@@ -636,6 +658,8 @@ export default function App() {
                 <ul className="space-y-2 text-slate-400 text-sm">
                   <li><button onClick={() => user ? setViewState('app') : openAuth('signup')} className="hover:text-white transition-colors">Try Free</button></li>
                   <li><button onClick={() => setShowPurchaseModal(true)} className="hover:text-white transition-colors">Get Credits</button></li>
+                  <li><button onClick={() => setViewState('free-tools')} className="hover:text-white transition-colors">🎬 Free YouTube Tools</button></li>
+                  <li><button onClick={() => setViewState('perplexity')} className="hover:text-white transition-colors">☄️ Perplexity AI Free</button></li>
                 </ul>
               </div>
               <div>
