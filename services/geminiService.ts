@@ -1,4 +1,5 @@
 import { ProductAnalysis } from "../types";
+import type { SocialPlatform } from "../types";
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
 
@@ -20,7 +21,7 @@ function getUserId(): string {
   return '';
 }
 
-export const analyzeProductUrl = async (url: string): Promise<ProductAnalysis> => {
+export const analyzeProductUrl = async (url: string, platform: SocialPlatform = 'instagram'): Promise<ProductAnalysis> => {
   const headers: Record<string, string> = { 
     'Content-Type': 'application/json',
     'x-session-id': getSessionId()
@@ -35,7 +36,7 @@ export const analyzeProductUrl = async (url: string): Promise<ProductAnalysis> =
   const response = await fetch(`${API_BASE}/api/analyze`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ url })
+    body: JSON.stringify({ url, platform })
   });
 
   if (!response.ok) {

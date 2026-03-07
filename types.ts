@@ -1,3 +1,12 @@
+export type SocialPlatform = 'instagram' | 'tiktok' | 'facebook' | 'linkedin' | 'youtube';
+
+export interface SocialContentKit {
+  caption: string;            // Ready-to-post caption for the chosen platform
+  hashtags: string[];         // 20-25 hashtags
+  videoHook: string;          // TikTok/Reels hook (first 3 seconds)
+  emailSubjectLines: string[]; // 3 email subject line options
+}
+
 export interface ProductAnalysis {
   productName: string;
   headline: string;
@@ -6,6 +15,8 @@ export interface ProductAnalysis {
   emotionalTrigger: string;
   imagePrompt: string;
   colors: string[];
+  // Social content kit (platform-specific)
+  socialContent?: SocialContentKit;
   // Enhanced audience insights
   audienceProfile?: AudienceProfile;
   copyVariations?: CopyVariation[];

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS } from './types';
+import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, SocialPlatform } from './types';
 import { analyzeProductUrl, generatePromoBackground } from './services/geminiService';
 import PromoCanvas from './components/PromoCanvas';
 import LoadingStep from './components/LoadingStep';
@@ -11,7 +11,7 @@ import AuthModal from './components/AuthModal';
 import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './components/LegalPages';
 import FreeToolsPage from './components/FreeToolsPage';
 import PerplexityPage from './components/PerplexityPage';
-import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal } from 'lucide-react';
+import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail } from 'lucide-react';
 import { FlameIcon, SparklesIcon } from './components/Icons';
 import { 
   AuthUser, 
@@ -132,6 +132,11 @@ export default function App() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  
+  // Platform & social content state
+  const [platform, setPlatform] = useState<SocialPlatform>('instagram');
+  const [contentKitTab, setContentKitTab] = useState<'caption' | 'hashtags' | 'hook' | 'email'>('caption');
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
@@ -413,11 +418,22 @@ export default function App() {
     setImageBase64(null);
     setFinalImage(null);
     setActiveCopyVariation(-1);
+    setContentKitTab('caption');
     setState(AppState.ANALYZING);
 
+    // Auto-select optimal aspect ratio for chosen platform
+    const platformRatios: Record<SocialPlatform, AspectRatio> = {
+      instagram: '4:5',
+      tiktok: '9:16',
+      facebook: '1:1',
+      linkedin: '16:9',
+      youtube: '16:9',
+    };
+    setAspectRatio(platformRatios[platform] || aspectRatio);
+
     try {
-      // 1. Analyze URL
-      const result = await analyzeProductUrl(url);
+      // 1. Analyze URL (pass platform context)
+      const result = await analyzeProductUrl(url, platform);
       setAnalysis(result);
       
       // 2. Generate Image
@@ -499,6 +515,26 @@ export default function App() {
       }
     }
   }, [state, analysis, imageBase64, url, activeBrandKit, user]);
+
+  const copyToClipboard = async (text: string, fieldId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldId);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch {
+      // Fallback for older browsers
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopiedField(fieldId);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
+  };
 
   const downloadImage = async () => {
     if (!finalImage) {
@@ -959,6 +995,42 @@ export default function App() {
                 />
               </div>
 
+              {/* Platform Selector */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                  Target Platform
+                </label>
+                <div className="grid grid-cols-5 gap-2">
+                  {([
+                    { id: 'instagram', label: 'Instagram', icon: '📸', ratio: '4:5' },
+                    { id: 'tiktok', label: 'TikTok', icon: '🎵', ratio: '9:16' },
+                    { id: 'facebook', label: 'Facebook', icon: '👥', ratio: '1:1' },
+                    { id: 'linkedin', label: 'LinkedIn', icon: '💼', ratio: '16:9' },
+                    { id: 'youtube', label: 'YouTube', icon: '▶️', ratio: '16:9' },
+                  ] as { id: SocialPlatform; label: string; icon: string; ratio: string }[]).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setPlatform(p.id)}
+                      className={`flex flex-col items-center gap-1 p-2 md:p-3 rounded-xl border transition-all ${
+                        platform === p.id
+                          ? 'bg-indigo-500/20 border-indigo-500/60 text-indigo-300'
+                          : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      <span className="text-lg md:text-xl leading-none">{p.icon}</span>
+                      <span className="text-[10px] md:text-xs font-semibold leading-tight text-center">{p.label}</span>
+                      {platform === p.id && (
+                        <span className="text-[9px] text-indigo-400 font-medium">{p.ratio}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Generates a platform-optimized caption, hashtags, and video hook alongside your image
+                </p>
+              </div>
+
               {/* Branding Customization (Foldable) */}
               <div>
                  <button 
@@ -1224,6 +1296,151 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Social Content Kit Panel */}
+              {analysis?.socialContent && (
+                <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/20 rounded-xl border border-indigo-500/30 overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 pt-4 pb-3 border-b border-indigo-500/20">
+                    <Sparkles className="w-4 h-4 text-indigo-400" />
+                    <h4 className="font-bold text-sm text-white">Social Content Kit</h4>
+                    <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full capitalize border border-indigo-500/30">
+                      {platform}
+                    </span>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex border-b border-indigo-500/20">
+                    {([
+                      { id: 'caption', label: 'Caption', icon: MessageSquare },
+                      { id: 'hashtags', label: 'Hashtags', icon: Hash },
+                      { id: 'hook', label: 'Video Hook', icon: Film },
+                      { id: 'email', label: 'Email', icon: Mail },
+                    ] as { id: typeof contentKitTab; label: string; icon: React.ElementType }[]).map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setContentKitTab(tab.id)}
+                        className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-all flex-1 justify-center border-b-2 ${
+                          contentKitTab === tab.id
+                            ? 'border-indigo-400 text-indigo-300 bg-indigo-500/10'
+                            : 'border-transparent text-slate-500 hover:text-slate-400 hover:bg-slate-800/30'
+                        }`}
+                      >
+                        <tab.icon className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="p-4">
+                    {contentKitTab === 'caption' && (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap bg-slate-900/50 rounded-lg p-4 pr-10 border border-slate-700/50 max-h-48 overflow-y-auto">
+                            {analysis.socialContent.caption}
+                          </p>
+                          <button
+                            onClick={() => copyToClipboard(analysis.socialContent!.caption, 'caption')}
+                            className="absolute top-2 right-2 p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors"
+                            title="Copy caption"
+                          >
+                            {copiedField === 'caption' ? (
+                              <CheckCheck className="w-4 h-4 text-green-400" />
+                            ) : (
+                              <Copy className="w-4 h-4 text-slate-400" />
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          {analysis.socialContent.caption.length} characters — optimized for {platform}
+                        </p>
+                      </div>
+                    )}
+
+                    {contentKitTab === 'hashtags' && (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <div className="bg-slate-900/50 rounded-lg p-4 pr-10 border border-slate-700/50 max-h-48 overflow-y-auto">
+                            <div className="flex flex-wrap gap-1.5">
+                              {analysis.socialContent.hashtags.map((tag, i) => (
+                                <span
+                                  key={i}
+                                  className="text-xs bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 px-2 py-1 rounded-full"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(analysis.socialContent!.hashtags.join(' '), 'hashtags')}
+                            className="absolute top-2 right-2 p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors"
+                            title="Copy all hashtags"
+                          >
+                            {copiedField === 'hashtags' ? (
+                              <CheckCheck className="w-4 h-4 text-green-400" />
+                            ) : (
+                              <Copy className="w-4 h-4 text-slate-400" />
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          {analysis.socialContent.hashtags.length} hashtags — click copy to get all at once
+                        </p>
+                      </div>
+                    )}
+
+                    {contentKitTab === 'hook' && (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <p className="text-lg font-bold text-white bg-slate-900/50 rounded-lg p-4 pr-10 border border-slate-700/50 leading-snug">
+                            "{analysis.socialContent.videoHook}"
+                          </p>
+                          <button
+                            onClick={() => copyToClipboard(analysis.socialContent!.videoHook, 'hook')}
+                            className="absolute top-2 right-2 p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors"
+                            title="Copy hook"
+                          >
+                            {copiedField === 'hook' ? (
+                              <CheckCheck className="w-4 h-4 text-green-400" />
+                            ) : (
+                              <Copy className="w-4 h-4 text-slate-400" />
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Use this as your first line/frame to stop the scroll on {platform === 'tiktok' ? 'TikTok' : platform === 'youtube' ? 'YouTube Shorts' : 'Reels'}
+                        </p>
+                      </div>
+                    )}
+
+                    {contentKitTab === 'email' && (
+                      <div className="space-y-3">
+                        {analysis.socialContent.emailSubjectLines.map((line, i) => (
+                          <div key={i} className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-4 py-3 border border-slate-700/50 group">
+                            <span className="text-[10px] font-bold text-slate-600 w-4 flex-shrink-0">#{i + 1}</span>
+                            <p className="text-sm text-slate-200 flex-1">{line}</p>
+                            <button
+                              onClick={() => copyToClipboard(line, `email-${i}`)}
+                              className="p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                              title="Copy"
+                            >
+                              {copiedField === `email-${i}` ? (
+                                <CheckCheck className="w-3.5 h-3.5 text-green-400" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5 text-slate-400" />
+                              )}
+                            </button>
+                          </div>
+                        ))}
+                        <p className="text-[11px] text-slate-500">
+                          3 subject line options for your email campaigns
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

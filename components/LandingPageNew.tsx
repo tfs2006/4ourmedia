@@ -167,25 +167,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
     <div className="min-h-screen" style={{ background: 'var(--color-bg-deep)' }}>
       <div className="pg-bg" />
       
-      {/* Urgency Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-violet-700 via-indigo-700 to-violet-700 text-white py-2 px-4 text-center text-sm font-semibold">
+      {/* Feature Announcement Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-700 via-violet-700 to-indigo-700 text-white py-2.5 px-4 text-center text-sm font-semibold">
         <div className="absolute inset-0 shimmer opacity-20" />
-        <div className="relative flex items-center justify-center gap-4 flex-wrap">
+        <div className="relative flex items-center justify-center gap-3 flex-wrap">
           <span className="flex items-center gap-2">
-            <TimerIcon size={14} className="text-yellow-300 animate-pulse" />
-            Launch Week Ends In:
+            <SparklesIcon size={14} className="text-yellow-300" />
+            New: Social Content Kit — Caption + Hashtags + Video Hook generated alongside every promo
           </span>
-          <span className="font-mono font-bold tracking-widest text-yellow-200">
-            {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
-          </span>
-          <span className="hidden sm:inline opacity-40">â”‚</span>
-          <span className="flex items-center gap-1 text-yellow-200 live-badge">
-            {visitorCount} live visitors
+          <span className="hidden sm:flex items-center gap-1.5 bg-white/15 px-3 py-0.5 rounded-full border border-white/20 text-xs text-yellow-200 font-bold">
+            Instagram · TikTok · LinkedIn · YouTube
           </span>
         </div>
       </div>
 
-      {/* Hero Section */}
+            {/* Hero Section */}
       <section className="relative py-16 lg:py-28 px-4 overflow-hidden">
         {/* Background orbs */}
         <div className="glow-orb-violet" style={{ width: '600px', height: '600px', top: '-10%', left: '-10%', opacity: 0.6 }} />
@@ -198,38 +194,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             {/* Left: Copy */}
             <div className="flex-1 text-center lg:text-left space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/15 rounded-full border border-emerald-500/30 text-emerald-300 text-sm font-medium">
-                <GiftIcon size={14} className="text-emerald-400" />
-                Launch Week: Extra 20% Credits FREE
+                <SparklesIcon size={14} className="text-emerald-400" />
+                The Complete Social Media Kit for Online Sellers
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-200">
-                  Your Product Deserves
+                  Paste a URL. Get a
                 </span>
                 <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-                  Better Than a Boring Photo.
+                  Ready-to-Post Kit.
                 </span>
               </h1>
               
               <p className="text-xl md:text-2xl text-slate-300 max-w-xl leading-relaxed">
-                Paste any product URL. In <strong className="text-white">10 seconds</strong>, get a 
-                <strong className="text-white"> scroll-stopping promo</strong> with AI-written headlines, 
-                psychology-driven copy, and cinematic visuals that make people <em>stop, stare, and buy</em>.
+                PromoGen analyzes any Amazon, Shopify, or Etsy product and instantly creates a{' '}
+                <strong className="text-white">promo image</strong>,{' '}
+                <strong className="text-white">caption</strong>,{' '}
+                <strong className="text-white">hashtags</strong>, and{' '}
+                <strong className="text-white">video hook</strong> — tailored to your chosen platform.
               </p>
 
               <p className="text-base text-slate-400 max-w-lg">
-                No Photoshop. No copywriter. No waiting 3 days for a freelancer. 
-                Just paste, click, and post â€” while your competitors are still drafting briefs.
+                No designer. No copywriter. No agency. Just paste the URL, pick your platform, and walk away with a complete content kit in under 30 seconds.
               </p>
 
               {/* Value Props */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {[
-                  { Icon: SpeedIcon,    text: '10-second generation' },
-                  { Icon: AIBrainIcon,  text: 'Psychology-driven copy' },
-                  { Icon: TemplateIcon, text: '12 pro templates' },
-                  { Icon: PGImageIcon,  text: '4 export sizes' }
+                  { Icon: SpeedIcon,    text: 'Promo image in 10 sec' },
+                  { Icon: AIBrainIcon,  text: 'Platform-native caption' },
+                  { Icon: TemplateIcon, text: 'Hashtag bundle included' },
+                  { Icon: PGImageIcon,  text: 'Instagram · TikTok · LinkedIn · YouTube' }
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-slate-300 glass-card px-3 py-2">
                     <item.Icon size={16} className="text-violet-400 flex-shrink-0" />
@@ -238,7 +235,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 ))}
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={onGetStarted}
                   className="btn-primary text-lg px-8 py-4 group"
