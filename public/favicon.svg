@@ -1,41 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#7C3AED"/>
-      <stop offset="50%" style="stop-color:#4F46E5"/>
-      <stop offset="100%" style="stop-color:#2563EB"/>
+    <linearGradient id="fv-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B0E1F"/>
+      <stop offset="1" stop-color="#1A0B38"/>
     </linearGradient>
-    <linearGradient id="aperture" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#F59E0B"/>
-      <stop offset="100%" style="stop-color:#FBBF24"/>
+    <linearGradient id="fv-brand" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED"/>
+      <stop offset=".5" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#2563EB"/>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <linearGradient id="fv-gold" x1="74" y1="12" x2="88" y2="26" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#FCD34D"/>
+    </linearGradient>
+    <linearGradient id="fv-shine" x1="22" y1="20" x2="22" y2="42" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity=".18"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="fv-pglow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="fv-blob" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="fv-starglow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="fv-clip">
+      <rect width="100" height="100" rx="22"/>
+    </clipPath>
   </defs>
-  <!-- Background rounded rect -->
-  <rect width="100" height="100" rx="22" fill="url(#bg)"/>
-  <!-- Aperture ring blades -->
-  <g transform="translate(50,50)" filter="url(#glow)">
-    <!-- 6 aperture blades -->
-    <ellipse cx="0" cy="-16" rx="6" ry="12" fill="url(#aperture)" opacity="0.9" transform="rotate(0)"/>
-    <ellipse cx="0" cy="-16" rx="6" ry="12" fill="url(#aperture)" opacity="0.9" transform="rotate(60)"/>
-    <ellipse cx="0" cy="-16" rx="6" ry="12" fill="url(#aperture)" opacity="0.9" transform="rotate(120)"/>
-    <ellipse cx="0" cy="-16" rx="6" ry="12" fill="url(#aperture)" opacity="0.9" transform="rotate(180)"/>
-    <ellipse cx="0" cy="-16" rx="6" ry="12" fill="url(#aperture)" opacity="0.9" transform="rotate(240)"/>
-    <ellipse cx="0" cy="-16" rx="6" ry="12" fill="url(#aperture)" opacity="0.9" transform="rotate(300)"/>
-    <!-- Center circle -->
-    <circle cx="0" cy="0" r="8" fill="white" opacity="0.95"/>
-    <!-- Inner P letter -->
-    <text x="0" y="5" font-size="10" text-anchor="middle" fill="#4F46E5" font-weight="900" font-family="system-ui, sans-serif">P</text>
+
+  <!-- Background -->
+  <rect width="100" height="100" rx="22" fill="url(#fv-bg)"/>
+  <!-- Brand sheen -->
+  <rect width="100" height="100" rx="22" fill="url(#fv-brand)" opacity=".11" clip-path="url(#fv-clip)"/>
+  <!-- Ambient purple glow -->
+  <ellipse cx="50" cy="46" rx="38" ry="32" fill="#6D28D9" opacity=".28" filter="url(#fv-blob)" clip-path="url(#fv-clip)"/>
+  <!-- Secondary blue glow (bottom-right) -->
+  <ellipse cx="82" cy="78" rx="30" ry="26" fill="#2563EB" opacity=".18" filter="url(#fv-blob)" clip-path="url(#fv-clip)"/>
+
+  <!-- P letterform — solid white -->
+  <path d="M22,80 L22,20 L54,20 Q76,20 76,36 Q76,52 54,52 L37,52 L37,80 Z"
+        fill="white" opacity=".95" filter="url(#fv-pglow)" clip-path="url(#fv-clip)"/>
+  <!-- Subtle inner top-shine on the P -->
+  <path d="M22,20 L54,20 Q73,20 76,33 Q68,26 54,24 L22,24 Z"
+        fill="url(#fv-shine)" clip-path="url(#fv-clip)"/>
+
+  <!-- Border ring -->
+  <rect width="100" height="100" rx="22" fill="none" stroke="url(#fv-brand)" stroke-width="1.5" opacity=".45"/>
+
+  <!-- Gold 4-pointed sparkle (top-right) -->
+  <g transform="translate(80,19)" filter="url(#fv-starglow)">
+    <polygon points="0,-6 1.4,-1.4 6,0 1.4,1.4 0,6 -1.4,1.4 -6,0 -1.4,-1.4"
+             fill="url(#fv-gold)" opacity=".96"/>
   </g>
-  <!-- Sparkle top-right -->
-  <g transform="translate(78,20)" fill="white" opacity="0.8">
-    <polygon points="0,-5 1,-1 5,0 1,1 0,5 -1,1 -5,0 -1,-1" />
-  </g>
-  <!-- Sparkle bottom-left -->
-  <g transform="translate(22,80)" fill="white" opacity="0.5">
-    <polygon points="0,-3 0.7,-0.7 3,0 0.7,0.7 0,3 -0.7,0.7 -3,0 -0.7,-0.7" />
-  </g>
+
+  <!-- Micro accent dots -->
+  <circle cx="76" cy="66" r="2.2" fill="#4F46E5" opacity=".55"/>
+  <circle cx="70" cy="58" r="1.4" fill="white" opacity=".22"/>
+  <circle cx="28" cy="82" r="1.4" fill="white" opacity=".2"/>
 </svg>
