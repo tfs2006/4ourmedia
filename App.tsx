@@ -436,9 +436,9 @@ export default function App() {
       const result = await analyzeProductUrl(url, platform);
       setAnalysis(result);
       
-      // 2. Generate Image
+      // 2. Generate Image — pass full analysis context for scene-aware, colour-matched generation
       setState(AppState.GENERATING_IMAGE);
-      const bgImage = await generatePromoBackground(result.imagePrompt);
+      const bgImage = await generatePromoBackground(result.imagePrompt, result, platform);
       setImageBase64(bgImage);
 
       // 3. Trigger Canvas Composition

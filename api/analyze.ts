@@ -185,16 +185,66 @@ COPY RULES:
 4. Be SPECIFIC - vague claims don't convert
 5. Inject subtle urgency without being pushy
 
-=== STEP 4: VISUAL STRATEGY ===
+=== STEP 4: PRODUCT CATEGORY & VISUAL IDENTITY ===
 
-IMAGE CONCEPT:
-- Must visually represent the EMOTION of ownership/usage
-- Abstract/atmospheric backgrounds that evoke the feeling
-- Color psychology that reinforces the message
-- Premium, cinematic quality that elevates perceived value
-- NEVER include: text, logos, product images, screens, faces, hands
+FIRST — classify the product into ONE of these categories (this drives the entire visual direction):
+- food_beverage: Food products, drinks, supplements, snacks, restaurants
+- fashion_apparel: Clothing, shoes, accessories, jewelry, bags
+- beauty_cosmetics: Skincare, makeup, haircare, fragrance, grooming
+- health_fitness: Workout gear, supplements, wellness, yoga, sports equipment
+- tech_software: Apps, SaaS, gadgets, electronics, devices
+- home_lifestyle: Furniture, decor, kitchen, cleaning, organization
+- business_finance: B2B tools, consulting, finance, productivity, courses
+- entertainment_media: Games, music, video, books, content subscriptions
+- sports_outdoor: Outdoor gear, athletic equipment, adventure, bikes
+- pets: Pet food, toys, accessories, healthcare
+- education: Courses, tutoring, books, e-learning, skills
+- travel: Hotels, tours, transport, luggage, travel accessories
+- default: Anything else
 
-COLOR PSYCHOLOGY:
+THEN — identify the visual style that fits the brand positioning:
+Use ONE of: luxury | vibrant | minimal | natural | bold | playful | professional | cinematic | editorial
+
+=== STEP 5: SCENE-AWARE IMAGE PROMPT ENGINEERING ===
+
+Using the product category and emotional trigger, construct a HIGHLY SPECIFIC background image prompt.
+
+SCENE BASE — match to category:
+- food_beverage: overhead kitchen counter with scattered raw ingredients (herbs, spices, produce), dramatic side lighting, realistic food photography style
+- fashion_apparel: sun-drenched soft fabric textures, draped cloth folds, scattered accessories on marble or wood
+- beauty_cosmetics: dewy marble surface with scattered flower petals and liquid droplets, soft bokeh
+- health_fitness: misty early-morning outdoor landscape, dew on grass, golden sunrise rays through trees, dynamic energy
+- tech_software: dark glass desk surface reflecting cool ambient blue light, glowing particle streaks, holographic depth
+- home_lifestyle: warm interior scene with bokeh candlelight, textured wood grain, cozy ambient warmth
+- business_finance: sleek modern office exterior glass reflections at dusk, cool blue city lights bokeh in background
+- entertainment_media: cinematic deep space or dramatic stage lighting, vibrant colour streaks, dynamic light trails
+- sports_outdoor: rugged natural terrain close-up — cracked earth, rushing water, mountain rock — dynamic energy
+- pets: warm cosy living room bokeh, soft natural morning light on fabric textures, nature-inspired warmth
+- education: clean bright study surface, scattered papers and open books in soft bokeh, inspiring daylight
+- travel: sweeping aerial landscape — coastline, mountain range or city at golden hour — expansive and aspirational
+- default: dramatic layered abstract colour gradient, soft glowing particles, depth of field bokeh
+
+LIGHTING — match to emotional trigger:
+- fear_of_missing_out: vibrant golden-hour side lighting with long dramatic urgency shadows and warm lens flare
+- desire_for_status: moody dark studio lighting with single hero spotlight, deep rich blacks and velvety shadows
+- need_for_security: soft diffused natural daylight, airy clean bright atmosphere, reassuring open space
+- pursuit_of_pleasure: warm golden sunset tones, glowing inviting ambient warmth, soft sensuous bokeh
+- avoidance_of_pain: cool crisp clinical precision lighting, clean whites with subtle warm accent highlights
+- sense_of_belonging: warm community golden light, soft inclusive bokeh, inviting social atmosphere
+
+COMPOSITION RULES (always include ALL of these):
+1. The bottom 40% of the image must darken strongly via natural vignette or gradient — this is where text will overlay
+2. Leave an open empty mid-ground with no focal subject — the product name and headline go here
+3. Bokeh depth of field to create separation between foreground texture and soft background
+4. No text, no words, no letters, no numbers, no watermarks, no logos, no human faces, no hands, no identifiable products, no UI screens
+
+BUILD THE imagePrompt as a single flowing paragraph using: [SCENE BASE] + [LIGHTING] + [COLOR PALETTE from colors array] + [COMPOSITION RULES] + [QUALITY SUFFIX]
+
+Quality suffix to always end with: "Photorealistic, Phase One IQ4 150MP medium format camera, 85mm f/1.4 lens, cinematic color grade, 8K resolution, award-winning advertising photography."
+
+=== STEP 6: COLOR PSYCHOLOGY ===
+
+Pick 2 hex colors that work for the brand and reinforce the message:
 - Red/Orange: Urgency, energy, appetite, excitement
 - Blue: Trust, calm, professionalism, reliability
 - Green: Growth, health, wealth, nature, freshness
@@ -203,7 +253,7 @@ COLOR PSYCHOLOGY:
 - Black: Sophistication, power, elegance, exclusivity
 - Pink: Playful, romantic, feminine, youthful
 
-=== STEP 5: PLATFORM-SPECIFIC SOCIAL CONTENT KIT ===
+=== STEP 7: PLATFORM-SPECIFIC SOCIAL CONTENT KIT ===
 
 ${platformGuide}
 
@@ -220,7 +270,9 @@ Return ONLY this JSON, no other text:
   "subheadline": "[8 words MAX - pain point + solution]",
   "callToAction": "[3 words MAX - urgent action verb]",
   "emotionalTrigger": "[ONE of: fear_of_missing_out, desire_for_status, need_for_security, pursuit_of_pleasure, avoidance_of_pain, sense_of_belonging]",
-  "imagePrompt": "[Detailed atmospheric background: lighting, gradients, mood, texture - NO text/products/people]",
+  "productCategory": "[ONE of: food_beverage, fashion_apparel, beauty_cosmetics, health_fitness, tech_software, home_lifestyle, business_finance, entertainment_media, sports_outdoor, pets, education, travel, default]",
+  "visualStyle": "[ONE of: luxury, vibrant, minimal, natural, bold, playful, professional, cinematic, editorial]",
+  "imagePrompt": "[Single flowing paragraph combining: scene base matching productCategory + lighting matching emotionalTrigger + reference to the primary hex color from colors array + all 4 composition rules + quality suffix. This must be a rich, specific, scene-grounded description — NO generic words like 'atmospheric' or 'abstract gradients' alone]",
   "colors": ["[primary hex]", "[secondary hex]"],
   "socialContent": {
     "caption": "[Platform-optimized ready-to-post caption following the guide above]",
@@ -247,6 +299,9 @@ Return ONLY this JSON, no other text:
 
 QUALITY CHECK:
 ✓ productName accurate to what's ACTUALLY sold?
+✓ productCategory correctly identifies the product type?
+✓ imagePrompt contains a SPECIFIC scene (not just "atmospheric abstract") with lighting, color, and composition details?
+✓ imagePrompt ends with the quality suffix?
 ✓ Caption follows the platform length/tone guide exactly?
 ✓ Hashtags start with # and match the platform count?
 ✓ videoHook is punchy and platform-appropriate?

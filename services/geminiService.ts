@@ -72,7 +72,11 @@ export interface GenerateImageResult {
   };
 }
 
-export const generatePromoBackground = async (imagePrompt: string): Promise<string> => {
+export const generatePromoBackground = async (
+  imagePrompt: string,
+  context?: Pick<ProductAnalysis, 'emotionalTrigger' | 'colors' | 'productCategory' | 'visualStyle' | 'audienceProfile'>,
+  platform?: SocialPlatform
+): Promise<string> => {
   const headers: Record<string, string> = { 
     'Content-Type': 'application/json',
     'x-session-id': getSessionId()
@@ -87,7 +91,15 @@ export const generatePromoBackground = async (imagePrompt: string): Promise<stri
   const response = await fetch(`${API_BASE}/api/generate-image`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ imagePrompt })
+    body: JSON.stringify({
+      imagePrompt,
+      emotionalTrigger: context?.emotionalTrigger,
+      colors: context?.colors,
+      productCategory: context?.productCategory,
+      visualStyle: context?.visualStyle,
+      toneOfVoice: context?.audienceProfile?.toneOfVoice,
+      platform: platform || 'instagram',
+    })
   });
 
   if (!response.ok) {

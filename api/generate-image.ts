@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { imagePrompt } = req.body;
+    const { imagePrompt, emotionalTrigger, colors, productCategory, platform, visualStyle, toneOfVoice } = req.body;
 
     if (!imagePrompt) {
       return res.status(400).json({ error: 'imagePrompt is required' });
@@ -94,12 +94,77 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Enhanced prompt for better images
-    const optimizedPrompt = `Create a stunning ${imagePrompt}. 
-Style: Premium advertising campaign, cinematic lighting, rich deep colors, luxury feel.
-Mood: Aspirational, exclusive, high-end brand aesthetic.
-Technical: 4K quality, smooth gradients, soft bokeh, dramatic lighting.
-CRITICAL: Absolutely NO text, NO words, NO letters, NO numbers, NO watermarks, NO products - pure abstract visual only.`;
+    // --- Build a context-aware prompt instead of generic luxury wrapper ---
+
+    // Lighting matched to the emotional trigger
+    const lightingMap: Record<string, string> = {
+      fear_of_missing_out: 'vibrant golden-hour side lighting with long dramatic urgency shadows and warm lens flare',
+      desire_for_status: 'moody dark studio lighting with a single focused hero spotlight, deep velvety blacks and rich shadows',
+      need_for_security: 'soft diffused natural daylight, airy clean bright atmosphere, open reassuring space',
+      pursuit_of_pleasure: 'warm golden sunset tones, glowing inviting ambient warmth, sensuous soft bokeh',
+      avoidance_of_pain: 'cool crisp clinical precision lighting, clean whites with subtle warm accent highlights',
+      sense_of_belonging: 'warm golden community light, soft inclusive bokeh, inviting social atmosphere',
+    };
+
+    // Visual style matched to brand positioning
+    const styleMap: Record<string, string> = {
+      luxury: 'ultra-premium editorial quality, deep shadows, rich desaturated tones, Vogue/Vanity Fair aesthetic',
+      vibrant: 'highly saturated vibrant energy, punchy contrast, electric colour palette',
+      minimal: 'clean minimalist composition, generous negative space, subtle muted tones',
+      natural: 'organic authentic textures, earthy warm tones, imperfect natural beauty',
+      bold: 'high contrast graphic impact, strong shapes, powerful dramatic presence',
+      playful: 'bright cheerful fun atmosphere, saturated warm colours, energetic joyful mood',
+      professional: 'clean corporate precision, cool neutral tones, confident structured composition',
+      cinematic: 'Hollywood blockbuster cinematic grade, anamorphic lens flare, epic scale lighting',
+      editorial: 'fashion editorial photographic quality, asymmetric avant-garde composition',
+    };
+
+    // Composition guidance per platform
+    const compositionMap: Record<string, string> = {
+      instagram: 'portrait vertical 4:5 composition, strong bokeh edges, strong dark gradient vignette in bottom 40%',
+      tiktok: 'ultra-vertical 9:16 portrait composition, dynamic centre focus, heavy dark gradient in bottom 45%',
+      facebook: 'square-friendly balanced composition, centred focal point, soft dark vignette edges and bottom',
+      linkedin: 'wide horizontal 16:9 professional composition, left-to-right visual flow, gradient darkening along bottom',
+      youtube: 'cinematic widescreen 16:9 composition, dramatic depth of field, gradient darkening along bottom third',
+    };
+
+    // Category-specific scene enhancement
+    const categoryScene: Record<string, string> = {
+      food_beverage: 'rich food photography environment, ingredient textures, steam, condensation, rustic or modern kitchen surfaces',
+      fashion_apparel: 'soft fabric textures, draped cloth, refined lifestyle setting, natural light and shadow play',
+      beauty_cosmetics: 'dewy surfaces, liquid droplets, soft petal textures, pastel tones, skin-care micro textures',
+      health_fitness: 'dynamic outdoor natural energy, motion implied, fresh air and natural movement atmosphere',
+      tech_software: 'dark glass surfaces, cool blue ambient LED light, glowing particle grid, holographic depth',
+      home_lifestyle: 'warm interior candlelight bokeh, textured wood and fabric, cozy domestic warmth',
+      business_finance: 'modern glass office exterior at dusk, city lights bokeh, sleek cool-toned reflections',
+      entertainment_media: 'dramatic stage or cinema lighting, bold colour streaks, dynamic light trails, spectacle',
+      sports_outdoor: 'rugged terrain textures — rock, water, dirt — raw natural energy, movement and impact',
+      pets: 'warm morning light on natural fabrics, soft garden textures, cosy and gentle atmosphere',
+      education: 'clean bright study surface, soft focus paper and book textures, inspiring natural daylight',
+      travel: 'expansive aerial landscape — coastline, mountains or golden-hour city — aspirational wide open space',
+      default: 'richly layered deep colour gradient, soft glowing particle bokeh, cinematic depth',
+    };
+
+    const lighting = lightingMap[emotionalTrigger] || 'cinematic premium lighting, dramatic shadows';
+    const styleGuide = styleMap[visualStyle] || styleMap['cinematic'];
+    const composition = compositionMap[platform] || compositionMap['instagram'];
+    const sceneEnhancement = categoryScene[productCategory] || categoryScene['default'];
+
+    // Colour specification from the analysis palette
+    const colorSpec = Array.isArray(colors) && colors.length > 0
+      ? `Dominant colour palette must prominently feature ${colors[0]}${colors[1] ? ` as primary and ${colors[1]} as secondary accent` : ''}. Apply as colour grade and tonal base throughout the image.`
+      : '';
+
+    const optimizedPrompt = `${imagePrompt}
+
+SCENE ENVIRONMENT: ${sceneEnhancement}
+LIGHTING: ${lighting}
+VISUAL STYLE: ${styleGuide}
+COMPOSITION: ${composition}
+${colorSpec}
+COMPOSITION RULES: The bottom 40% of the image must darken naturally through deep vignette or natural shadow — this zone is reserved for text overlay. Leave an open empty mid-ground with no dominant focal subject. Use shallow depth of field with bokeh to separate foreground texture from soft background.
+ABSOLUTE RESTRICTIONS: NO text of any kind, NO words, NO letters, NO numbers, NO watermarks, NO logos, NO brand identifiers, NO human faces, NO hands, NO identifiable products or packaging, NO UI screens or devices — pure atmospheric background scene only.
+QUALITY: Photorealistic, Phase One IQ4 150MP medium format camera, 85mm f/1.4 lens, cinema-grade colour treatment, 8K resolution, award-winning advertising photography.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash-exp-image-generation',

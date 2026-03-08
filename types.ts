@@ -15,6 +15,9 @@ export interface ProductAnalysis {
   emotionalTrigger: string;
   imagePrompt: string;
   colors: string[];
+  // Product classification for scene-aware image generation
+  productCategory?: string;
+  visualStyle?: string;
   // Social content kit (platform-specific)
   socialContent?: SocialContentKit;
   // Enhanced audience insights
