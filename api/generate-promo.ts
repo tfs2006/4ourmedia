@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { FEATURE_PRICING } from '../lib/pricing';
-import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
+import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
+import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
 import { generatePromoAsset } from '../lib/promoPipelineRuntime.js';
-import { logUsageTelemetry } from '../lib/usageTelemetry';
+import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
 import type { SocialPlatform } from '../types';
 
 const sessionUsage = new Map<string, { generationsUsed: number }>();

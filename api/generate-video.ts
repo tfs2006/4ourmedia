@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { FEATURE_PRICING } from '../lib/pricing';
-import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
-import { logUsageTelemetry } from '../lib/usageTelemetry';
-import { generateVideoAsset } from '../lib/videoGeneration';
+import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
+import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
+import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
+import { generateVideoAsset } from '../lib/videoGenerationRuntime.js';
 
 function getClientIP(req: any): string {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || 'unknown';

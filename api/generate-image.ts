@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { generatePromoImage } from '../lib/promoPipelineRuntime.js';
-import { FEATURE_PRICING } from '../lib/pricing';
-import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
-import { logUsageTelemetry } from '../lib/usageTelemetry';
+import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
+import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
+import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
 import type { SocialPlatform } from '../types';
 
 // Session tracking for demo limits (backup - Supabase is primary)
