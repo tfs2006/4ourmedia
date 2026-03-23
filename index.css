@@ -1,4 +1,6 @@
-﻿/* ============================================================
+﻿@import "tailwindcss";
+
+/* ============================================================
    PromoGen Design System -- Premium Dark Theme
    One-of-a-kind UI for 4ourMedia PromoGen
    ============================================================ */
@@ -60,6 +62,11 @@ body {
   overflow-x: hidden;
 }
 
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
 /* -- Background Mesh Pattern ------------------------------- */
 .pg-bg {
   position: fixed;
@@ -83,8 +90,7 @@ body {
 
 /* -- Typography -------------------------------------------- */
 .font-display {
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  font-feature-settings: "cv01", "cv02", "ss01";
+  font-family: 'Montserrat', 'Inter', 'Segoe UI', system-ui, sans-serif;
   letter-spacing: -0.03em;
 }
 

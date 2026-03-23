@@ -13,6 +13,20 @@ interface PurchaseModalProps {
 
 const API_BASE = (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? 'http://localhost:3001' : '';
 
+async function parseApiResponse(response: Response) {
+  const raw = await response.text();
+
+  try {
+    return JSON.parse(raw) as { url?: string; error?: string };
+  } catch {
+    if (!response.ok) {
+      return { error: raw || 'Failed to create checkout' };
+    }
+
+    throw new Error('Received an invalid response from checkout');
+  }
+}
+
 // Plan Type
 interface Plan {
   id: string;
@@ -89,9 +103,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
         })
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse(response);
 
-      if (data.url) {
+      if (response.ok && data.url) {
         window.location.href = data.url;
       } else {
         throw new Error(data.error || 'Failed to create checkout');

@@ -11,6 +11,20 @@ interface PurchaseModalProps {
 declare const __DEV__: boolean;
 const API_BASE = (typeof window !== 'undefined' && window.location.port === '3000') ? 'http://localhost:3001' : '';
 
+async function parseApiResponse(response: Response) {
+  const raw = await response.text();
+
+  try {
+    return JSON.parse(raw) as { url?: string; error?: string };
+  } catch {
+    if (!response.ok) {
+      return { error: raw || 'Failed to create checkout' };
+    }
+
+    throw new Error('Received an invalid response from checkout');
+  }
+}
+
 const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, demoRemaining }) => {
   const [loading, setLoading] = useState(false);
   const [purchased, setPurchased] = useState(false);
@@ -32,9 +46,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, demoRema
         })
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse(response);
 
-      if (data.url) {
+      if (response.ok && data.url) {
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
