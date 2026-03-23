@@ -991,15 +991,13 @@ export default function App() {
                     <p className="text-sm font-medium text-white truncate">{user.name || user.email}</p>
                     <p className="text-xs text-slate-400 truncate">{user.email}</p>
                   </div>
-                  {isAdminSessionActive && (
                     <button
                       onClick={openAdminDashboard}
                       className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 flex items-center gap-2"
                     >
                       <Shield className="w-4 h-4" />
-                      Admin Dashboard
+                      {isAdminSessionActive ? 'Admin Dashboard' : 'Admin Access'}
                     </button>
-                  )}
                   <button
                     onClick={handleSignOut}
                     className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-slate-700 flex items-center gap-2"
