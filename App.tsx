@@ -1,17 +1,9 @@
 import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, SocialPlatform } from './types';
 import { generatePromoAsset } from './services/geminiService';
-import PromoCanvas from './components/PromoCanvas';
-import LoadingStep from './components/LoadingStep';
-import PurchaseModal from './components/PurchaseModalNew';
 import LandingPage from './components/LandingPageNew';
 import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/BrandKit';
 import HistoryPanel, { addToHistory } from './components/HistoryPanel';
-import AuthModal from './components/AuthModal';
-import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './components/LegalPages';
-import FreeToolsPage from './components/FreeToolsPage';
-import PerplexityPage from './components/PerplexityPage';
-import VeoStudioPage from './components/VeoStudioPage';
 import { FEATURE_PRICING } from './lib/pricing';
 import { clearAdminSession, hasAdminSessionAccess } from './lib/adminSession';
 import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail, Shield } from 'lucide-react';
@@ -33,8 +25,44 @@ import {
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
 const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'));
+const PromoCanvas = lazy(() => import('./components/PromoCanvas'));
+const LoadingStep = lazy(() => import('./components/LoadingStep'));
+const PurchaseModal = lazy(() => import('./components/PurchaseModalNew'));
+const AuthModal = lazy(() => import('./components/AuthModal'));
+const FreeToolsPage = lazy(() => import('./components/FreeToolsPage'));
+const PerplexityPage = lazy(() => import('./components/PerplexityPage'));
+const VeoStudioPage = lazy(() => import('./components/VeoStudioPage'));
+const PrivacyPolicy = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.TermsOfService })));
+const RefundPolicy = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.RefundPolicy })));
+const ContactPage = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.ContactPage })));
 
 type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
+
+function PageLoader({ label }: { label: string }) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="pg-bg" />
+      <div className="flex min-h-screen items-center justify-center px-6">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 px-8 py-10 text-center shadow-2xl shadow-black/20">
+          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-violet-300" />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModalLoader({ label }: { label: string }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-6">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/85 px-6 py-5 text-center shadow-2xl shadow-black/30">
+        <RefreshCw className="mx-auto h-6 w-6 animate-spin text-violet-300" />
+        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</p>
+      </div>
+    </div>
+  );
+}
 
 // Daily credit helper functions (localStorage fallback for non-authenticated users)
 function getDailyCreditStatus(): DailyCreditStatus {
@@ -652,21 +680,31 @@ export default function App() {
 
   // Extra Pages
   if (viewState === 'free-tools') {
-    return <FreeToolsPage onBack={() => setViewState('landing')} />;
+    return (
+      <Suspense fallback={<PageLoader label="Loading Free Tools" />}>
+        <FreeToolsPage onBack={() => setViewState('landing')} />
+      </Suspense>
+    );
   }
   if (viewState === 'perplexity') {
-    return <PerplexityPage onBack={() => setViewState('landing')} />;
+    return (
+      <Suspense fallback={<PageLoader label="Loading Perplexity" />}>
+        <PerplexityPage onBack={() => setViewState('landing')} />
+      </Suspense>
+    );
   }
   if (viewState === 'veo-studio') {
     return (
-      <VeoStudioPage
-        onBack={() => setViewState(user ? 'app' : 'landing')}
-        user={user}
-        creditsRemaining={creditsRemaining}
-        onRequireAuth={() => openAuth('signup')}
-        onRequirePurchase={() => setShowPurchaseModal(true)}
-        onCreditsUpdated={(remaining) => setCreditsRemaining(remaining)}
-      />
+      <Suspense fallback={<PageLoader label="Loading Veo Studio" />}>
+        <VeoStudioPage
+          onBack={() => setViewState(user ? 'app' : 'landing')}
+          user={user}
+          creditsRemaining={creditsRemaining}
+          onRequireAuth={() => openAuth('signup')}
+          onRequirePurchase={() => setShowPurchaseModal(true)}
+          onCreditsUpdated={(remaining) => setCreditsRemaining(remaining)}
+        />
+      </Suspense>
     );
   }
   if (viewState === 'admin') {
@@ -695,16 +733,32 @@ export default function App() {
 
   // Legal Pages
   if (viewState === 'privacy') {
-    return <PrivacyPolicy onBack={() => setViewState('landing')} />;
+    return (
+      <Suspense fallback={<PageLoader label="Loading Privacy Policy" />}>
+        <PrivacyPolicy onBack={() => setViewState('landing')} />
+      </Suspense>
+    );
   }
   if (viewState === 'terms') {
-    return <TermsOfService onBack={() => setViewState('landing')} />;
+    return (
+      <Suspense fallback={<PageLoader label="Loading Terms" />}>
+        <TermsOfService onBack={() => setViewState('landing')} />
+      </Suspense>
+    );
   }
   if (viewState === 'refund') {
-    return <RefundPolicy onBack={() => setViewState('landing')} />;
+    return (
+      <Suspense fallback={<PageLoader label="Loading Refund Policy" />}>
+        <RefundPolicy onBack={() => setViewState('landing')} />
+      </Suspense>
+    );
   }
   if (viewState === 'contact') {
-    return <ContactPage onBack={() => setViewState('landing')} />;
+    return (
+      <Suspense fallback={<PageLoader label="Loading Contact Page" />}>
+        <ContactPage onBack={() => setViewState('landing')} />
+      </Suspense>
+    );
   }
 
   // Show landing page
@@ -821,22 +875,30 @@ export default function App() {
         </footer>
         
         {/* Auth Modal */}
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onAuthSuccess={handleAuthSuccess}
-          initialMode={authMode}
-        />
+        {showAuthModal && (
+          <Suspense fallback={<ModalLoader label="Loading Sign In" />}>
+            <AuthModal
+              isOpen={showAuthModal}
+              onClose={() => setShowAuthModal(false)}
+              onAuthSuccess={handleAuthSuccess}
+              initialMode={authMode}
+            />
+          </Suspense>
+        )}
         
         {/* Purchase Modal */}
-        <PurchaseModal 
-          isOpen={showPurchaseModal} 
-          onClose={() => setShowPurchaseModal(false)}
-          creditsRemaining={creditsRemaining}
-          selectedPlan={selectedPlan}
-          userId={user?.id}
-          userEmail={user?.email}
-        />
+        {showPurchaseModal && (
+          <Suspense fallback={<ModalLoader label="Loading Checkout" />}>
+            <PurchaseModal 
+              isOpen={showPurchaseModal} 
+              onClose={() => setShowPurchaseModal(false)}
+              creditsRemaining={creditsRemaining}
+              selectedPlan={selectedPlan}
+              userId={user?.id}
+              userEmail={user?.email}
+            />
+          </Suspense>
+        )}
       </div>
     );
   }
@@ -845,22 +907,30 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white flex flex-col">
       
       {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={handleAuthSuccess}
-        initialMode={authMode}
-      />
+      {showAuthModal && (
+        <Suspense fallback={<ModalLoader label="Loading Sign In" />}>
+          <AuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+            onAuthSuccess={handleAuthSuccess}
+            initialMode={authMode}
+          />
+        </Suspense>
+      )}
       
       {/* Purchase Modal */}
-      <PurchaseModal 
-        isOpen={showPurchaseModal} 
-        onClose={() => setShowPurchaseModal(false)}
-        creditsRemaining={creditsRemaining}
-        selectedPlan={selectedPlan}
-        userId={user?.id}
-        userEmail={user?.email}
-      />
+      {showPurchaseModal && (
+        <Suspense fallback={<ModalLoader label="Loading Checkout" />}>
+          <PurchaseModal 
+            isOpen={showPurchaseModal} 
+            onClose={() => setShowPurchaseModal(false)}
+            creditsRemaining={creditsRemaining}
+            selectedPlan={selectedPlan}
+            userId={user?.id}
+            userEmail={user?.email}
+          />
+        </Suspense>
+      )}
       
       {/* Brand Kit Modal */}
       {showBrandKit && (
@@ -1280,7 +1350,9 @@ export default function App() {
 
         {/* Loading State */}
         {(state === AppState.ANALYZING || state === AppState.GENERATING_IMAGE || state === AppState.COMPOSITING) && (
-          <LoadingStep currentStep={state} />
+          <Suspense fallback={<PageLoader label="Preparing Generation" />}>
+            <LoadingStep currentStep={state} />
+          </Suspense>
         )}
 
         {/* Error State */}
@@ -1798,16 +1870,18 @@ export default function App() {
 
         {/* Hidden Canvas Logic */}
         {imageBase64 && effectiveAnalysis && (
-          <PromoCanvas 
-            imageBase64={imageBase64} 
-            analysis={effectiveAnalysis}
-            customLogo={customLogo}
-            logoPosition={logoPosition}
-            logoSize={logoSize}
-            displayUrl={displayUrl}
-            aspectRatio={aspectRatio}
-            onCompositionComplete={handleCompositionComplete} 
-          />
+          <Suspense fallback={null}>
+            <PromoCanvas 
+              imageBase64={imageBase64} 
+              analysis={effectiveAnalysis}
+              customLogo={customLogo}
+              logoPosition={logoPosition}
+              logoSize={logoSize}
+              displayUrl={displayUrl}
+              aspectRatio={aspectRatio}
+              onCompositionComplete={handleCompositionComplete} 
+            />
+          </Suspense>
         )}
 
       </main>
