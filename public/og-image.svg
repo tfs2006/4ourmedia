@@ -190,44 +190,61 @@
 
   <!-- Card top-right ambient circle -->
   <circle cx="1100" cy="60" r="120" fill="white" opacity=".06" clip-path="url(#og-cardclip)"/>
+  <!-- Bottom-left accent circle -->
+  <circle cx="720" cy="580" r="100" fill="white" opacity=".04" clip-path="url(#og-cardclip)"/>
 
   <!-- Card border -->
   <rect x="738" y="76" width="344" height="480" rx="28"
         fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
 
-  <!-- BEST DEAL badge on card -->
-  <rect x="762" y="108" width="112" height="26" rx="13" fill="url(#og-cardbadge)"/>
-  <text x="785" y="126"
+  <!-- AI GENERATED badge on card -->
+  <rect x="762" y="108" width="148" height="26" rx="13" fill="url(#og-cardbadge)"/>
+  <text x="784" y="126"
         font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
-        font-size="11.5" font-weight="800" fill="#1C1400" letter-spacing="1">✦ BEST DEAL</text>
+        font-size="11.5" font-weight="800" fill="#1C1400" letter-spacing="1">✦ AI-GENERATED</text>
 
-  <!-- Big discount number -->
-  <text x="762" y="232"
+  <!-- Product category -->
+  <text x="762" y="170"
         font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
-        font-size="100" font-weight="900" fill="white" letter-spacing="-5" opacity=".97">60%</text>
-  <text x="764" y="268"
-        font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
-        font-size="24" font-weight="700" fill="rgba(255,255,255,0.85)">OFF TODAY</text>
-  <text x="764" y="292"
-        font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
-        font-size="13" font-weight="400" fill="rgba(255,255,255,0.45)">Limited time · While stocks last</text>
+        font-size="10" font-weight="600" fill="rgba(255,255,255,0.4)" letter-spacing="2">SKINCARE · FEATURED</text>
 
-  <!-- Product placeholder box -->
-  <rect x="762" y="312" width="296" height="148" rx="16"
-        fill="rgba(255,255,255,0.09)" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
-  <!-- Placeholder shimmer lines -->
-  <rect x="786" y="348" width="100" height="10" rx="5" fill="rgba(255,255,255,0.14)"/>
-  <rect x="786" y="368" width="160" height="8" rx="4" fill="rgba(255,255,255,0.09)"/>
-  <rect x="786" y="384" width="70" height="8" rx="4" fill="rgba(255,255,255,0.07)"/>
-  <!-- Product icon placeholder -->
-  <text x="960" y="396"
-        font-family="'Inter','Segoe UI',Arial,sans-serif"
-        font-size="48" fill="rgba(255,255,255,0.2)" text-anchor="middle">✦</text>
+  <!-- Product name -->
+  <text x="762" y="205"
+        font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+        font-size="30" font-weight="900" fill="white" letter-spacing="-1">Lumis Pro</text>
+  <text x="762" y="238"
+        font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+        font-size="30" font-weight="900" fill="white" letter-spacing="-1">Radiance Serum</text>
+
+  <!-- Divider line -->
+  <line x1="762" y1="256" x2="1058" y2="256" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <!-- Product visual placeholder (gradient orb) -->
+  <circle cx="910" cy="355" r="80" fill="url(#og-iconbrand)" opacity=".25" clip-path="url(#og-cardclip)"/>
+  <circle cx="910" cy="355" r="56" fill="rgba(255,255,255,0.08)" clip-path="url(#og-cardclip)"/>
+  <circle cx="910" cy="355" r="34" fill="rgba(255,255,255,0.12)" clip-path="url(#og-cardclip)"/>
+  <circle cx="910" cy="355" r="16" fill="rgba(255,255,255,0.22)" clip-path="url(#og-cardclip)"/>
+  <!-- Sparkle at centre-right of orb -->
+  <g transform="translate(948,318)">
+    <polygon points="0,-8 1.8,-1.8 8,0 1.8,1.8 0,8 -1.8,1.8 -8,0 -1.8,-1.8"
+             fill="#FCD34D" opacity=".9"/>
+  </g>
+  <!-- Product shimmer lines -->
+  <rect x="762" y="272" width="120" height="9" rx="4.5" fill="rgba(255,255,255,0.14)"/>
+  <rect x="762" y="287" width="180" height="7" rx="3.5" fill="rgba(255,255,255,0.09)"/>
+  <rect x="762" y="300" width="80" height="7" rx="3.5" fill="rgba(255,255,255,0.07)"/>
+
+  <!-- Price line -->
+  <text x="762" y="438"
+        font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+        font-size="13" font-weight="500" fill="rgba(255,255,255,0.38)" letter-spacing=".5">Was $89</text>
+  <text x="820" y="438"
+        font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
+        font-size="13" font-weight="700" fill="#FCD34D" letter-spacing=".5">  →  $62 TODAY</text>
 
   <!-- CTA Button -->
-  <rect x="762" y="476" width="296" height="52" rx="14"
-        fill="white"/>
-  <text x="910" y="508"
+  <rect x="762" y="452" width="296" height="52" rx="14" fill="white"/>
+  <text x="910" y="484"
         font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
         font-size="16" font-weight="800" fill="#4338CA" text-anchor="middle"
         letter-spacing="0.5">SHOP NOW  →</text>
@@ -237,11 +254,11 @@
     <polygon points="0,-6 1.4,-1.4 6,0 1.4,1.4 0,6 -1.4,1.4 -6,0 -1.4,-1.4"
              fill="rgba(255,255,255,0.55)"/>
   </g>
-  <g transform="translate(757,440)">
+  <g transform="translate(757,510)">
     <polygon points="0,-3.5 0.8,-0.8 3.5,0 0.8,0.8 0,3.5 -0.8,0.8 -3.5,0 -0.8,-0.8"
              fill="rgba(255,255,255,0.25)"/>
   </g>
-  <g transform="translate(1074,310)">
+  <g transform="translate(1074,390)">
     <polygon points="0,-2.5 0.6,-0.6 2.5,0 0.6,0.6 0,2.5 -0.6,0.6 -2.5,0 -0.6,-0.6"
              fill="rgba(255,255,255,0.2)"/>
   </g>
@@ -251,7 +268,6 @@
         font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif"
         font-size="12" font-weight="500" fill="#334155" text-anchor="middle"
         letter-spacing="0.5">✦  SAMPLE AI OUTPUT</text>
-
   <!-- ═══════════════════════════════════════════════════════ -->
   <!-- BOTTOM BAR                                             -->
   <!-- ═══════════════════════════════════════════════════════ -->

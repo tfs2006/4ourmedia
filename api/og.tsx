@@ -346,7 +346,7 @@ export default function handler() {
                 borderRadius: '100px',
                 padding: '4px 14px',
                 width: 'fit-content',
-                marginBottom: '18px',
+                marginBottom: '14px',
               }}
             >
               <span
@@ -357,72 +357,103 @@ export default function handler() {
                   letterSpacing: '1px',
                 }}
               >
-                ✦ BEST DEAL
+                ✦ AI-GENERATED
               </span>
             </div>
 
-            {/* Big offer text */}
+            {/* Product category */}
+            <span
+              style={{
+                color: 'rgba(255,255,255,0.38)',
+                fontSize: '10px',
+                fontWeight: 600,
+                letterSpacing: '2px',
+                marginBottom: '10px',
+              }}
+            >
+              SKINCARE · FEATURED
+            </span>
+
+            {/* Product name */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                marginBottom: '16px',
+                marginBottom: '14px',
               }}
             >
               <span
                 style={{
                   color: 'white',
-                  fontSize: '92px',
+                  fontSize: '30px',
                   fontWeight: 900,
-                  letterSpacing: '-4px',
-                  lineHeight: 1,
-                  opacity: 0.97,
+                  letterSpacing: '-1px',
+                  lineHeight: 1.15,
                 }}
               >
-                60%
+                Lumis Pro
               </span>
               <span
                 style={{
-                  color: 'rgba(255,255,255,0.88)',
-                  fontSize: '22px',
-                  fontWeight: 700,
-                  lineHeight: 1,
+                  color: 'white',
+                  fontSize: '30px',
+                  fontWeight: 900,
+                  letterSpacing: '-1px',
+                  lineHeight: 1.15,
                 }}
               >
-                OFF TODAY
-              </span>
-              <span
-                style={{
-                  color: 'rgba(255,255,255,0.42)',
-                  fontSize: '12px',
-                  marginTop: '6px',
-                }}
-              >
-                Limited time · While stocks last
+                Radiance Serum
               </span>
             </div>
 
-            {/* Product placeholder */}
+            {/* Product visual — glowing orb representing the product */}
             <div
               style={{
                 display: 'flex',
                 flex: 1,
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(255,255,255,0.09)',
+                background: 'rgba(255,255,255,0.06)',
                 borderRadius: '14px',
-                marginBottom: '16px',
-                border: '1px solid rgba(255,255,255,0.14)',
+                marginBottom: '14px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              <span
-                style={{
-                  color: 'rgba(255,255,255,0.22)',
-                  fontSize: '44px',
-                }}
-              >
-                ✦
-              </span>
+              {/* Glow layer */}
+              <div style={{
+                position: 'absolute',
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%)',
+              }}/>
+              {/* Inner orbs */}
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <span style={{ color: 'rgba(253,212,77,0.9)', fontSize: '28px', lineHeight: 1 }}>✦</span>
+              </div>
+            </div>
+
+            {/* Price line */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '14px',
+              }}
+            >
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px' }}>Was $89</span>
+              <span style={{ color: '#FCD34D', fontSize: '13px', fontWeight: 700 }}>→  $62 TODAY</span>
             </div>
 
             {/* CTA */}

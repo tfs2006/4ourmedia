@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Background dark gradient -->
+    <linearGradient id="ic-bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08091C"/>
+      <stop offset="1" stop-color="#150830"/>
+    </linearGradient>
+    <!-- Brand gradient (violet → indigo → blue) -->
+    <linearGradient id="ic-brand" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED"/>
+      <stop offset=".5" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <!-- Letterform gradient (lighter, luminous) -->
+    <linearGradient id="ic-letter" x1="80" y1="62" x2="390" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EDE9FE"/>
+      <stop offset=".35" stop-color="#C4B5FD"/>
+      <stop offset=".7" stop-color="#A5B4FC"/>
+      <stop offset="1" stop-color="#93C5FD"/>
+    </linearGradient>
+    <!-- Gold for sparkle -->
+    <linearGradient id="ic-gold" x1="368" y1="55" x2="470" y2="155" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FEF3C7"/>
+      <stop offset=".5" stop-color="#FDE068"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <!-- Ambient glow — upper-left violet -->
+    <radialGradient id="ic-glow1" cx="140" cy="160" r="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6D28D9" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#6D28D9" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Ambient glow — lower-right blue -->
+    <radialGradient id="ic-glow2" cx="390" cy="370" r="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D4ED8" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Top-edge highlight -->
+    <linearGradient id="ic-topshine" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="white" stop-opacity=".12"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Letter bloom glow filter -->
+    <filter id="ic-lglow" x="-18%" y="-18%" width="136%" height="136%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Sparkle glow filter -->
+    <filter id="ic-sparkglow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="12" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Subtle inner ring filter -->
+    <filter id="ic-innerring" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="ic-clip">
+      <rect width="512" height="512" rx="114"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Background ────────────────────────────────────────── -->
+  <rect width="512" height="512" rx="114" fill="url(#ic-bg)"/>
+
+  <!-- ── Ambient glows (clipped to rounded square) ─────────── -->
+  <rect width="512" height="512" fill="url(#ic-glow1)" clip-path="url(#ic-clip)"/>
+  <rect width="512" height="512" fill="url(#ic-glow2)" clip-path="url(#ic-clip)"/>
+
+  <!-- ── Brand tint overlay ─────────────────────────────────── -->
+  <rect width="512" height="512" rx="114" fill="url(#ic-brand)" opacity=".08" clip-path="url(#ic-clip)"/>
+
+  <!-- ── Subtle dot grid ────────────────────────────────────── -->
+  <defs>
+    <pattern id="ic-dots" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="1.2" fill="rgba(139,92,246,0.1)"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#ic-dots)" clip-path="url(#ic-clip)" opacity=".6"/>
+
+  <!-- ── Top highlight edge ─────────────────────────────────── -->
+  <rect x="40" y="0" width="432" height="8" rx="4" fill="white" opacity=".07"/>
+
+  <!-- ── P letterform ───────────────────────────────────────── -->
+  <!-- Scale: 512/100 = 5.12 from the 100×100 favicon design   -->
+  <!-- Outer: M82,72 L82,440 L159,440 L159,271                  -->
+  <!--        L266,271 Q374,271 374,171.5 Q374,72 266,72 Z      -->
+  <!-- Inner: M159,128 L256,128 Q317,128 317,171.5              -->
+  <!--        Q317,215 256,215 L159,215 Z                        -->
+  <path fill-rule="evenodd"
+        fill="url(#ic-letter)"
+        filter="url(#ic-lglow)"
+        d="M 82 72 L 82 440 L 159 440 L 159 271
+           L 266 271 Q 374 271 374 171.5
+           Q 374 72 266 72 Z
+           M 159 128 L 256 128
+           Q 317 128 317 171.5
+           Q 317 215 256 215
+           L 159 215 Z"/>
+
+  <!-- ── Border ring ────────────────────────────────────────── -->
+  <rect width="512" height="512" rx="114" fill="none"
+        stroke="url(#ic-brand)" stroke-width="7" opacity=".45"/>
+  <!-- Inner glow ring -->
+  <rect x="4" y="4" width="504" height="504" rx="111" fill="none"
+        stroke="url(#ic-brand)" stroke-width="2" opacity=".18" filter="url(#ic-innerring)"/>
+
+  <!-- ── Gold 4-point sparkle — top right ───────────────────── -->
+  <g transform="translate(412,97)" filter="url(#ic-sparkglow)">
+    <polygon points="0,-40 8.5,-8.5 40,0 8.5,8.5 0,40 -8.5,8.5 -40,0 -8.5,-8.5"
+             fill="url(#ic-gold)"/>
+  </g>
+  <!-- Secondary small sparkle -->
+  <g transform="translate(448,148)">
+    <polygon points="0,-16 3.4,-3.4 16,0 3.4,3.4 0,16 -3.4,3.4 -16,0 -3.4,-3.4"
+             fill="url(#ic-gold)" opacity=".55"/>
+  </g>
+
+  <!-- ── Micro accent dots ─────────────────────────────────── -->
+  <circle cx="110" cy="450" r="11" fill="#6D28D9" opacity=".55"/>
+  <circle cx="148" cy="472" r="7" fill="#4F46E5" opacity=".35"/>
+  <circle cx="80" cy="430" r="5" fill="#7C3AED" opacity=".25"/>
+</svg>

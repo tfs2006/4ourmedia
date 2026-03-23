@@ -1,30 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
     <linearGradient id="fv-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0B0E1F"/>
-      <stop offset="1" stop-color="#1A0B38"/>
+      <stop stop-color="#08091C"/>
+      <stop offset="1" stop-color="#150830"/>
     </linearGradient>
     <linearGradient id="fv-brand" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
       <stop stop-color="#7C3AED"/>
       <stop offset=".5" stop-color="#4F46E5"/>
       <stop offset="1" stop-color="#2563EB"/>
     </linearGradient>
-    <linearGradient id="fv-gold" x1="74" y1="12" x2="88" y2="26" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F59E0B"/>
-      <stop offset="1" stop-color="#FCD34D"/>
+    <linearGradient id="fv-letter" x1="15" y1="12" x2="75" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDD6FE"/>
+      <stop offset=".45" stop-color="#A5B4FC"/>
+      <stop offset="1" stop-color="#93C5FD"/>
     </linearGradient>
-    <linearGradient id="fv-shine" x1="22" y1="20" x2="22" y2="42" gradientUnits="userSpaceOnUse">
-      <stop stop-color="white" stop-opacity=".18"/>
-      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    <linearGradient id="fv-gold" x1="72" y1="12" x2="92" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDE068"/>
+      <stop offset="1" stop-color="#F59E0B"/>
     </linearGradient>
-    <filter id="fv-pglow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="2" result="b"/>
+    <radialGradient id="fv-glow1" cx="28%" cy="32%" r="60%" gradientUnits="objectBoundingBox">
+      <stop stop-color="#6D28D9" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#6D28D9" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fv-glow2" cx="75%" cy="72%" r="50%" gradientUnits="objectBoundingBox">
+      <stop stop-color="#1D4ED8" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="fv-starglow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="fv-blob" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur stdDeviation="14"/>
-    </filter>
-    <filter id="fv-starglow" x="-100%" y="-100%" width="300%" height="300%">
+    <filter id="fv-lglow" x="-25%" y="-25%" width="150%" height="150%">
       <feGaussianBlur stdDeviation="2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
@@ -35,31 +41,38 @@
 
   <!-- Background -->
   <rect width="100" height="100" rx="22" fill="url(#fv-bg)"/>
-  <!-- Brand sheen -->
-  <rect width="100" height="100" rx="22" fill="url(#fv-brand)" opacity=".11" clip-path="url(#fv-clip)"/>
-  <!-- Ambient purple glow -->
-  <ellipse cx="50" cy="46" rx="38" ry="32" fill="#6D28D9" opacity=".28" filter="url(#fv-blob)" clip-path="url(#fv-clip)"/>
-  <!-- Secondary blue glow (bottom-right) -->
-  <ellipse cx="82" cy="78" rx="30" ry="26" fill="#2563EB" opacity=".18" filter="url(#fv-blob)" clip-path="url(#fv-clip)"/>
+  <!-- Ambient glows -->
+  <rect width="100" height="100" fill="url(#fv-glow1)" clip-path="url(#fv-clip)"/>
+  <rect width="100" height="100" fill="url(#fv-glow2)" clip-path="url(#fv-clip)"/>
+  <!-- Brand tint -->
+  <rect width="100" height="100" rx="22" fill="url(#fv-brand)" opacity=".09" clip-path="url(#fv-clip)"/>
+  <!-- Top edge highlight -->
+  <rect x="8" y="0" width="84" height="1.5" rx=".75" fill="white" opacity=".1"/>
 
-  <!-- P letterform — solid white -->
-  <path d="M22,80 L22,20 L54,20 Q76,20 76,36 Q76,52 54,52 L37,52 L37,80 Z"
-        fill="white" opacity=".95" filter="url(#fv-pglow)" clip-path="url(#fv-clip)"/>
-  <!-- Subtle inner top-shine on the P -->
-  <path d="M22,20 L54,20 Q73,20 76,33 Q68,26 54,24 L22,24 Z"
-        fill="url(#fv-shine)" clip-path="url(#fv-clip)"/>
+  <!-- P letterform — gradient fill with bowl hole via fill-rule:evenodd -->
+  <!-- Outer path: stem (16,14)→(16,86)→(31,86)→(31,53), then bowl arc -->
+  <!-- Inner path: bowl hole punch-out -->
+  <path fill-rule="evenodd"
+        fill="url(#fv-letter)"
+        filter="url(#fv-lglow)"
+        d="M 16 14 L 16 86 L 31 86 L 31 53
+           L 52 53 Q 73 53 73 33.5
+           Q 73 14 52 14 Z
+           M 31 25 L 50 25
+           Q 62 25 62 33.5
+           Q 62 42 50 42
+           L 31 42 Z"/>
 
   <!-- Border ring -->
   <rect width="100" height="100" rx="22" fill="none" stroke="url(#fv-brand)" stroke-width="1.5" opacity=".45"/>
 
-  <!-- Gold 4-pointed sparkle (top-right) -->
+  <!-- Gold 4-point sparkle — top right -->
   <g transform="translate(80,19)" filter="url(#fv-starglow)">
-    <polygon points="0,-6 1.4,-1.4 6,0 1.4,1.4 0,6 -1.4,1.4 -6,0 -1.4,-1.4"
-             fill="url(#fv-gold)" opacity=".96"/>
+    <polygon points="0,-7.5 1.6,-1.6 7.5,0 1.6,1.6 0,7.5 -1.6,1.6 -7.5,0 -1.6,-1.6"
+             fill="url(#fv-gold)"/>
   </g>
 
   <!-- Micro accent dots -->
-  <circle cx="76" cy="66" r="2.2" fill="#4F46E5" opacity=".55"/>
-  <circle cx="70" cy="58" r="1.4" fill="white" opacity=".22"/>
-  <circle cx="28" cy="82" r="1.4" fill="white" opacity=".2"/>
+  <circle cx="22" cy="88" r="2.2" fill="#6D28D9" opacity=".55"/>
+  <circle cx="29" cy="93" r="1.5" fill="#4F46E5" opacity=".35"/>
 </svg>
