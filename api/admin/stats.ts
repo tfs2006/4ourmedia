@@ -37,16 +37,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(503).json({ error: 'Admin allowlist is not configured. Set ADMIN_EMAILS or ADMIN_USER_IDS.' });
   }
 
-  const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
-  if (!authenticatedUser) {
-    return res.status(401).json({ error: 'Sign in required for admin access.' });
-  }
-
-  if (!isAuthorizedAdmin(authenticatedUser)) {
-    return res.status(403).json({ error: 'This account is not approved for admin access.' });
-  }
-
   try {
+    const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
+    if (!authenticatedUser) {
+      return res.status(401).json({ error: 'Sign in required for admin access.' });
+    }
+
+    if (!isAuthorizedAdmin(authenticatedUser)) {
+      return res.status(403).json({ error: 'This account is not approved for admin access.' });
+    }
+
     const stats = await getAdminStats();
     
     res.json({
@@ -64,6 +64,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error('Admin stats error:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch stats' });
+    const message = error?.message || 'Failed to fetch stats';
+    if (message.includes('Supabase service role is not configured')) {
+      return res.status(503).json({
+        error: 'Admin backend is missing Supabase server credentials. Set SUPABASE_SERVICE_ROLE_KEY and SUPABASE_URL or VITE_SUPABASE_URL in Vercel.',
+      });
+    }
+
+    res.status(500).json({ error: message });
   }
 }
