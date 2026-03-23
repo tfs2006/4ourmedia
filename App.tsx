@@ -41,12 +41,16 @@ type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' 
 
 function PageLoader({ label }: { label: string }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white" role="status" aria-live="polite" aria-label={label}>
       <div className="pg-bg" />
       <div className="flex min-h-screen items-center justify-center px-6">
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 px-8 py-10 text-center shadow-2xl shadow-black/20">
-          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-violet-300" />
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</p>
+        <div className="max-w-sm rounded-3xl border border-slate-800 bg-slate-900/70 px-8 py-10 text-center shadow-2xl shadow-black/20">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-500/10">
+            <RefreshCw className="h-8 w-8 animate-spin text-violet-300" />
+          </div>
+          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/80">PromoGen</p>
+          <p className="mt-2 text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</p>
+          <p className="mt-3 text-sm text-slate-500">This view is loading in a separate chunk to keep the main app fast.</p>
         </div>
       </div>
     </div>
@@ -55,10 +59,14 @@ function PageLoader({ label }: { label: string }) {
 
 function ModalLoader({ label }: { label: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-6">
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/85 px-6 py-5 text-center shadow-2xl shadow-black/30">
-        <RefreshCw className="mx-auto h-6 w-6 animate-spin text-violet-300" />
-        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-6" role="status" aria-live="polite" aria-label={label}>
+      <div className="w-full max-w-xs rounded-2xl border border-slate-800 bg-slate-900/85 px-6 py-5 text-center shadow-2xl shadow-black/30">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-500/10">
+          <RefreshCw className="h-6 w-6 animate-spin text-violet-300" />
+        </div>
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/80">PromoGen</p>
+        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{label}</p>
+        <p className="mt-2 text-xs text-slate-500">Just a moment while the modal loads.</p>
       </div>
     </div>
   );
