@@ -1,5 +1,49 @@
 export type SocialPlatform = 'instagram' | 'tiktok' | 'facebook' | 'linkedin' | 'youtube';
 
+export type VideoGenerationMode = 'assets' | 'frames';
+export type VideoAspectRatio = '16:9' | '9:16';
+export type VideoResolution = '720p' | '1080p';
+
+export interface SerializedMediaFile {
+  name: string;
+  mimeType: string;
+  data: string;
+}
+
+export interface VideoGenerationPayload {
+  prompt: string;
+  mode: VideoGenerationMode;
+  assetImages: SerializedMediaFile[];
+  startFrame: SerializedMediaFile | null;
+  endFrame: SerializedMediaFile | null;
+  aspectRatio: VideoAspectRatio;
+  resolution: VideoResolution;
+}
+
+export interface VideoGenerationConfig {
+  prompt: string;
+  mode: VideoGenerationMode;
+  assetImages: File[];
+  startFrame: File | null;
+  endFrame: File | null;
+  aspectRatio: VideoAspectRatio;
+  resolution: VideoResolution;
+}
+
+export interface GeneratedVideo {
+  url: string;
+  blob: Blob;
+  mimeType: string;
+  fileName: string;
+  remainingCredits?: number;
+}
+
+export interface VideoGenerationStatus {
+  isGenerating: boolean;
+  progressMessage: string;
+  error?: string;
+}
+
 export interface SocialContentKit {
   caption: string;            // Ready-to-post caption for the chosen platform
   hashtags: string[];         // 20-25 hashtags
@@ -45,6 +89,11 @@ export interface CopyVariation {
 export interface GeneratedAsset {
   imageBase64: string;
   analysis: ProductAnalysis;
+  remainingCredits?: number;
+  demoStatus?: {
+    generationsUsed: number;
+    remaining: number;
+  };
 }
 
 export enum AppState {

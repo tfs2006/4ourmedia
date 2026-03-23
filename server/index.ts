@@ -8,6 +8,12 @@ import cors from 'cors';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
 import { getConfig, saveConfig, isConfigured } from './config';
+import { FEATURE_PRICING } from '../lib/pricing';
+import { generatePromoAnalysis, generatePromoAsset, generatePromoImage } from '../lib/promoPipeline';
+import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
+import { logUsageTelemetry } from '../lib/usageTelemetry';
+import { generateVideoAsset } from '../lib/videoGeneration';
+import type { SocialPlatform } from '../types';
 import {
   DEMO_CONFIG,
   canUseDemo,
@@ -330,18 +336,19 @@ app.get('/api/daily-status', (_req, res) => {
 
 // Analyze product URL
 app.post('/api/analyze', requireSetup, async (req, res) => {
+  let chargedCredits = false;
+  const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
+  const requestIp = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip || 'unknown';
+
   try {
-    const { url } = req.body;
-    const sessionId = req.headers['x-session-id'] as string;
+    const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
 
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
     }
 
-    // Check cache first to save API calls
-    const cached = getCachedAnalysis(url);
-    if (cached) {
-      return res.json(cached);
+    if (!authenticatedUser) {
+      return res.status(401).json({ error: 'Please sign in to use PromoGen.', requiresAuth: true });
     }
 
     // Check GLOBAL daily limit for demo mode (protects against unlimited usage)
@@ -349,139 +356,58 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
       const dailyCheck = checkDailyLimit();
       if (!dailyCheck.allowed) {
         return res.status(429).json({
-          error: 'Demo limit reached for today. Please try again tomorrow or purchase a license for unlimited access.',
+          error: 'Demo limit reached for today. Please try again tomorrow or purchase credits to continue.',
           dailyLimitReached: true,
           reason: dailyCheck.reason
         });
       }
     }
 
-    // Use demo API key in demo mode
     const ai = IS_DEMO_SERVER
       ? getAIClient(DEMO_CONFIG.demoApiKey)
       : getAIClient();
 
-    // ENHANCED: Deep audience research + marketing psychology prompt
-    const prompt = `You are a world-class marketing strategist and conversion copywriter. Your job is to create VIRAL promotional content.
+    const charge = await consumeUserCredits(authenticatedUser.id, FEATURE_PRICING['analysis-only'].creditsRequired);
+    if (!charge.success) {
+      await logUsageTelemetry({
+        endpoint: 'analyze',
+        ipAddress: requestIp,
+        userId: authenticatedUser.id,
+        success: false,
+        featureId: 'analysis-only',
+        source: 'express',
+        metadata: { failureReason: 'insufficient_credits' },
+      });
+      return res.status(402).json({
+        error: 'Not enough credits. Purchase more credits to continue.',
+        insufficientCredits: true,
+        remainingCredits: charge.remaining,
+      });
+    }
+    chargedCredits = true;
 
-STEP 1 - DEEP RESEARCH (use Google Search):
-Analyze this URL: ${url}
-- What is this product/service?
-- Who are the competitors? What are their weaknesses?
-- What do reviews say? What problems do customers mention?
-- What's the target demographic buying this category?
-- What trends are relevant to this product?
-
-STEP 2 - AUDIENCE PROFILING:
-Based on research, define:
-- Demographics (age, gender, income, location)
-- Psychographics (values, lifestyle, aspirations)
-- Pain points they're experiencing
-- Desires they want fulfilled
-- What triggers them to buy (social proof, scarcity, authority, etc.)
-- Best social platforms to reach them
-
-STEP 3 - CONVERSION COPY CREATION:
-Apply these psychology principles:
-- Power words: Exclusive, Instant, Proven, Secret, Guaranteed, Limited, Free, New
-- Focus on TRANSFORMATION not features (before → after)
-- Create desire gap (what they have vs what they could have)
-- Address the #1 objection in the subheadline
-- Match tone to audience (Gen Z = casual/bold, Millennials = aspirational, Boomers = trustworthy)
-
-STEP 4 - VISUAL STRATEGY:
-- Choose colors that match the emotional trigger
-- Red/Orange = Urgency, excitement
-- Blue = Trust, calm, professionalism  
-- Purple = Luxury, creativity
-- Green = Health, growth, money
-- Gold/Black = Premium, exclusive
-- Pink = Feminine, playful
-
-Return this EXACT JSON structure:
-{
-  "productName": "Short catchy name (max 18 chars)",
-  "headline": "Desire-driven hook (max 5 words) - make them FEEL the benefit",
-  "subheadline": "Pain point → solution (max 10 words) - address frustration",
-  "callToAction": "Urgency CTA (max 3 words)",
-  "emotionalTrigger": "One of: fomo, status, security, pleasure, pain_avoidance, belonging",
-  "imagePrompt": "Detailed prompt for a stunning abstract background with cinematic lighting, luxury feel, rich gradients - NO text, NO products, NO people - pure visual mood that matches the emotion",
-  "colors": ["primary_hex", "secondary_hex"],
-  "audienceProfile": {
-    "demographics": "Specific description e.g. Women 25-40, urban, $50k+ income",
-    "psychographics": "Values and lifestyle e.g. Status-conscious, time-poor, Instagram-active",
-    "painPoints": ["Pain 1", "Pain 2", "Pain 3"],
-    "desires": ["Desire 1", "Desire 2", "Desire 3"],
-    "buyingTriggers": ["Trigger 1", "Trigger 2"],
-    "competitorWeaknesses": "What competitors do wrong that we can exploit",
-    "bestPlatforms": ["Instagram", "TikTok"],
-    "toneOfVoice": "e.g. Bold and confident, Warm and friendly, Luxurious and exclusive"
-  },
-  "copyVariations": [
-    {"headline": "Alternative bold headline", "subheadline": "Bold subheadline", "style": "bold"},
-    {"headline": "Alternative emotional headline", "subheadline": "Emotional subheadline", "style": "emotional"},
-    {"headline": "Alternative urgent headline", "subheadline": "Urgent subheadline", "style": "urgent"}
-  ]
-}`;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            productName: { type: Type.STRING },
-            headline: { type: Type.STRING },
-            subheadline: { type: Type.STRING },
-            callToAction: { type: Type.STRING },
-            emotionalTrigger: { type: Type.STRING },
-            imagePrompt: { type: Type.STRING },
-            colors: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            audienceProfile: {
-              type: Type.OBJECT,
-              properties: {
-                demographics: { type: Type.STRING },
-                psychographics: { type: Type.STRING },
-                painPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
-                desires: { type: Type.ARRAY, items: { type: Type.STRING } },
-                buyingTriggers: { type: Type.ARRAY, items: { type: Type.STRING } },
-                competitorWeaknesses: { type: Type.STRING },
-                bestPlatforms: { type: Type.ARRAY, items: { type: Type.STRING } },
-                toneOfVoice: { type: Type.STRING }
-              }
-            },
-            copyVariations: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  headline: { type: Type.STRING },
-                  subheadline: { type: Type.STRING },
-                  style: { type: Type.STRING }
-                }
-              }
-            }
-          },
-          required: ['productName', 'headline', 'subheadline', 'callToAction', 'emotionalTrigger', 'imagePrompt', 'colors']
-        }
-      }
-    });
-
-    const text = response.text;
-    if (!text) {
-      return res.status(500).json({ error: 'No analysis returned from Gemini' });
+    // Check cache after charging so standalone analysis remains monetized.
+    const cacheKey = `${url}::${platform}`;
+    const cached = getCachedAnalysis(cacheKey);
+    if (cached) {
+      await logUsageTelemetry({
+        endpoint: 'analyze',
+        ipAddress: requestIp,
+        userId: authenticatedUser.id,
+        success: true,
+        featureId: 'analysis-only',
+        creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
+        remainingCredits: charge.remaining,
+        source: 'express',
+        metadata: { platform, cacheHit: true },
+      });
+      return res.json({ ...cached, remainingCredits: charge.remaining });
     }
 
-    const result = JSON.parse(text);
+    const result = await generatePromoAnalysis(ai, url, platform);
 
     // Cache the result to avoid duplicate API calls
-    setCachedAnalysis(url, result);
+    setCachedAnalysis(cacheKey, result);
 
     // Track daily usage for cost control (analysis is cheap but still counts)
     if (IS_DEMO_SERVER) {
@@ -489,18 +415,57 @@ Return this EXACT JSON structure:
     }
 
     // Don't increment demo usage here - do it after successful image generation
-    res.json(result);
+    await logUsageTelemetry({
+      endpoint: 'analyze',
+      ipAddress: requestIp,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'analysis-only',
+      creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
+      remainingCredits: charge.remaining,
+      source: 'express',
+      metadata: { platform, cacheHit: false },
+    });
+
+    res.json({ ...result, remainingCredits: charge.remaining });
   } catch (error: any) {
     console.error('Analysis error:', error);
+    if (chargedCredits && authenticatedUser) {
+      await refundUserCredits(authenticatedUser.id, FEATURE_PRICING['analysis-only'].creditsRequired).catch(() => undefined);
+    }
+    await logUsageTelemetry({
+      endpoint: 'analyze',
+      ipAddress: requestIp,
+      userId: authenticatedUser?.id,
+      success: false,
+      featureId: 'analysis-only',
+      refunded: chargedCredits,
+      source: 'express',
+      metadata: { failureReason: error.message || 'analysis_failed' },
+    });
     res.status(500).json({ error: error.message || 'Failed to analyze URL' });
   }
 });
 
 // Generate promo background image
 app.post('/api/generate-image', requireSetup, async (req, res) => {
+  let chargedCredits = false;
+  const requestIp = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip || 'unknown';
   try {
-    const { imagePrompt } = req.body;
+    const { imagePrompt, emotionalTrigger, colors, productCategory, platform, visualStyle } = req.body as {
+      imagePrompt?: string;
+      emotionalTrigger?: string;
+      colors?: string[];
+      productCategory?: string;
+      platform?: SocialPlatform;
+      visualStyle?: string;
+    };
     const sessionId = req.headers['x-session-id'] as string;
+    const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
+
+    if (!authenticatedUser) {
+      return res.status(401).json({ error: 'Please sign in to generate promos.', requiresAuth: true });
+    }
 
     if (!imagePrompt) {
       return res.status(400).json({ error: 'imagePrompt is required' });
@@ -511,7 +476,7 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
       const dailyCheck = checkDailyLimit();
       if (!dailyCheck.allowed) {
         return res.status(429).json({
-          error: 'Demo limit reached for today. Please try again tomorrow or purchase a license for unlimited access.',
+          error: 'Demo limit reached for today. Please try again tomorrow or purchase credits to continue.',
           dailyLimitReached: true,
           reason: dailyCheck.reason
         });
@@ -523,35 +488,33 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
       ? getAIClient(DEMO_CONFIG.demoApiKey)
       : getAIClient();
 
-    // Psychology-enhanced image prompt for maximum visual impact
-    const optimizedPrompt = `Create a stunning ${imagePrompt}. 
-Style: Premium advertising campaign, cinematic lighting, rich deep colors, luxury feel.
-Mood: Aspirational, exclusive, high-end brand aesthetic.
-Technical: 4K quality, smooth gradients, soft bokeh, dramatic lighting.
-CRITICAL: Absolutely NO text, NO words, NO letters, NO numbers, NO watermarks, NO products - pure abstract visual only.`;
+    const charge = await consumeUserCredits(authenticatedUser.id, FEATURE_PRICING['promo-generation'].creditsRequired);
+    if (!charge.success) {
+      await logUsageTelemetry({
+        endpoint: 'generate-image',
+        ipAddress: requestIp,
+        userId: authenticatedUser.id,
+        success: false,
+        featureId: 'promo-generation',
+        source: 'express',
+        metadata: { failureReason: 'insufficient_credits' },
+      });
+      return res.status(402).json({
+        error: 'Not enough credits. Purchase more credits to continue.',
+        insufficientCredits: true,
+        remainingCredits: charge.remaining,
+      });
+    }
+    chargedCredits = true;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp-image-generation',
-      contents: {
-        parts: [{ text: optimizedPrompt }]
-      },
-      config: {
-        responseModalities: ['image', 'text']
-      }
+    const base64Data = await generatePromoImage(ai, {
+      imagePrompt,
+      emotionalTrigger,
+      colors,
+      productCategory,
+      platform,
+      visualStyle,
     });
-
-    // Extract base64 image data
-    let base64Data = '';
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        base64Data = part.inlineData.data;
-        break;
-      }
-    }
-
-    if (!base64Data) {
-      return res.status(500).json({ error: 'Failed to generate image' });
-    }
 
     // Track daily usage for cost control (image generation is the expensive part)
     if (IS_DEMO_SERVER) {
@@ -568,10 +531,212 @@ CRITICAL: Absolutely NO text, NO words, NO letters, NO numbers, NO watermarks, N
       };
     }
 
-    res.json({ imageBase64: base64Data, demoStatus });
+    await logUsageTelemetry({
+      endpoint: 'generate-image',
+      ipAddress: requestIp,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'promo-generation',
+      creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
+      remainingCredits: charge.remaining,
+      source: 'express',
+      metadata: { mode: 'standalone-image' },
+    });
+
+    res.json({ imageBase64: base64Data, demoStatus, remainingCredits: charge.remaining });
   } catch (error: any) {
     console.error('Image generation error:', error);
+    const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>).catch(() => null);
+    if (chargedCredits && authenticatedUser) {
+      await refundUserCredits(authenticatedUser.id, FEATURE_PRICING['promo-generation'].creditsRequired).catch(() => undefined);
+    }
+    await logUsageTelemetry({
+      endpoint: 'generate-image',
+      ipAddress: requestIp,
+      userId: authenticatedUser?.id,
+      success: false,
+      featureId: 'promo-generation',
+      refunded: chargedCredits,
+      source: 'express',
+      metadata: { failureReason: error.message || 'image_generation_failed' },
+    });
     res.status(500).json({ error: error.message || 'Failed to generate image' });
+  }
+});
+
+app.post('/api/generate-promo', requireSetup, async (req, res) => {
+  const sessionId = req.headers['x-session-id'] as string;
+  const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
+  let chargedCredits = false;
+  const requestIp = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip || 'unknown';
+
+  try {
+    if (!authenticatedUser) {
+      return res.status(401).json({ error: 'Please sign in to generate promos.', requiresAuth: true });
+    }
+
+    const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    if (IS_DEMO_SERVER) {
+      const dailyCheck = checkDailyLimit();
+      if (!dailyCheck.allowed) {
+        return res.status(429).json({
+          error: 'Demo limit reached for today. Please try again tomorrow or purchase credits to continue.',
+          dailyLimitReached: true,
+          reason: dailyCheck.reason,
+        });
+      }
+    }
+
+    const charge = await consumeUserCredits(authenticatedUser.id, FEATURE_PRICING['promo-generation'].creditsRequired);
+    if (!charge.success) {
+      await logUsageTelemetry({
+        endpoint: 'generate-promo',
+        ipAddress: requestIp,
+        userId: authenticatedUser.id,
+        success: false,
+        featureId: 'promo-generation',
+        source: 'express',
+        metadata: { failureReason: 'insufficient_credits' },
+      });
+      return res.status(402).json({
+        error: 'Not enough credits. Purchase more credits to continue.',
+        insufficientCredits: true,
+        remainingCredits: charge.remaining,
+      });
+    }
+    chargedCredits = true;
+
+    const ai = IS_DEMO_SERVER
+      ? getAIClient(DEMO_CONFIG.demoApiKey)
+      : getAIClient();
+    const promo = await generatePromoAsset(ai, url, platform);
+
+    if (IS_DEMO_SERVER) {
+      incrementDailyUsage('analysis');
+      incrementDailyUsage('generation');
+    }
+
+    let demoStatus = null;
+    if (IS_DEMO_SERVER && sessionId) {
+      const usage = incrementDemoUsage(sessionId, req.ip);
+      demoStatus = {
+        generationsUsed: usage.generationsUsed,
+        remaining: Math.max(0, DEMO_CONFIG.maxGenerations - usage.generationsUsed),
+      };
+    }
+
+    await logUsageTelemetry({
+      endpoint: 'generate-promo',
+      ipAddress: requestIp,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'promo-generation',
+      creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
+      remainingCredits: charge.remaining,
+      source: 'express',
+      metadata: { platform, mode: 'atomic-promo' },
+    });
+
+    res.json({ ...promo, demoStatus, remainingCredits: charge.remaining });
+  } catch (error: any) {
+    console.error('Promo generation error:', error);
+    if (chargedCredits && authenticatedUser) {
+      await refundUserCredits(authenticatedUser.id, FEATURE_PRICING['promo-generation'].creditsRequired).catch(() => undefined);
+    }
+    await logUsageTelemetry({
+      endpoint: 'generate-promo',
+      ipAddress: requestIp,
+      userId: authenticatedUser?.id,
+      success: false,
+      featureId: 'promo-generation',
+      refunded: chargedCredits,
+      source: 'express',
+      metadata: { failureReason: error.message || 'promo_generation_failed' },
+    });
+    res.status(500).json({ error: error.message || 'Failed to generate promo' });
+  }
+});
+
+app.post('/api/generate-video', requireSetup, async (req, res) => {
+  const requestIp = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip || 'unknown';
+  let chargedCredits = false;
+  try {
+    const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
+    if (!authenticatedUser) {
+      return res.status(401).json({ error: 'Please sign in to use video generation.', requiresAuth: true });
+    }
+
+    if (IS_DEMO_SERVER) {
+      const dailyCheck = checkDailyLimit();
+      if (!dailyCheck.allowed) {
+        return res.status(429).json({
+          error: 'Demo limit reached for today. Please try again tomorrow or purchase credits to continue.',
+          dailyLimitReached: true,
+          reason: dailyCheck.reason,
+        });
+      }
+    }
+
+    const apiKey = IS_DEMO_SERVER ? DEMO_CONFIG.demoApiKey : getConfig().geminiApiKey;
+    const charge = await consumeUserCredits(authenticatedUser.id, FEATURE_PRICING['veo-video'].creditsRequired);
+    if (!charge.success) {
+      await logUsageTelemetry({
+        endpoint: 'generate-video',
+        ipAddress: requestIp,
+        userId: authenticatedUser.id,
+        success: false,
+        featureId: 'veo-video',
+        source: 'express',
+        metadata: { failureReason: 'insufficient_credits' },
+      });
+      return res.status(402).json({
+        error: 'Not enough credits for a Veo render. Purchase more credits to continue.',
+        insufficientCredits: true,
+        remainingCredits: charge.remaining,
+      });
+    }
+    chargedCredits = true;
+
+    const video = await generateVideoAsset(apiKey, req.body);
+
+    await logUsageTelemetry({
+      endpoint: 'generate-video',
+      ipAddress: requestIp,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'veo-video',
+      creditsCharged: FEATURE_PRICING['veo-video'].creditsRequired,
+      remainingCredits: charge.remaining,
+      source: 'express',
+      metadata: { mode: req.body?.mode || null },
+    });
+
+    if (IS_DEMO_SERVER) {
+      incrementDailyUsage('generation');
+    }
+
+    res.json({ ...video, remainingCredits: charge.remaining });
+  } catch (error: any) {
+    console.error('Video generation error:', error);
+    const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>).catch(() => null);
+    if (chargedCredits && authenticatedUser) {
+      await refundUserCredits(authenticatedUser.id, FEATURE_PRICING['veo-video'].creditsRequired).catch(() => undefined);
+    }
+    await logUsageTelemetry({
+      endpoint: 'generate-video',
+      ipAddress: requestIp,
+      userId: authenticatedUser?.id,
+      success: false,
+      featureId: 'veo-video',
+      refunded: chargedCredits,
+      source: 'express',
+      metadata: { failureReason: error.message || 'video_generation_failed' },
+    });
+    res.status(500).json({ error: error.message || 'Failed to generate video' });
   }
 });
 

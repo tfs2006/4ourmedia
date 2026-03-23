@@ -205,24 +205,67 @@ export async function getUserCredits(userId: string): Promise<UserCredits> {
   };
 }
 
-export async function useCredit(userId: string): Promise<{ success: boolean; remaining: number }> {
-  // Use the atomic DB function with row-level locking to prevent race conditions
-  const { data, error } = await supabase
-    .rpc('use_credit', { user_uuid: userId })
-    .single();
-
-  if (error) {
-    console.error('Error using credit (atomic):', error);
-    // Fallback: fetch current credits to return a meaningful remaining count
-    const { data: user } = await supabase
-      .from('users')
-      .select('credits')
-      .eq('id', userId)
+export async function useCredit(userId: string, amount = 1): Promise<{ success: boolean; remaining: number }> {
+  if (amount <= 1) {
+    const { data, error } = await supabase
+      .rpc('use_credit', { user_uuid: userId })
       .single();
-    return { success: false, remaining: user?.credits || 0 };
+
+    const typedData = data as { success?: boolean; remaining?: number } | null;
+
+    if (error) {
+      console.error('Error using credit (atomic):', error);
+      const { data: user } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      return { success: false, remaining: user?.credits || 0 };
+    }
+
+    return { success: typedData?.success ?? false, remaining: typedData?.remaining ?? 0 };
   }
 
-  return { success: data?.success ?? false, remaining: data?.remaining ?? 0 };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('credits, total_used')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !user) {
+      console.error('Error fetching credits for multi-credit charge:', fetchError);
+      return { success: false, remaining: 0 };
+    }
+
+    if ((user.credits || 0) < amount) {
+      return { success: false, remaining: user.credits || 0 };
+    }
+
+    const { data: updatedRow, error: updateError } = await supabase
+      .from('users')
+      .update({
+        credits: user.credits - amount,
+        total_used: (user.total_used || 0) + amount,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .eq('credits', user.credits)
+      .select('credits')
+      .single();
+
+    if (!updateError && updatedRow) {
+      return { success: true, remaining: updatedRow.credits || 0 };
+    }
+  }
+
+  const { data: latestUser } = await supabase
+    .from('users')
+    .select('credits')
+    .eq('id', userId)
+    .single();
+
+  return { success: false, remaining: latestUser?.credits || 0 };
 }
 
 export async function addCredits(userId: string, amount: number, stripeSessionId?: string): Promise<boolean> {

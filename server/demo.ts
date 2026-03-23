@@ -107,7 +107,7 @@ export function checkDailyLimit(): { allowed: boolean; reason?: string; usage: D
   if (usage.totalGenerations >= DEMO_CONFIG.maxDailyGenerations) {
     return {
       allowed: false,
-      reason: 'Daily demo limit reached. Please try again tomorrow or purchase for unlimited access.',
+      reason: 'Daily demo limit reached. Please try again tomorrow or purchase credits to continue.',
       usage
     };
   }
@@ -116,7 +116,7 @@ export function checkDailyLimit(): { allowed: boolean; reason?: string; usage: D
   if (usage.estimatedCostCents >= DEMO_CONFIG.maxDailyCostCents) {
     return {
       allowed: false,
-      reason: 'Daily demo limit reached. Please try again tomorrow or purchase for unlimited access.',
+      reason: 'Daily demo limit reached. Please try again tomorrow or purchase credits to continue.',
       usage
     };
   }

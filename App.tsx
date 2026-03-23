@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react';
 import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, SocialPlatform } from './types';
-import { analyzeProductUrl, generatePromoBackground } from './services/geminiService';
+import { generatePromoAsset } from './services/geminiService';
 import PromoCanvas from './components/PromoCanvas';
 import LoadingStep from './components/LoadingStep';
 import PurchaseModal from './components/PurchaseModalNew';
@@ -11,7 +11,10 @@ import AuthModal from './components/AuthModal';
 import { PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage } from './components/LegalPages';
 import FreeToolsPage from './components/FreeToolsPage';
 import PerplexityPage from './components/PerplexityPage';
-import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail } from 'lucide-react';
+import VeoStudioPage from './components/VeoStudioPage';
+import { FEATURE_PRICING } from './lib/pricing';
+import { clearAdminSession, hasAdminSessionAccess } from './lib/adminSession';
+import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail, Shield } from 'lucide-react';
 import { FlameIcon, SparklesIcon } from './components/Icons';
 import { 
   AuthUser, 
@@ -27,8 +30,9 @@ import {
 } from './services/supabase';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
+const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'));
 
-type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity';
+type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
 
 // Daily credit helper functions (localStorage fallback for non-authenticated users)
 function getDailyCreditStatus(): DailyCreditStatus {
@@ -98,6 +102,8 @@ function claimDailyCredit(): number {
 
 export default function App() {
   const [viewState, setViewState] = useState<ViewState>('landing');
+  const [previousViewState, setPreviousViewState] = useState<ViewState>('landing');
+  const [isAdminSessionActive, setIsAdminSessionActive] = useState(() => hasAdminSessionAccess());
   const [url, setUrl] = useState('');
   
   // Auth state
@@ -180,6 +186,19 @@ export default function App() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const syncViewFromHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash === 'admin') {
+        setViewState('admin');
+      }
+    };
+
+    syncViewFromHash();
+    window.addEventListener('hashchange', syncViewFromHash);
+    return () => window.removeEventListener('hashchange', syncViewFromHash);
+  }, []);
   
   const initializeAuth = async () => {
     setIsLoadingAuth(true);
@@ -238,6 +257,8 @@ export default function App() {
   
   const handleSignOut = async () => {
     await signOut();
+    clearAdminSession();
+    setIsAdminSessionActive(false);
     setUser(null);
     setCreditsRemaining(3);
     setHasPurchased(false);
@@ -254,6 +275,24 @@ export default function App() {
     if (viewState === 'landing') {
       setViewState('app');
     }
+  };
+
+  const openAdminDashboard = () => {
+    if (!user) {
+      openAuth('signin');
+      return;
+    }
+
+    setPreviousViewState(viewState === 'admin' ? 'landing' : viewState);
+    window.location.hash = 'admin';
+    setViewState('admin');
+  };
+
+  const closeAdminDashboard = () => {
+    if (window.location.hash === '#admin') {
+      window.history.replaceState({}, '', `${window.location.pathname}${window.location.search}`);
+    }
+    setViewState(previousViewState === 'admin' ? 'landing' : previousViewState);
   };
   
   const openAuth = (mode: 'signin' | 'signup') => {
@@ -303,7 +342,7 @@ export default function App() {
       setShowDailyReward(false);
     }
   };
-  
+
   const handleBrandKitSelect = (kit: BrandKitType) => {
     setActiveBrandKitState(kit);
     setDisplayUrl(kit.displayUrl || '4ourmedia.com');
@@ -407,7 +446,7 @@ export default function App() {
     }
     
     // Check credits
-    if (creditsRemaining <= 0) {
+    if (creditsRemaining < FEATURE_PRICING['promo-generation'].creditsRequired) {
       setShowPurchaseModal(true);
       return;
     }
@@ -432,38 +471,20 @@ export default function App() {
     setAspectRatio(platformRatios[platform] || aspectRatio);
 
     try {
-      // 1. Analyze URL (pass platform context)
-      const result = await analyzeProductUrl(url, platform);
-      setAnalysis(result);
-      
-      // 2. Generate Image — pass full analysis context for scene-aware, colour-matched generation
-      setState(AppState.GENERATING_IMAGE);
-      const bgImage = await generatePromoBackground(result.imagePrompt, result, platform);
-      setImageBase64(bgImage);
+      const promoResult = await generatePromoAsset(url, platform);
+      setAnalysis(promoResult.analysis);
 
-      // 3. Trigger Canvas Composition
-      setState(AppState.COMPOSITING);
-      
-      // 4. Decrement credits (using Supabase if authenticated)
-      if (user) {
-        const creditResult = await useSupabaseCredit(user.id);
-        setCreditsRemaining(creditResult.remaining);
-      } else {
-        // Fallback to localStorage
-        const newRemaining = creditsRemaining - 1;
-        setCreditsRemaining(newRemaining);
-        
-        // Update stored credits
-        if (hasPurchased) {
-          const stored = JSON.parse(localStorage.getItem('promo_credits') || '{}');
-          stored.remaining = newRemaining;
-          localStorage.setItem('promo_credits', JSON.stringify(stored));
-        }
+      setState(AppState.GENERATING_IMAGE);
+      setImageBase64(promoResult.imageBase64);
+      if (typeof promoResult.remainingCredits === 'number') {
+        setCreditsRemaining(promoResult.remainingCredits);
       }
+
+      setState(AppState.COMPOSITING);
 
     } catch (err: any) {
       console.error(err);
-      if (err.message?.includes('Demo limit') || err.message?.includes('limit reached')) {
+      if (err.message?.includes('Demo limit') || err.message?.includes('limit reached') || err.message?.includes('Not enough credits')) {
         setShowPurchaseModal(true);
       }
       setError(err.message || "Something went wrong. Please check the URL and try again.");
@@ -605,6 +626,41 @@ export default function App() {
   if (viewState === 'perplexity') {
     return <PerplexityPage onBack={() => setViewState('landing')} />;
   }
+  if (viewState === 'veo-studio') {
+    return (
+      <VeoStudioPage
+        onBack={() => setViewState(user ? 'app' : 'landing')}
+        user={user}
+        creditsRemaining={creditsRemaining}
+        onRequireAuth={() => openAuth('signup')}
+        onRequirePurchase={() => setShowPurchaseModal(true)}
+        onCreditsUpdated={(remaining) => setCreditsRemaining(remaining)}
+      />
+    );
+  }
+  if (viewState === 'admin') {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-slate-950 text-white">
+            <div className="pg-bg" />
+            <div className="flex min-h-screen items-center justify-center px-6">
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/70 px-8 py-10 text-center shadow-2xl shadow-black/20">
+                <RefreshCw className="mx-auto h-8 w-8 animate-spin text-violet-300" />
+                <p className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Loading Admin Tools</p>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <AdminDashboardPage
+          onBack={closeAdminDashboard}
+          onAccessGranted={() => setIsAdminSessionActive(true)}
+          onAccessRevoked={() => setIsAdminSessionActive(false)}
+        />
+      </Suspense>
+    );
+  }
 
   // Legal Pages
   if (viewState === 'privacy') {
@@ -637,6 +693,12 @@ export default function App() {
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
+              <button
+                onClick={() => setViewState('veo-studio')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                🎥 Veo Studio
+              </button>
               <button
                 onClick={() => setViewState('free-tools')}
                 className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
@@ -695,6 +757,7 @@ export default function App() {
                 <ul className="space-y-2 text-slate-400 text-sm">
                   <li><button onClick={() => user ? setViewState('app') : openAuth('signup')} className="hover:text-white transition-colors">Try Free</button></li>
                   <li><button onClick={() => setShowPurchaseModal(true)} className="hover:text-white transition-colors">Get Credits</button></li>
+                  <li><button onClick={() => setViewState('veo-studio')} className="hover:text-white transition-colors">🎥 Veo Studio</button></li>
                   <li><button onClick={() => setViewState('free-tools')} className="hover:text-white transition-colors">🎬 Free YouTube Tools</button></li>
                   <li><button onClick={() => setViewState('perplexity')} className="hover:text-white transition-colors">☄️ Perplexity AI Free</button></li>
                 </ul>
@@ -856,6 +919,15 @@ export default function App() {
             
             {/* History Button */}
             <button
+              onClick={() => setViewState('veo-studio')}
+              className="hidden md:flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-indigo-400 hover:text-white"
+              title="Veo Studio"
+            >
+              <Film className="w-4 h-4" />
+              <span className="hidden lg:inline">Veo Studio</span>
+            </button>
+
+            <button
               onClick={() => setShowHistory(true)}
               className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
               title="History"
@@ -919,6 +991,15 @@ export default function App() {
                     <p className="text-sm font-medium text-white truncate">{user.name || user.email}</p>
                     <p className="text-xs text-slate-400 truncate">{user.email}</p>
                   </div>
+                  {isAdminSessionActive && (
+                    <button
+                      onClick={openAdminDashboard}
+                      className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin Dashboard
+                    </button>
+                  )}
                   <button
                     onClick={handleSignOut}
                     className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-slate-700 flex items-center gap-2"

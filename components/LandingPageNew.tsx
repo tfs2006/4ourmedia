@@ -15,6 +15,7 @@ import {
   AvatarFounderIcon, PackageIcon, CloseIcon, ArrowRightIcon, StarIcon,
   CommunityIcon, DownloadIcon, CardIcon
 } from './Icons';
+import { ACTIVE_PLAN_IDS, ACTIVE_PRICING_PLANS, FEATURE_PRICING, formatPricePerCredit } from '../lib/pricing';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -38,84 +39,27 @@ interface PricingPlan {
   features: string[];
 }
 
-// Pricing Plans Data
-const PRICING_PLANS: Record<string, PricingPlan> = {
-  starter: {
-    id: 'starter',
-    name: 'Starter Pack',
-    credits: 25,
-    price: 9,
-    pricePerCredit: '$0.36',
-    description: 'Perfect for trying out the full power',
-    popular: false,
-    badge: null,
-    features: [
-      '25 promo generations',
-      '2 templates included',
-      'Story size (9:16)',
-      'Never expires'
-    ]
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro Pack',
-    credits: 100,
-    price: 29,
-    originalPrice: 36,
-    pricePerCredit: '$0.29',
-    description: 'Best value for serious marketers',
-    popular: true,
-    badge: 'MOST POPULAR',
-    savings: '19%',
-    features: [
-      '100 promo generations',
-      '8 premium templates',
-      'All export sizes (6 formats)',
-      'Priority generation queue',
-      'Never expires'
-    ]
-  },
-  agency: {
-    id: 'agency',
-    name: 'Agency Pack',
-    credits: 500,
-    price: 99,
-    originalPrice: 180,
-    pricePerCredit: '$0.20',
-    description: 'For teams and agencies',
-    popular: false,
-    badge: 'BEST VALUE',
-    savings: '45%',
-    features: [
-      '500 promo generations',
-      '12 templates (inc. exclusive)',
-      'All export sizes',
-      'Priority queue',
-      'Bulk generation (10 at once)',
-      'White-label export',
-      'Never expires'
-    ]
-  },
-  unlimited: {
-    id: 'unlimited',
-    name: 'Unlimited',
-    credits: -1,
-    price: 19,
-    interval: '/month',
-    description: 'Unlimited for power users',
-    popular: false,
-    badge: 'UNLIMITED',
-    features: [
-      'Unlimited generations',
-      'All 12 templates',
-      'All export sizes',
-      'Priority queue',
-      'Bulk generation (25 at once)',
-      'White-label export',
-      'Cancel anytime'
-    ]
-  }
-};
+const PRICING_PLANS: Record<string, PricingPlan> = Object.fromEntries(
+  ACTIVE_PLAN_IDS.map((planId) => {
+    const plan = ACTIVE_PRICING_PLANS[planId];
+    return [
+      planId,
+      {
+        id: plan.id,
+        name: plan.name,
+        credits: plan.credits,
+        price: plan.priceInCents / 100,
+        originalPrice: plan.originalPriceInCents ? plan.originalPriceInCents / 100 : undefined,
+        pricePerCredit: formatPricePerCredit(plan.id),
+        description: plan.description,
+        popular: !!plan.popular,
+        badge: plan.badge || null,
+        savings: plan.savings,
+        features: plan.features,
+      },
+    ];
+  })
+) as Record<string, PricingPlan>;
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onNavigate }) => {
   // Urgency countdown (resets daily)
@@ -760,13 +704,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30 text-amber-300 text-sm font-medium mb-4">
               <TimerIcon size={16} className="text-amber-400" />
-              Launch Week: Extra 20% Credits on Pro &amp; Agency packs
+              Margin-safe pricing for every feature
             </div>
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
               Simple, Transparent Pricing
             </h2>
             <p className="text-xl text-slate-400">
-              Pay per promo. No subscriptions required. Credits never expire.
+              Pay with credits. Standard promos use {FEATURE_PRICING['promo-generation'].creditsRequired} credit. Veo video renders use {FEATURE_PRICING['veo-video'].creditsRequired} credits.
             </p>
           </div>
 
@@ -778,7 +722,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.values(PRICING_PLANS).map((plan) => (
               <div key={plan.id} className={`relative rounded-2xl p-6 border transition-all ${
                 plan.popular 
@@ -801,7 +745,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold">${plan.price}</span>
-                    {plan.interval && <span className="text-slate-400">{plan.interval}</span>}
                   </div>
                   
                   {plan.originalPrice && (
@@ -812,7 +755,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   )}
                   
                   {plan.pricePerCredit && (
-                    <p className="text-slate-500 text-xs mt-2">{plan.pricePerCredit} per promo</p>
+                    <p className="text-slate-500 text-xs mt-2">{plan.pricePerCredit} per credit</p>
                   )}
                 </div>
                 
@@ -834,7 +777,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   }`}
                 >
                   <CardIcon size={16} />
-                  {plan.interval ? 'Subscribe' : 'Buy Now'}
+                  Buy Now
                 </button>
               </div>
             ))}
@@ -911,15 +854,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             {[
               {
                 q: 'How does the credit system work?',
-                a: '1 credit = 1 promo generation. Buy credits in packs (they never expire) or subscribe to Unlimited for infinite generations. Credits are deducted only after successful generation.'
+                a: `Credits are feature-based. Standard promo generations use ${FEATURE_PRICING['promo-generation'].creditsRequired} credit, and Veo video renders use ${FEATURE_PRICING['veo-video'].creditsRequired} credits. Credits are deducted only after successful generation and never expire.`
               },
               {
                 q: 'Do credits expire?',
-                a: 'No! Credit packs never expire. Use them whenever you wantâ€”today, next month, or next year. Only the Unlimited subscription requires monthly renewal.'
+                a: 'No. Credit packs never expire. Use them today, next month, or next year.'
               },
               {
                 q: 'What\'s a Gemini API key and is it free?',
-                a: 'Google Gemini is the AI that powers generation. You can get a free API key from Google AI Studio in 2 minutes. The API cost is minimal (about $0.002 per promo)â€”far less than our credit price, which covers our service, templates, and support.'
+                a: 'Google Gemini powers generation. You can configure your own API key. Pricing is designed so even the lowest-priced credit pack stays above our target gross margin across standard promos and Veo video renders.'
               },
               {
                 q: 'Can I use this for client work?',

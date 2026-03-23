@@ -1,12 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-
-const PRICING_TIERS: Record<string, { name: string; credits: number; priceInCents: number; isSubscription?: boolean }> = {
-  starter: { name: 'Starter Pack', credits: 25, priceInCents: 900 },
-  pro: { name: 'Pro Pack', credits: 100, priceInCents: 2900 },
-  agency: { name: 'Agency Pack', credits: 500, priceInCents: 9900 },
-  unlimited: { name: 'Unlimited Monthly', credits: -1, priceInCents: 1900, isSubscription: true }
-};
+import { ACTIVE_PRICING_PLANS } from '../../lib/pricing';
 
 // Initialize Stripe once at module level (avoids cold-start overhead per request)
 let stripe: Stripe | null = null;
@@ -41,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const stripeClient = getStripe();
     const { successUrl, cancelUrl, planId = 'pro', userId, userEmail } = req.body || {};
-    const tier = PRICING_TIERS[planId];
+    const tier = ACTIVE_PRICING_PLANS[planId as keyof typeof ACTIVE_PRICING_PLANS];
     
     if (!tier) {
       return res.status(400).json({ error: 'Invalid plan selected' });
@@ -56,16 +50,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           currency: 'usd',
           product_data: {
             name: `PromoGen - ${tier.name}`,
-            description: tier.credits === -1 
-              ? 'Unlimited AI promo generations per month' 
-              : `${tier.credits} AI promo generation credits`,
+            description: `${tier.credits} PromoGen credits`,
           },
           unit_amount: tier.priceInCents,
-          ...(tier.isSubscription ? { recurring: { interval: 'month' as const } } : {})
         },
         quantity: 1,
       }],
-      mode: tier.isSubscription ? 'subscription' : 'payment',
+      mode: 'payment',
       success_url: successUrl || `${origin}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${origin}/#pricing`,
       customer_email: userEmail || undefined,

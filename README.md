@@ -61,6 +61,10 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 
 # Enable demo mode
 DEMO_MODE=true
+
+# Admin dashboard access
+ADMIN_SECRET=your_secure_random_string
+ADMIN_EMAILS=owner@example.com
 ```
 
 ### 2. Configure Demo Settings
@@ -87,6 +91,23 @@ In your Stripe dashboard:
 2. Add endpoint: `https://yourdomain.com/api/stripe/webhook`
 3. Select event: `checkout.session.completed`
 4. Copy the signing secret to `STRIPE_WEBHOOK_SECRET`
+
+### 6. Configure Admin Dashboard Access
+
+The profitability dashboard at `#admin` now requires:
+
+- a signed-in account from your Supabase auth flow
+- the correct `ADMIN_SECRET`
+- an allowlisted admin identity in `ADMIN_EMAILS` or `ADMIN_USER_IDS`
+
+Example:
+
+```bash
+ADMIN_SECRET=replace_with_a_long_random_string
+ADMIN_EMAILS=owner@example.com
+```
+
+If you sign in with Google, add the exact Google account email to `ADMIN_EMAILS`.
 
 ---
 

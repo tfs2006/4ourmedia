@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Check, Loader2, X, Sparkles, Zap, Star, Crown, Package } from 'lucide-react';
+import { ACTIVE_PRICING_PLANS, ACTIVE_PLAN_IDS, formatPricePerCredit, FEATURE_PRICING } from '../lib/pricing';
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -29,45 +30,40 @@ interface Plan {
   features: string[];
 }
 
-// Simplified Pricing Plans
-const PLANS: Record<string, Plan> = {
-  starter: {
-    id: 'starter',
-    name: 'Starter',
-    credits: 25,
-    price: 9,
-    pricePerCredit: '$0.36',
-    icon: Package,
-    color: 'from-slate-600 to-slate-700',
-    features: ['25 promo generations', 'All templates', 'All export sizes', 'Never expires']
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro',
-    credits: 100,
-    price: 29,
-    originalPrice: 36,
-    pricePerCredit: '$0.29',
-    savings: '19%',
-    popular: true,
-    icon: Star,
-    color: 'from-indigo-600 to-purple-600',
-    features: ['100 promo generations', 'All templates', 'All export sizes', 'Priority queue', 'Never expires']
-  },
-  agency: {
-    id: 'agency',
-    name: 'Agency',
-    credits: 500,
-    price: 99,
-    originalPrice: 180,
-    pricePerCredit: '$0.20',
-    savings: '45%',
-    bestValue: true,
-    icon: Crown,
-    color: 'from-amber-500 to-orange-500',
-    features: ['500 promo generations', 'All templates', 'Bulk generation', 'Priority queue', 'Never expires']
-  }
+const PLAN_ICONS: Record<string, React.FC<{ className?: string }>> = {
+  starter: Package,
+  pro: Star,
+  agency: Crown,
 };
+
+const PLAN_COLORS: Record<string, string> = {
+  starter: 'from-slate-600 to-slate-700',
+  pro: 'from-indigo-600 to-purple-600',
+  agency: 'from-amber-500 to-orange-500',
+};
+
+const PLANS: Record<string, Plan> = Object.fromEntries(
+  ACTIVE_PLAN_IDS.map((planId) => {
+    const plan = ACTIVE_PRICING_PLANS[planId];
+    return [
+      planId,
+      {
+        id: plan.id,
+        name: plan.name.replace(' Pack', ''),
+        credits: plan.credits,
+        price: plan.priceInCents / 100,
+        originalPrice: plan.originalPriceInCents ? plan.originalPriceInCents / 100 : undefined,
+        pricePerCredit: formatPricePerCredit(plan.id),
+        savings: plan.savings,
+        popular: !!plan.popular,
+        bestValue: plan.badge === 'BEST VALUE',
+        icon: PLAN_ICONS[plan.id],
+        color: PLAN_COLORS[plan.id],
+        features: plan.features,
+      },
+    ];
+  })
+) as Record<string, Plan>;
 
 const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsRemaining = 0, selectedPlan = 'pro', userId, userEmail }) => {
   const [currentPlan, setCurrentPlan] = useState(selectedPlan);
@@ -207,6 +203,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-xs text-slate-500">
+              Standard promo generations use {FEATURE_PRICING['promo-generation'].creditsRequired} credit. Veo video renders use {FEATURE_PRICING['veo-video'].creditsRequired} credits.
+            </p>
           </div>
 
           {/* Error */}

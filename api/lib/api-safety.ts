@@ -9,6 +9,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { FEATURE_PRICING } from '../../lib/pricing';
 
 // ============ Configuration ============
 const ALLOWED_ORIGINS = [
@@ -79,7 +80,29 @@ export interface UsageStats {
   dailyCalls: number;
   monthlyCalls: number;
   estimatedCost: number;
+  estimatedRevenue: number;
+  estimatedProfit: number;
+  estimatedMargin: number | null;
+  totalCreditsCharged: number;
   limitReached: boolean;
+  byEndpoint: Array<{
+    endpoint: string;
+    totalCalls: number;
+    successfulCalls: number;
+    failedCalls: number;
+    creditsCharged: number;
+    estimatedCost: number;
+    estimatedRevenue: number;
+    estimatedProfit: number;
+    estimatedMargin: number | null;
+  }>;
+}
+
+function getLegacyEstimatedCost(endpoint: string) {
+  if (endpoint === 'analyze') return FEATURE_PRICING['analysis-only'].estimatedCostUsd;
+  if (endpoint === 'generate-image' || endpoint === 'generate-promo') return FEATURE_PRICING['promo-generation'].estimatedCostUsd;
+  if (endpoint === 'generate-video') return FEATURE_PRICING['veo-video'].estimatedCostUsd;
+  return 0;
 }
 
 // ============ Core Safety Functions ============
@@ -197,22 +220,81 @@ export async function getUsageStats(): Promise<UsageStats | null> {
     // Get monthly cost estimate
     const { data: costData } = await supabase
       .from('api_usage')
-      .select('endpoint')
+      .select('endpoint, success, metadata')
       .gte('created_at', startOfMonth);
     
     let estimatedCost = 0;
+    let estimatedRevenue = 0;
+    let totalCreditsCharged = 0;
+    const endpointStats = new Map<string, {
+      endpoint: string;
+      totalCalls: number;
+      successfulCalls: number;
+      failedCalls: number;
+      creditsCharged: number;
+      estimatedCost: number;
+      estimatedRevenue: number;
+      estimatedProfit: number;
+    }>();
+
     if (costData) {
       for (const row of costData) {
-        if (row.endpoint === 'analyze') estimatedCost += COST_PER_ANALYZE;
-        else if (row.endpoint === 'generate-image') estimatedCost += COST_PER_IMAGE;
+        const metadata = typeof row.metadata === 'object' && row.metadata ? row.metadata as Record<string, any> : {};
+        const rowCost = typeof metadata.estimatedCostUsd === 'number'
+          ? metadata.estimatedCostUsd
+          : getLegacyEstimatedCost(row.endpoint);
+        const rowRevenue = typeof metadata.estimatedRevenueUsd === 'number'
+          ? metadata.estimatedRevenueUsd
+          : 0;
+        const rowCredits = typeof metadata.creditsCharged === 'number'
+          ? metadata.creditsCharged
+          : 0;
+
+        estimatedCost += rowCost;
+        estimatedRevenue += rowRevenue;
+        totalCreditsCharged += rowCredits;
+
+        const current = endpointStats.get(row.endpoint) || {
+          endpoint: row.endpoint,
+          totalCalls: 0,
+          successfulCalls: 0,
+          failedCalls: 0,
+          creditsCharged: 0,
+          estimatedCost: 0,
+          estimatedRevenue: 0,
+          estimatedProfit: 0,
+        };
+
+        current.totalCalls += 1;
+        if (row.success) current.successfulCalls += 1;
+        else current.failedCalls += 1;
+        current.creditsCharged += rowCredits;
+        current.estimatedCost += rowCost;
+        current.estimatedRevenue += rowRevenue;
+        current.estimatedProfit = current.estimatedRevenue - current.estimatedCost;
+        endpointStats.set(row.endpoint, current);
       }
     }
+
+    const estimatedProfit = estimatedRevenue - estimatedCost;
+    const byEndpoint = Array.from(endpointStats.values())
+      .sort((left, right) => right.estimatedRevenue - left.estimatedRevenue)
+      .map((entry) => ({
+        ...entry,
+        estimatedMargin: entry.estimatedRevenue > 0 ? entry.estimatedProfit / entry.estimatedRevenue : null,
+      }));
     
     return {
       dailyCalls: dailyCalls || 0,
       monthlyCalls: monthlyCalls || 0,
       estimatedCost,
+      estimatedRevenue,
+      estimatedProfit,
+      estimatedMargin: estimatedRevenue > 0 ? estimatedProfit / estimatedRevenue : null,
+      totalCreditsCharged,
       limitReached: (monthlyCalls || 0) >= GLOBAL_MONTHLY_LIMIT || (dailyCalls || 0) >= GLOBAL_DAILY_LIMIT
+      ,
+      byEndpoint,
     };
   } catch (err) {
     console.error('Error fetching usage stats:', err);
@@ -255,7 +337,7 @@ export async function checkGlobalLimits(): Promise<SafetyCheckResult> {
  * Log API usage to Supabase
  */
 export async function logApiUsage(
-  endpoint: 'analyze' | 'generate-image',
+  endpoint: string,
   ip: string,
   userId?: string,
   success: boolean = true,

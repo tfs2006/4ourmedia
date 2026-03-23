@@ -1,77 +1,54 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { generatePromoAnalysis } from '../lib/promoPipeline';
 import { FEATURE_PRICING } from '../lib/pricing';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
+import { generatePromoAsset } from '../lib/promoPipeline';
 import { logUsageTelemetry } from '../lib/usageTelemetry';
 import type { SocialPlatform } from '../types';
 
-// Simple in-memory cache
-const analysisCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+const sessionUsage = new Map<string, { generationsUsed: number }>();
+const MAX_DEMO_GENERATIONS = 3;
+const ipRequests = new Map<string, { count: number; resetTime: number }>();
+const IP_LIMIT = parseInt(process.env.IP_RATE_LIMIT || '10');
 
-function getCached(url: string): any | null {
-  const cached = analysisCache.get(url);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-  return null;
-}
-
-function setCache(url: string, data: any) {
-  if (analysisCache.size > 100) {
-    const firstKey = analysisCache.keys().next().value;
-    if (firstKey) analysisCache.delete(firstKey);
-  }
-  analysisCache.set(url, { data, timestamp: Date.now() });
-}
-
-// ============ Inline Safety Helpers ============
 function getClientIP(req: any): string {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || 'unknown';
 }
 
-// Simple rate limiting (in-memory, resets on cold start)
-const ipRequests = new Map<string, { count: number; resetTime: number }>();
-const IP_LIMIT = parseInt(process.env.IP_RATE_LIMIT || '10');
-
 function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const entry = ipRequests.get(ip);
-  
+
   if (!entry || now > entry.resetTime) {
     ipRequests.set(ip, { count: 1, resetTime: now + 60000 });
     return { allowed: true };
   }
-  
+
   if (entry.count >= IP_LIMIT) {
     return { allowed: false, retryAfter: Math.ceil((entry.resetTime - now) / 1000) };
   }
-  
-  entry.count++;
+
+  entry.count += 1;
   return { allowed: true };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-session-id, x-user-id, Authorization');
-  
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Kill switch check
   if (process.env.API_KILL_SWITCH === 'true') {
     return res.status(503).json({ error: 'Service temporarily disabled for maintenance.' });
   }
 
-  // Rate limiting
   const ip = getClientIP(req);
   const rateCheck = checkRateLimit(ip);
   if (!rateCheck.allowed) {
@@ -79,36 +56,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({ error: `Rate limit exceeded. Try again in ${rateCheck.retryAfter} seconds.` });
   }
 
+  const sessionId = req.headers['x-session-id'] as string;
   const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
+
   if (!authenticatedUser) {
-    return res.status(401).json({ error: 'Please sign in to use PromoGen.', requiresAuth: true });
+    return res.status(401).json({ error: 'Please sign in to generate promos.', requiresAuth: true });
   }
 
   let chargedCredits = false;
 
   try {
     const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
-    
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
     }
 
-    const validPlatforms = ['instagram', 'tiktok', 'facebook', 'linkedin', 'youtube'];
-    const safePlatform = validPlatforms.includes(platform) ? platform : 'instagram';
+    if (process.env.DEMO_MODE === 'true' && sessionId) {
+      const usage = sessionUsage.get(sessionId) || { generationsUsed: 0 };
+      if (usage.generationsUsed >= MAX_DEMO_GENERATIONS) {
+        return res.status(403).json({
+          error: 'Demo limit reached. Purchase credits to continue.',
+          demoLimitReached: true,
+          remaining: 0,
+        });
+      }
+    }
 
     const apiKey = process.env.DEMO_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return res.status(403).json({ error: 'API key not configured', needsSetup: true });
     }
 
-    const charge = await consumeUserCredits(authenticatedUser.id, FEATURE_PRICING['analysis-only'].creditsRequired);
+    const charge = await consumeUserCredits(authenticatedUser.id, FEATURE_PRICING['promo-generation'].creditsRequired);
     if (!charge.success) {
       await logUsageTelemetry({
-        endpoint: 'analyze',
+        endpoint: 'generate-promo',
         ipAddress: ip,
         userId: authenticatedUser.id,
         success: false,
-        featureId: 'analysis-only',
+        featureId: 'promo-generation',
         source: 'vercel-api',
         metadata: { failureReason: 'insufficient_credits' },
       });
@@ -120,56 +106,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     chargedCredits = true;
 
-    // Check cache after charging so analysis-only access is always billed.
-    const cacheKey = `${url}::${safePlatform}`;
-    const cached = getCached(cacheKey);
-    if (cached) {
-      await logUsageTelemetry({
-        endpoint: 'analyze',
-        ipAddress: ip,
-        userId: authenticatedUser.id,
-        success: true,
-        featureId: 'analysis-only',
-        creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
-        remainingCredits: charge.remaining,
-        source: 'vercel-api',
-        metadata: { platform: safePlatform, cacheHit: true },
-      });
-      return res.json({ ...cached, remainingCredits: charge.remaining });
+    const ai = new GoogleGenAI({ apiKey });
+    const promo = await generatePromoAsset(ai, url, platform);
+
+    let demoStatus = null;
+    if (process.env.DEMO_MODE === 'true' && sessionId) {
+      const usage = sessionUsage.get(sessionId) || { generationsUsed: 0 };
+      usage.generationsUsed += 1;
+      sessionUsage.set(sessionId, usage);
+      demoStatus = {
+        generationsUsed: usage.generationsUsed,
+        remaining: Math.max(0, MAX_DEMO_GENERATIONS - usage.generationsUsed),
+      };
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-    const result = await generatePromoAnalysis(ai, url, safePlatform);
-    setCache(cacheKey, result);
-
     await logUsageTelemetry({
-      endpoint: 'analyze',
+      endpoint: 'generate-promo',
       ipAddress: ip,
       userId: authenticatedUser.id,
       success: true,
-      featureId: 'analysis-only',
-      creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
+      featureId: 'promo-generation',
+      creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'vercel-api',
-      metadata: { platform: safePlatform, cacheHit: false },
+      metadata: { platform, mode: 'atomic-promo' },
     });
 
-    res.json({ ...result, remainingCredits: charge.remaining });
+    return res.json({ ...promo, demoStatus, remainingCredits: charge.remaining });
   } catch (error: any) {
-    console.error('Analysis error:', error);
+    console.error('Promo generation error:', error);
     if (chargedCredits) {
-      await refundUserCredits(authenticatedUser.id, FEATURE_PRICING['analysis-only'].creditsRequired).catch(() => undefined);
+      await refundUserCredits(authenticatedUser.id, FEATURE_PRICING['promo-generation'].creditsRequired).catch(() => undefined);
     }
     await logUsageTelemetry({
-      endpoint: 'analyze',
+      endpoint: 'generate-promo',
       ipAddress: ip,
       userId: authenticatedUser.id,
       success: false,
-      featureId: 'analysis-only',
+      featureId: 'promo-generation',
       refunded: chargedCredits,
       source: 'vercel-api',
-      metadata: { failureReason: error.message || 'analysis_failed' },
+      metadata: { failureReason: error.message || 'generation_failed' },
     });
-    res.status(500).json({ error: error.message || 'Failed to analyze URL' });
+    return res.status(500).json({ error: error.message || 'Failed to generate promo' });
   }
 }
