@@ -7,7 +7,7 @@
     "api/**/*.ts": {
       "memory": 1024,
       "maxDuration": 60,
-      "includeFiles": "api/lib/**"
+      "includeFiles": ["api/lib/**", "lib/**"]
     },
     "api/og.tsx": {
       "memory": 256,
