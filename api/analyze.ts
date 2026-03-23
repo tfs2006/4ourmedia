@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { generatePromoAnalysis } from '../lib/promoPipeline.js';
+import { generatePromoAnalysis } from './lib/promoPipeline.js';
 import { FEATURE_PRICING } from '../lib/pricing';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
 import { logUsageTelemetry } from '../lib/usageTelemetry';
