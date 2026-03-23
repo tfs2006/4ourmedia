@@ -10,6 +10,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   res.json({ 
     status: 'ok', 
+    configured: false,
+    hasApiKey: false,
     demoMode: process.env.DEMO_MODE === 'true',
     version: '1.0.0'
   });

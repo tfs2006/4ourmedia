@@ -152,7 +152,7 @@ Licenses are stored in `config/licenses.json`.
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /api/setup/status` | Check if app is configured |
+| `GET /api/health` | Health check and demo status |
 | `POST /api/setup/configure` | Save API key |
 | `GET /api/demo/status` | Get demo usage info |
 | `POST /api/analyze` | Analyze product URL |
