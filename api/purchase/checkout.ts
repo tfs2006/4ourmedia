@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { ACTIVE_PRICING_PLANS } from '../../lib/pricing';
+import { ACTIVE_PRICING_PLANS } from '../../lib/pricingRuntime.js';
 
 // Initialize Stripe once at module level (avoids cold-start overhead per request)
 let stripe: Stripe | null = null;
