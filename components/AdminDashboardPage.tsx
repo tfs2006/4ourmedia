@@ -142,6 +142,8 @@ export default function AdminDashboardPage({ onBack, onAccessGranted, onAccessRe
 
     try {
       const session = await getSession();
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 15000);
       const headers: Record<string, string> = {
         'x-admin-secret': secret,
       };
@@ -152,7 +154,9 @@ export default function AdminDashboardPage({ onBack, onAccessGranted, onAccessRe
 
       const response = await fetch(`${API_BASE}/api/admin/stats`, {
         headers,
+        signal: controller.signal,
       });
+      window.clearTimeout(timeoutId);
       const data = await response.json().catch(() => ({ error: 'Request failed' }));
 
       if (!response.ok) {
@@ -164,11 +168,14 @@ export default function AdminDashboardPage({ onBack, onAccessGranted, onAccessRe
       onAccessGranted?.();
       setStats(data as AdminStatsResponse);
     } catch (fetchError: any) {
+      const message = fetchError?.name === 'AbortError'
+        ? 'Admin stats request timed out. Check the deployment env vars and try again.'
+        : fetchError?.message || 'Failed to load admin stats';
       setStats(null);
       clearAdminSession();
       setHasAccess(false);
       onAccessRevoked?.();
-      setError(fetchError?.message || 'Failed to load admin stats');
+      setError(message);
     } finally {
       setIsLoading(false);
     }

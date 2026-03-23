@@ -44,16 +44,14 @@ interface RateLimitEntry {
 const ipRateLimits = new Map<string, RateLimitEntry>();
 const userRateLimits = new Map<string, RateLimitEntry>();
 
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now();
+function cleanupExpiredRateLimits(now: number) {
   for (const [key, entry] of ipRateLimits.entries()) {
     if (now > entry.resetTime) ipRateLimits.delete(key);
   }
   for (const [key, entry] of userRateLimits.entries()) {
     if (now > entry.resetTime) userRateLimits.delete(key);
   }
-}, 60000); // Clean every minute
+}
 
 // ============ Supabase Client (Service Role for backend) ============
 function getSupabaseAdmin() {
@@ -145,6 +143,7 @@ export function getClientIP(req: any): string {
  */
 export function checkIPRateLimit(ip: string): SafetyCheckResult {
   const now = Date.now();
+  cleanupExpiredRateLimits(now);
   const entry = ipRateLimits.get(ip);
   
   if (!entry || now > entry.resetTime) {
@@ -172,6 +171,7 @@ export function checkIPRateLimit(ip: string): SafetyCheckResult {
  */
 export function checkUserRateLimit(userId: string): SafetyCheckResult {
   const now = Date.now();
+  cleanupExpiredRateLimits(now);
   const entry = userRateLimits.get(userId);
   
   if (!entry || now > entry.resetTime) {
