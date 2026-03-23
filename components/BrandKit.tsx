@@ -170,7 +170,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-700">
         {/* Header */}
-        <div className="p-6 border-b border-slate-700 flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-slate-700 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
               <Palette className="w-5 h-5 text-white" />
@@ -187,7 +187,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
 
         <div className="overflow-y-auto max-h-[calc(90vh-100px)]">
           {!isCreating ? (
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               {/* Create New Button */}
               <button
                 onClick={() => { resetForm(); setIsCreating(true); }}
@@ -206,8 +206,8 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
                       key={kit.id}
                       className="p-4 bg-slate-700/50 rounded-xl border border-slate-600 hover:border-purple-500/50 transition-all group"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-center gap-4 min-w-0">
                           {/* Logo Preview */}
                           <div 
                             className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden"
@@ -219,14 +219,14 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
                               <Image className="w-6 h-6 text-white/70" />
                             )}
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-white">{kit.name}</h4>
+                          <div className="min-w-0">
+                            <h4 className="font-semibold text-white truncate">{kit.name}</h4>
                             <p className="text-sm text-slate-400 flex items-center gap-2">
                               {kit.displayUrl && <><Link2 className="w-3 h-3" />{kit.displayUrl}</>}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
                           <button
                             onClick={() => loadKitToForm(kit)}
                             className="p-2 hover:bg-slate-600 rounded-lg transition-colors text-slate-400 hover:text-white"
@@ -260,7 +260,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
             </div>
           ) : (
             /* Create/Edit Form */
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
               <button
                 onClick={() => { setIsCreating(false); setEditing(null); resetForm(); }}
                 className="text-sm text-slate-400 hover:text-white flex items-center gap-1"
@@ -287,7 +287,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
                 <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider block mb-2">
                   Logo
                 </label>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div 
                     className="w-20 h-20 rounded-xl bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-600"
                     style={logo ? {} : { background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
@@ -325,7 +325,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
               </div>
 
               {/* Logo Position & Size */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider block mb-2">
                     Logo Position
@@ -370,7 +370,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
               </div>
 
               {/* Colors */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider block mb-2">
                     Primary Color
@@ -416,7 +416,7 @@ const BrandKit: React.FC<BrandKitProps> = ({ onSelect, onClose, currentKit }) =>
                 <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider block mb-2">
                   Font Style
                 </label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {FONT_STYLES.map(style => (
                     <button
                       key={style.value}

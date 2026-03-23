@@ -98,23 +98,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       </div>
 
             {/* Hero Section */}
-      <section className="relative py-16 lg:py-28 px-4 overflow-hidden">
+      <section className="relative py-12 sm:py-16 lg:py-28 px-4 overflow-hidden">
         {/* Background orbs */}
         <div className="glow-orb-violet" style={{ width: '600px', height: '600px', top: '-10%', left: '-10%', opacity: 0.6 }} />
         <div className="glow-orb-blue"   style={{ width: '500px', height: '500px', bottom: '0%', right: '-5%', opacity: 0.5 }} />
         <div className="glow-orb-gold"   style={{ width: '300px', height: '300px', top: '30%', left: '50%', opacity: 0.4 }} />
         
         <div className="relative container mx-auto max-w-6xl">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+          <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
             
             {/* Left: Copy */}
-            <div className="flex-1 text-center lg:text-left space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/15 rounded-full border border-emerald-500/30 text-emerald-300 text-sm font-medium">
+            <div className="flex-1 text-center lg:text-left space-y-5 sm:space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500/15 rounded-full border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-medium">
                 <SparklesIcon size={14} className="text-emerald-400" />
                 The Complete Social Media Kit for Online Sellers
               </div>
               
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-200">
                   Paste a URL. Get a
                 </span>
@@ -124,7 +124,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 </span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-slate-300 max-w-xl leading-relaxed">
+              <p className="text-base sm:text-xl md:text-2xl text-slate-300 max-w-xl leading-relaxed">
                 PromoGen analyzes any Amazon, Shopify, or Etsy product and instantly creates a{' '}
                 <strong className="text-white">promo image</strong>,{' '}
                 <strong className="text-white">caption</strong>,{' '}
@@ -137,14 +137,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </p>
 
               {/* Value Props */}
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 {[
                   { Icon: SpeedIcon,    text: 'Promo image in 10 sec' },
                   { Icon: AIBrainIcon,  text: 'Platform-native caption' },
                   { Icon: TemplateIcon, text: 'Hashtag bundle included' },
                   { Icon: PGImageIcon,  text: 'Instagram · TikTok · LinkedIn · YouTube' }
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-slate-300 glass-card px-3 py-2">
+                  <div key={i} className="flex items-center gap-2 text-slate-300 glass-card px-3 py-2 text-left">
                     <item.Icon size={16} className="text-violet-400 flex-shrink-0" />
                     {item.text}
                   </div>
@@ -154,21 +154,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                             <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={onGetStarted}
-                  className="btn-primary text-lg px-8 py-4 group"
+                  className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3.5 sm:py-4 group w-full sm:w-auto"
                 >
                   Create My First Promo Free
                   <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
                   onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="btn-ghost text-lg px-8 py-4"
+                  className="btn-ghost text-base sm:text-lg px-6 sm:px-8 py-3.5 sm:py-4 w-full sm:w-auto"
                 >
                   View Pricing
                   <ChevronDown className="w-5 h-5" />
                 </button>
               </div>
               
-              <div className="flex items-center gap-6 pt-2 text-sm text-slate-400">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-6 pt-2 text-sm text-slate-400">
                 <div className="flex items-center gap-2">
                   <CheckCircleIcon size={16} className="text-emerald-400" />
                   No credit card needed
@@ -181,8 +181,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
             </div>
             
             {/* Right: Hero Image Preview */}
-            <div className="flex-1 relative">
-              <div className="relative w-full max-w-sm mx-auto">
+            <div className="flex-1 relative w-full">
+              <div className="relative w-full max-w-[19rem] sm:max-w-sm mx-auto">
                 {/* Floating glow rings */}
                 <div className="absolute -inset-8 bg-gradient-to-br from-violet-500/10 to-blue-500/10 rounded-3xl blur-2xl" />
                 {/* Before/After comparison */}

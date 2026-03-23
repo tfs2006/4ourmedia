@@ -172,7 +172,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, onClose, onLoadProm
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
+        <div className="p-4 sm:p-6 border-b border-slate-700 flex items-center justify-between flex-shrink-0 gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
               <Clock className="w-5 h-5 text-white" />
@@ -255,7 +255,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, onClose, onLoadProm
                     )}
                     
                     {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-end p-3">
                       <div className="flex gap-2">
                         <button
                           onClick={(e) => {
@@ -312,8 +312,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, onClose, onLoadProm
                   <X className="w-5 h-5 text-slate-400" />
                 </button>
               </div>
-              <div className="p-4 flex gap-4">
-                <div className="w-1/3">
+              <div className="p-4 flex flex-col sm:flex-row gap-4">
+                <div className="w-full sm:w-1/3">
                   <img 
                     src={selectedItem.finalImage} 
                     alt="" 
@@ -345,7 +345,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, onClose, onLoadProm
                       <ExternalLink className="w-3 h-3 flex-shrink-0" />
                     </a>
                   </div>
-                  <div className="flex gap-2 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-4">
                     <button
                       onClick={() => {
                         onLoadPromo(selectedItem);
