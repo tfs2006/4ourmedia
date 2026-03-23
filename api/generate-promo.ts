@@ -10,6 +10,16 @@ const sessionUsage = new Map<string, { generationsUsed: number }>();
 const MAX_DEMO_GENERATIONS = 3;
 const ipRequests = new Map<string, { count: number; resetTime: number }>();
 const IP_LIMIT = parseInt(process.env.IP_RATE_LIMIT || '10');
+const PROMO_TIMEOUT_MS = 55000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeoutMs);
+    }),
+  ]);
+}
 
 function getClientIP(req: any): string {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || 'unknown';
@@ -107,7 +117,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     chargedCredits = true;
 
     const ai = new GoogleGenAI({ apiKey });
-    const promo = await generatePromoAsset(ai, url, platform);
+    const promo = await withTimeout(
+      generatePromoAsset(ai, url, platform),
+      PROMO_TIMEOUT_MS,
+      'Promo generation timed out on the server. Please retry the same URL.'
+    );
 
     let demoStatus = null;
     if (process.env.DEMO_MODE === 'true' && sessionId) {

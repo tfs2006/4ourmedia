@@ -9,6 +9,16 @@ import type { SocialPlatform } from '../types';
 // Session tracking for demo limits (backup - Supabase is primary)
 const sessionUsage = new Map<string, { generationsUsed: number }>();
 const MAX_DEMO_GENERATIONS = 3;
+const IMAGE_TIMEOUT_MS = 55000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeoutMs);
+    }),
+  ]);
+}
 
 // ============ Inline Safety Helpers ============
 function getClientIP(req: any): string {
@@ -123,14 +133,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     chargedCredits = true;
 
     const ai = new GoogleGenAI({ apiKey });
-    const base64Data = await generatePromoImage(ai, {
-      imagePrompt,
-      emotionalTrigger,
-      colors,
-      productCategory,
-      platform,
-      visualStyle,
-    });
+    const base64Data = await withTimeout(
+      generatePromoImage(ai, {
+        imagePrompt,
+        emotionalTrigger,
+        colors,
+        productCategory,
+        platform,
+        visualStyle,
+      }),
+      IMAGE_TIMEOUT_MS,
+      'Image generation timed out on the server. Please retry.'
+    );
 
     // Track usage in memory (backup)
     let demoStatus = null;

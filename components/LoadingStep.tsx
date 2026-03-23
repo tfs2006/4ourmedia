@@ -47,7 +47,7 @@ const LoadingStep: React.FC<LoadingStepProps> = ({ currentStep }) => {
           <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
           <span className="text-indigo-300 font-medium">AI Magic in Progress</span>
         </div>
-        <p className="text-slate-400 text-sm">This usually takes 10-15 seconds</p>
+        <p className="text-slate-400 text-sm">This usually takes 10-30 seconds</p>
       </div>
       
       {/* Steps */}

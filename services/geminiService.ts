@@ -2,6 +2,19 @@ import type { GeneratedAsset, ProductAnalysis, SocialPlatform } from "../types";
 import { getSession } from './supabase';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
+const ANALYZE_TIMEOUT_MS = 45000;
+const GENERATE_TIMEOUT_MS = 70000;
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 function getSessionId(): string {
   return localStorage.getItem('demo_session_id') || '';
@@ -24,11 +37,19 @@ async function getAuthHeaders() {
 export const analyzeProductUrl = async (url: string, platform: SocialPlatform = 'instagram'): Promise<ProductAnalysis> => {
   const headers = await getAuthHeaders();
 
-  const response = await fetch(`${API_BASE}/api/analyze`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ url, platform })
-  });
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(`${API_BASE}/api/analyze`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ url, platform })
+    }, ANALYZE_TIMEOUT_MS);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Product analysis took too long. Please try again in a few seconds.');
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
@@ -71,19 +92,27 @@ export const generatePromoBackground = async (
 ): Promise<GenerateImageResult> => {
   const headers = await getAuthHeaders();
 
-  const response = await fetch(`${API_BASE}/api/generate-image`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      imagePrompt,
-      emotionalTrigger: context?.emotionalTrigger,
-      colors: context?.colors,
-      productCategory: context?.productCategory,
-      visualStyle: context?.visualStyle,
-      toneOfVoice: context?.audienceProfile?.toneOfVoice,
-      platform: platform || 'instagram',
-    })
-  });
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(`${API_BASE}/api/generate-image`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        imagePrompt,
+        emotionalTrigger: context?.emotionalTrigger,
+        colors: context?.colors,
+        productCategory: context?.productCategory,
+        visualStyle: context?.visualStyle,
+        toneOfVoice: context?.audienceProfile?.toneOfVoice,
+        platform: platform || 'instagram',
+      })
+    }, GENERATE_TIMEOUT_MS);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Image generation took too long. Please try again.');
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
@@ -125,11 +154,19 @@ export const generatePromoAsset = async (
 ): Promise<GeneratedAsset> => {
   const headers = await getAuthHeaders();
 
-  const response = await fetch(`${API_BASE}/api/generate-promo`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ url, platform })
-  });
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(`${API_BASE}/api/generate-promo`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ url, platform })
+    }, GENERATE_TIMEOUT_MS);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Promo generation timed out. Try the same URL again or test a simpler product page.');
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));

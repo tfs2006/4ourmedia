@@ -10,6 +10,16 @@ function getClientIP(req: any): string {
 
 const ipRequests = new Map<string, { count: number; resetTime: number }>();
 const IP_LIMIT = parseInt(process.env.IP_RATE_LIMIT || '10');
+const VIDEO_TIMEOUT_MS = 55000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeoutMs);
+    }),
+  ]);
+}
 
 function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
@@ -84,7 +94,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     chargedCredits = true;
 
-    const video = await generateVideoAsset(apiKey, req.body);
+    const video = await withTimeout(
+      generateVideoAsset(apiKey, req.body),
+      VIDEO_TIMEOUT_MS,
+      'Video generation timed out on the server. Please retry with fewer assets or a shorter prompt.'
+    );
     await logUsageTelemetry({
       endpoint: 'generate-video',
       ipAddress: ip,

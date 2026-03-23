@@ -2,6 +2,18 @@ import type { GeneratedVideo, SerializedMediaFile, VideoGenerationConfig, VideoG
 import { getSession } from './supabase';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
+const VIDEO_REQUEST_TIMEOUT_MS = 70000;
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 function getSessionId(): string {
   return localStorage.getItem('demo_session_id') || '';
@@ -65,11 +77,19 @@ export async function generatePromoVideo(config: VideoGenerationConfig): Promise
 
   const headers = await getAuthHeaders();
 
-  const response = await fetch(`${API_BASE}/api/generate-video`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-  });
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(`${API_BASE}/api/generate-video`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    }, VIDEO_REQUEST_TIMEOUT_MS);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Video generation timed out. Please retry with fewer assets or a shorter prompt.');
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));

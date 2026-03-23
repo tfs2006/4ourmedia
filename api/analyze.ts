@@ -9,6 +9,16 @@ import type { SocialPlatform } from '../types';
 // Simple in-memory cache
 const analysisCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+const ANALYSIS_TIMEOUT_MS = 45000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeoutMs);
+    }),
+  ]);
+}
 
 function getCached(url: string): any | null {
   const cached = analysisCache.get(url);
@@ -139,7 +149,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const result = await generatePromoAnalysis(ai, url, safePlatform);
+    const result = await withTimeout(
+      generatePromoAnalysis(ai, url, safePlatform),
+      ANALYSIS_TIMEOUT_MS,
+      'Product analysis timed out on the server. Please retry in a moment.'
+    );
     setCache(cacheKey, result);
 
     await logUsageTelemetry({
