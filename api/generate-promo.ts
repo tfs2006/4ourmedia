@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { FEATURE_PRICING } from '../lib/pricing';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
-import { generatePromoAsset } from './lib/promoPipeline.js';
+import { generatePromoAsset } from '../lib/promoPipelineRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetry';
 import type { SocialPlatform } from '../types';
 
