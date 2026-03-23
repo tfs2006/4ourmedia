@@ -1,6 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
 import type { ProductAnalysis, SocialPlatform } from '../types';
 
+const PROMO_ANALYSIS_MODEL = process.env.GEMINI_ANALYSIS_MODEL || 'gemini-2.0-flash';
+const PROMO_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+
 const PLATFORM_GUIDES: Record<SocialPlatform, string> = {
   instagram: `PLATFORM: Instagram
 - Caption: 150-200 words, conversational & aspirational, 1-2 line breaks for readability, end with a soft CTA question to boost comments ("Which one would you pick? 👇"), use 3-5 emojis naturally
@@ -258,7 +261,7 @@ QUALITY CHECK:
 ✓ imagePrompt has NO text/products/people?`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+    model: PROMO_ANALYSIS_MODEL,
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
@@ -314,9 +317,9 @@ export async function generatePromoImage(
 ) {
   const optimizedPrompt = buildPromoImagePrompt(input);
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp-image-generation',
+    model: PROMO_IMAGE_MODEL,
     contents: { parts: [{ text: optimizedPrompt }] },
-    config: { responseModalities: ['image', 'text'] },
+    config: { responseModalities: ['IMAGE', 'TEXT'] },
   });
 
   for (const part of response.candidates?.[0]?.content?.parts || []) {

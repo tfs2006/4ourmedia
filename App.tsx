@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react';
 import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, SocialPlatform } from './types';
-import { generatePromoAsset } from './services/geminiService';
+import { analyzeProductUrl, generatePromoBackground } from './services/geminiService';
 import PromoCanvas from './components/PromoCanvas';
 import LoadingStep from './components/LoadingStep';
 import PurchaseModal from './components/PurchaseModalNew';
@@ -475,13 +475,25 @@ export default function App() {
     setAspectRatio(platformRatios[platform] || aspectRatio);
 
     try {
-      const promoResult = await generatePromoAsset(url, platform);
-      setAnalysis(promoResult.analysis);
+      const analysisResult = await analyzeProductUrl(url, platform);
+      setAnalysis(analysisResult);
 
       setState(AppState.GENERATING_IMAGE);
-      setImageBase64(promoResult.imageBase64);
-      if (typeof promoResult.remainingCredits === 'number') {
-        setCreditsRemaining(promoResult.remainingCredits);
+      const imageResult = await generatePromoBackground(
+        analysisResult.imagePrompt,
+        {
+          emotionalTrigger: analysisResult.emotionalTrigger,
+          colors: analysisResult.colors,
+          productCategory: analysisResult.productCategory,
+          visualStyle: analysisResult.visualStyle,
+          audienceProfile: analysisResult.audienceProfile,
+        },
+        platform,
+      );
+
+      setImageBase64(imageResult.imageBase64);
+      if (typeof imageResult.remainingCredits === 'number') {
+        setCreditsRemaining(imageResult.remainingCredits);
       }
 
       setState(AppState.COMPOSITING);
