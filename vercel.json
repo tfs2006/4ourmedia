@@ -15,6 +15,7 @@
     }
   },
   "rewrites": [
+    { "source": "/api/admin/stats", "destination": "/api/admin-stats" },
     { "source": "/api/setup/status", "destination": "/api/health" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
