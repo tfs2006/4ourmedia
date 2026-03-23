@@ -62,35 +62,9 @@ const PRICING_PLANS: Record<string, PricingPlan> = Object.fromEntries(
 ) as Record<string, PricingPlan>;
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onNavigate }) => {
-  // Urgency countdown (resets daily)
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [showExitIntent, setShowExitIntent] = useState(false);
-  const [visitorCount, setVisitorCount] = useState(0);
 
   useEffect(() => {
-    // Set countdown to end of day
-    const updateCountdown = () => {
-      const now = new Date();
-      const endOfDay = new Date(now);
-      endOfDay.setHours(23, 59, 59, 999);
-      const diff = endOfDay.getTime() - now.getTime();
-      
-      setTimeLeft({
-        hours: Math.floor(diff / (1000 * 60 * 60)),
-        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((diff % (1000 * 60)) / 1000)
-      });
-    };
-
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-
-    // Simulated live visitor count (for social proof)
-    setVisitorCount(Math.floor(Math.random() * 20) + 35);
-    const visitorTimer = setInterval(() => {
-      setVisitorCount(prev => prev + (Math.random() > 0.5 ? 1 : -1));
-    }, 8000);
-
     // Exit intent detection
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && !localStorage.getItem('exitIntentShown')) {
@@ -101,8 +75,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
-      clearInterval(timer);
-      clearInterval(visitorTimer);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, []);
@@ -117,10 +89,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         <div className="relative flex items-center justify-center gap-3 flex-wrap">
           <span className="flex items-center gap-2">
             <SparklesIcon size={14} className="text-yellow-300" />
-            New: Social Content Kit — Caption + Hashtags + Video Hook generated alongside every promo
+            Social Content Kit included — promo image + caption + hashtags + video hook in one generation
           </span>
           <span className="hidden sm:flex items-center gap-1.5 bg-white/15 px-3 py-0.5 rounded-full border border-white/20 text-xs text-yellow-200 font-bold">
-            Instagram · TikTok · LinkedIn · YouTube
+            Instagram · TikTok · Facebook · LinkedIn · YouTube
           </span>
         </div>
       </div>
@@ -254,7 +226,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                       </div>
                     </div>
                     <p className="text-xs text-emerald-400 text-center font-bold flex items-center justify-center gap-1">
-                      <RocketIcon size={12} className="text-emerald-400" /> 10x more clicks!
+                      <RocketIcon size={12} className="text-emerald-400" /> Engineered to convert
                     </p>
                   </div>
                 </div>
@@ -301,9 +273,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           </h2>
           <p className="text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
             You spent hours finding the perfect product. You know it could change lives. 
-            But when you post that plain product photo with a basic captionâ€¦ <strong className="text-slate-200">crickets</strong>. 
-            Meanwhile, that other seller â€” selling the <em>same exact product</em> â€” is 
-            getting thousands of clicks because their visuals <em>demand</em> attention.
+            But when you post that plain product photo with a basic caption… <strong className="text-slate-200">crickets</strong>. 
+            Meanwhile, another seller promoting the <em>same product</em> is 
+            getting clicks, saves, and shares — because their visuals <em>demand</em> attention.
           </p>
           <p className="text-lg text-indigo-300 font-medium">
             The difference isn't the product. It's the presentation.
@@ -344,7 +316,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 ))}
               </ul>
               <p className="mt-6 text-red-300/70 text-sm italic">
-                Sound familiar? You're not alone â€” 89% of sellers say creating promotional content is their #1 bottleneck.
+                Sound familiar? For most online sellers, creating compelling promotional content is the single biggest bottleneck between a great product and actual sales.
               </p>
             </div>
             
@@ -355,11 +327,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </h3>
               <ul className="space-y-4 text-slate-300">
                 {[
-                  'Paste a URL â†’ Get a stunning promo in 10 seconds',
-                  'AI writes headlines using proven psychology triggers',
-                  'Pay $0.20-0.36 per promo â€” less than a cup of coffee',
-                  'Choose from 4 sizes: Story, Square, Landscape, Instagram',
-                  'Post confidently knowing the copy was built to convert'
+                  'Paste a URL → get a scroll-stopping promo in seconds',
+                  'AI writes headlines using proven conversion psychology',
+                  'Pay as little as $0.20 per promo — a fraction of design costs',
+                  'Export in 4 formats: Story (9:16), Square, Landscape, Instagram Post',
+                  'Caption, hashtags & video hook included with every generation'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <CheckCircleIcon size={18} className="text-emerald-500 flex-shrink-0 mt-0.5" />
@@ -368,7 +340,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 ))}
               </ul>
               <p className="mt-6 text-emerald-300/70 text-sm italic">
-                "I made back my entire Pro Pack investment on my first sale from a PromoGen ad." â€” Sarah M.
+                "I made back my entire Pro Pack investment on my first sale from a PromoGen ad." — Sarah M.
               </p>
             </div>
           </div>
@@ -395,7 +367,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 bg: 'from-blue-900/40 to-blue-900/20',
                 border: 'border-blue-700/40 hover:border-blue-500/60',
                 title: 'E-Commerce Sellers',
-                description: 'Amazon FBA, Shopify, Etsy, eBay â€” turn any product listing into a conversion machine.',
+                description: 'Amazon, Shopify, Etsy, eBay — turn any product listing URL into a ready-to-post promo in seconds.',
               },
               {
                 Icon: MobileIcon,
@@ -403,7 +375,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 bg: 'from-violet-900/40 to-violet-900/20',
                 border: 'border-violet-700/40 hover:border-violet-500/60',
                 title: 'Social Media Marketers',
-                description: 'Create thumb-stopping Instagram, TikTok, and Facebook ads without touching Photoshop.',
+                description: 'Create scroll-stopping ads for Instagram, TikTok, Facebook, and LinkedIn — zero design skills needed.',
               },
               {
                 Icon: TrophyIcon,
@@ -411,7 +383,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 bg: 'from-amber-900/30 to-amber-900/10',
                 border: 'border-amber-700/40 hover:border-amber-500/60',
                 title: 'Agencies & Freelancers',
-                description: 'Deliver client creatives in minutes, not days. White-label, bulk generate, and scale.',
+                description: 'Deliver polished client creatives in minutes, not days. Bulk-generate across multiple products, brand with client logos, and scale output.',
               },
               {
                 Icon: RocketIcon,
@@ -419,7 +391,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 bg: 'from-emerald-900/30 to-emerald-900/10',
                 border: 'border-emerald-700/40 hover:border-emerald-500/60',
                 title: 'Founders & Solopreneurs',
-                description: 'You wear 10 hats already. Let AI handle design so you can focus on selling.',
+                description: 'You already wear too many hats. Let AI handle design, copywriting, and hashtags — so you can stay focused on your product and growth.',
               },
             ].map((item, i) => (
               <div key={i} className={`bg-gradient-to-br ${item.bg} rounded-2xl p-6 border ${item.border} transition-all group text-center pg-card card-beam`}>
@@ -452,7 +424,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 step: '01',
                 Icon: GlobeIcon,
                 title: 'Paste Your Link',
-                description: 'Drop any product URL â€” Amazon, Shopify, your website. Our AI fetches all the details automatically.',
+                description: 'Drop any product URL — Amazon, Shopify, Etsy, your own site. The AI extracts the product name, benefits, pricing, and key details automatically.',
                 color: 'from-blue-600 to-cyan-500',
                 glow: 'rgba(59,130,246,0.3)'
               },
@@ -460,7 +432,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 step: '02',
                 Icon: AIBrainIcon,
                 title: 'AI Does the Work',
-                description: 'Psychology-driven headlines, emotion-matched colors, and stunning AI-generated backgrounds â€” zero effort.',
+                description: 'Conversion-optimized headlines, emotion-matched color palettes, and a unique AI-generated background — all tailored to your specific product and target audience.',
                 color: 'from-violet-600 to-pink-500',
                 glow: 'rgba(124,58,237,0.3)'
               },
@@ -468,7 +440,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 step: '03',
                 Icon: DownloadIcon,
                 title: 'Download & Post',
-                description: 'Ready-to-post images in 6 sizes. Add your logo, download, and watch engagement soar.',
+                description: 'Ready-to-post images in 4 formats (Story, Square, Landscape, Instagram Post). Add your brand logo, download as high-res PNG, and publish.',
                 color: 'from-emerald-500 to-teal-400',
                 glow: 'rgba(16,185,129,0.3)'
               }
@@ -494,10 +466,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
-              12 Conversion-Optimized Templates
+              11 Conversion-Optimized Templates
             </h2>
             <p className="text-xl text-slate-400">
-              Every template designed by marketing psychologists to maximize clicks
+              Every template built around proven ad structures — from flash sales to luxury launches
             </p>
           </div>
           
@@ -562,43 +534,43 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 Icon: AIBrainIcon,
                 color: 'text-violet-400',
                 bg: 'bg-violet-500/10',
-                title: 'Headlines That Hijack Attention',
-                description: 'The AI uses FOMO, social proof, urgency, and desire triggers â€” the same psychology used by billion-dollar brands â€” to write copy that makes people stop scrolling.'
+                title: 'Headlines That Stop the Scroll',
+                description: 'The AI applies urgency, social proof, desire, and curiosity to every headline — writing copy engineered to make people pause and click rather than keep scrolling.'
               },
               {
                 Icon: PaletteIcon,
                 color: 'text-pink-400',
                 bg: 'bg-pink-500/10',
-                title: 'Colors That Trigger Buying',
-                description: 'Red for urgency. Gold for premium. Blue for trust. The AI matches colors to the emotional tone of your product â€” because color alone can boost conversions by 80%.'
+                title: 'Colors Matched to Your Product',
+                description: 'Red for urgency. Gold for premium. Blue for trust. The AI automatically matches your background palette to the emotional tone of your product and target audience.'
               },
               {
                 Icon: TemplateIcon,
                 color: 'text-indigo-400',
                 bg: 'bg-indigo-500/10',
-                title: 'Templates Designed to Convert',
-                description: 'Every template was built by studying top-performing ads. From flash sales to luxury launches â€” pick the one that fits your campaign and let the AI do the rest.'
+                title: 'Templates Built Around Real Ads',
+                description: '11 templates modeled on high-performing ad structures — Flash Sale, Luxury, Social Proof, Product Launch, and more. Pick one, paste your URL, done.'
               },
               {
                 Icon: PGImageIcon,
                 color: 'text-cyan-400',
                 bg: 'bg-cyan-500/10',
-                title: '4 Sizes, One Click',
-                description: 'Story (9:16), Square (1:1), Landscape (16:9), Instagram (4:5) â€” generate the perfect size for any platform without cropping, stretching, or redesigning.'
+                title: '4 Formats, One Click',
+                description: 'Story/Reel (9:16), Square Post (1:1), YouTube Banner (16:9), Instagram Post (4:5) — generate the perfect format for any platform with zero manual resizing.'
               },
               {
                 Icon: SpeedIcon,
                 color: 'text-amber-400',
                 bg: 'bg-amber-500/10',
-                title: 'Faster Than Your Competition',
-                description: 'While they\'re spending 2 hours per creative, you\'re generating 10 promos in 2 minutes. Speed is a competitive advantage â€” and now it\'s yours.'
+                title: 'Faster Than Any Manual Workflow',
+                description: 'While a competitor is still in Canva or waiting on a freelancer, you go from URL to published promo in under a minute. Speed is a real competitive edge.'
               },
               {
                 Icon: CommunityIcon,
                 color: 'text-emerald-400',
                 bg: 'bg-emerald-500/10',
-                title: 'AI Audience Insights',
-                description: 'Get instant breakdowns of your ideal buyer: demographics, pain points, desires, and buying triggers. Know your customer better than they know themselves.'
+                title: 'AI Audience & Copy Intelligence',
+                description: 'Every generation includes an AI breakdown of your ideal buyer — demographics, emotional pain points, and the copy angles most likely to drive action for your specific product.'
               }
             ].map((feature, i) => (
               <div key={i} className="pg-card card-beam p-6 group">
@@ -619,17 +591,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="bg-gradient-to-br from-indigo-900/60 to-purple-900/60 rounded-2xl p-10 border border-indigo-500/30 text-center space-y-6">
             <h2 className="text-2xl md:text-3xl font-bold font-display">
               Imagine Posting a Promo So Good,<br />
-              <span className="text-indigo-300">People Screenshot It to Buy Later</span>
+              <span className="text-indigo-300">People Screenshot It to Share Later</span>
             </h2>
             <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              That's what happens when you combine cinematic AI visuals with copy written by an AI 
-              trained on the psychology of persuasion. Your products don't just get seen â€” they get <em>desired</em>.
+              That's what you get when AI-generated visuals meet copy built for conversion. 
+              Your products don't just get seen — the right audience notices them, clicks, and <em>buys</em>.
             </p>
             <button
               onClick={onGetStarted}
               className="btn-primary text-lg px-8 py-4 inline-flex group"
             >
-              Try It Free â€” No Card Required
+              Try It Free — No Card Required
               <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -644,7 +616,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               Real Results from Real Marketers
             </h2>
             <p className="text-lg text-slate-400">
-              Don't take our word for it â€” see what happens when people start using PromoGen.
+              Don't take our word for it — see what happens when people start using PromoGen.
             </p>
           </div>
           
@@ -654,23 +626,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 name: 'Sarah M.',
                 role: 'Etsy Seller',
                 AvatarComp: AvatarArtistIcon,
-                quote: 'I used to spend 2 hours per promo in Canva. Now I generate 10 in the time it takes to drink my coffee. My click-through rate went up 340%!',
-                highlight: '+340% CTR',
+                quote: 'I used to spend nearly 2 hours on a single promo in Canva. Now I generate a full content kit while my coffee brews. The quality is better, and I post far more consistently.',
+                highlight: 'Posts more, earns more',
                 highlightColor: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
               },
               {
                 name: 'Mike R.',
                 role: 'Amazon FBA',
                 AvatarComp: AvatarMarketerIcon,
-                quote: 'The AI understands conversion psychology better than most marketers. The headlines it writes are genuinely compelling. Worth every penny.',
-                highlight: '5x ROI in week 1',
+                quote: "The AI understands what makes copy convert. The headlines it generates are genuinely compelling — not generic filler. I've tried other tools; this one actually thinks about the buyer.",
+                highlight: 'Best ROI of any tool I use',
                 highlightColor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
               },
               {
                 name: 'Jessica T.',
                 role: 'Marketing Agency',
                 AvatarComp: AvatarFounderIcon,
-                quote: 'We use the Agency pack for client work. The white-label option and bulk generation save us 20+ hours per week. Clients love the results.',
+                quote: 'We use the Agency pack across multiple client brands. The white-label export and batch workflow replaced our manual design process for product promos completely. Clients notice the quality.',
                 highlight: '20 hrs/week saved',
                 highlightColor: 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
               }
@@ -704,13 +676,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30 text-amber-300 text-sm font-medium mb-4">
               <TimerIcon size={16} className="text-amber-400" />
-              Margin-safe pricing for every feature
+              Pay per generation — no subscription, no lock-in
             </div>
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
               Simple, Transparent Pricing
             </h2>
             <p className="text-xl text-slate-400">
-              Pay with credits. Standard promos use {FEATURE_PRICING['promo-generation'].creditsRequired} credit. Veo video renders use {FEATURE_PRICING['veo-video'].creditsRequired} credits.
+              Buy credits once, use them any time. Standard promo: {FEATURE_PRICING['promo-generation'].creditsRequired} credit. Veo video render: {FEATURE_PRICING['veo-video'].creditsRequired} credits. Credits never expire.
             </p>
           </div>
 
@@ -820,22 +792,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 <p className="text-3xl font-bold text-white">10 promos/week</p>
               </div>
               <div>
-                <p className="text-slate-400 mb-2">Designer cost would be</p>
-                <p className="text-3xl font-bold text-red-400">$500-2,000</p>
+                <p className="text-slate-400 mb-2">Freelance designer cost</p>
+                <p className="text-3xl font-bold text-red-400">$500–$2,000</p>
               </div>
               <div>
                 <p className="text-slate-400 mb-2">PromoGen cost</p>
-                <p className="text-3xl font-bold text-green-400">$2.90</p>
-                <p className="text-green-400 text-sm">(Pro Pack)</p>
+                <p className="text-3xl font-bold text-green-400">~$2.90</p>
+                <p className="text-green-400 text-sm">(10 credits at Pro Pack rate)</p>
               </div>
             </div>
             
             <div className="text-center mt-8">
               <p className="text-2xl font-bold text-green-400 flex items-center justify-center gap-2">
                 <CelebrationIcon size={24} className="text-green-400" />
-                Save $497-1,997 per week
+                Save $497–$1,997 per week
               </p>
-              <p className="text-slate-400 mt-2">That's up to $103,844 per year in savings</p>
+              <p className="text-slate-400 mt-2">Versus typical freelance design rates of $50–$200 per promo</p>
             </div>
           </div>
         </div>
@@ -861,20 +833,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 a: 'No. Credit packs never expire. Use them today, next month, or next year.'
               },
               {
-                q: 'What\'s a Gemini API key and is it free?',
-                a: 'Google Gemini powers generation. You can configure your own API key. Pricing is designed so even the lowest-priced credit pack stays above our target gross margin across standard promos and Veo video renders.'
+                q: 'What AI powers PromoGen?',
+                a: 'PromoGen uses Google Gemini for intelligent product analysis and copywriting, combined with leading image generation models for the visuals. Everything runs server-side — you just paste a URL and get results. No API keys or technical setup required.'
               },
               {
                 q: 'Can I use this for client work?',
                 a: 'Absolutely! All plans include commercial use. The Agency pack also includes white-label export (no PromoGen branding) for client deliverables.'
               },
               {
-                q: 'What\'s the difference between Pro and Agency?',
-                a: 'Pro is perfect for individual marketers (100 credits, 8 templates, all sizes). Agency adds bulk generation (10 at once), white-label export, and exclusive templatesâ€”ideal for teams creating high volume.'
+                q: "What's the difference between Pro and Agency?",
+                a: 'Both plans include all aspect ratios and the same quality per generation. The Pro Pack (100 credits at $29) is ideal for individual marketers and sellers. The Agency Pack (500 credits at $99) offers a significantly lower cost per credit and is built for teams, agencies, or anyone running high-volume campaigns across multiple products or clients.'
               },
               {
-                q: 'What if I\'m not satisfied?',
-                a: '30-day money-back guarantee, no questions asked. If PromoGen isn\'t for you, email us for a full refund. We\'ve had less than 1% refund rate because it actually works.'
+                q: "What if I'm not satisfied?",
+                a: '30-day money-back guarantee, no questions asked. If PromoGen is not the right fit, email support@4ourmedia.com for a full refund. No forms, no hassle.'
               }
             ].map((faq, i) => (
               <details key={i} className="group bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
@@ -920,8 +892,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 iconColor: 'text-blue-400',
                 bg: 'from-blue-900/30 to-slate-900',
                 border: 'border-blue-700/30',
-                title: 'Works With Any URL',
-                text: 'Amazon, Shopify, Etsy, eBay, your own website, even a Notion page. If it has a URL, PromoGen can turn it into a promo.'
+                title: 'Works With Any Product URL',
+                text: 'Amazon, Shopify, Etsy, eBay, your own website. If the page has product information, PromoGen extracts it and builds a promo tailored to that product.'
               },
               {
                 Icon: AIBrainIcon,
@@ -936,8 +908,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 iconColor: 'text-emerald-400',
                 bg: 'from-emerald-900/30 to-slate-900',
                 border: 'border-emerald-700/30',
-                title: 'Risk-Free to Try',
-                text: '3 free generations. No credit card. Try it right now and see if the results blow your mind. We think they will.'
+                title: 'Try It Free, Right Now',
+                text: '3 free generations. No credit card. No account required to start. See a real promo built around your actual product before you spend a single dollar.'
               }
             ].map((item, i) => (
               <div key={i} className={`text-center space-y-4 p-7 rounded-2xl bg-gradient-to-br ${item.bg} border ${item.border}`}>
@@ -974,10 +946,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 What is an AI Promo Image Generator?
               </h3>
               <p className="mb-4">
-                An <strong className="text-white">AI promo image generator</strong> is a tool that uses artificial intelligence to automatically create promotional visuals for products, services, or brands â€” without requiring any design skills, expensive software, or hours of manual work. You provide a product URL or description, and the AI handles everything else: analyzing the product, writing persuasive copy, selecting a suitable visual style, and composing a finished ad-ready image.
+                An <strong className="text-white">AI promo image generator</strong> is a tool that uses artificial intelligence to automatically create promotional visuals for products, services, or brands — without requiring any design skills, expensive software, or hours of manual work. You provide a product URL or description, and the AI handles everything else: analyzing the product, writing persuasive copy, selecting a suitable visual style, and composing a finished ad-ready image.
               </p>
               <p>
-                PromoGen by 4ourMedia takes this a step further by combining <strong className="text-white">AI copywriting</strong> with <strong className="text-white">psychology-driven visual design</strong>. Every promo it generates includes a conversion-tested headline, an emotion trigger subheading, a clear call-to-action, and a cinematic AI-generated background â€” all matched to your specific product and target audience.
+                PromoGen by 4ourMedia takes this a step further by combining <strong className="text-white">AI copywriting</strong> with <strong className="text-white">psychology-driven visual design</strong>. Every promo it generates includes a conversion-tested headline, an emotion trigger subheading, a clear call-to-action, and a cinematic AI-generated background — all matched to your specific product and target audience.
               </p>
             </div>
 
@@ -986,10 +958,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 Why Product Marketers and E-Commerce Sellers Are Switching to AI Ad Makers
               </h3>
               <p className="mb-4">
-                The average social media user scrolls through hundreds of posts per day. Research consistently shows you have <strong className="text-white">less than 1.7 seconds</strong> to stop someone's scroll. That window is won or lost entirely by your visual â€” not your product quality, not your price, not your reviews.
+                The average social media user scrolls through hundreds of posts per day. Research consistently shows you have <strong className="text-white">less than 1.7 seconds</strong> to stop someone's scroll. That window is won or lost entirely by your visual — not your product quality, not your price, not your reviews.
               </p>
               <p className="mb-4">
-                Traditional graphic design workflows â€” hiring a freelancer, using complex tools like Photoshop or Canva, writing copy from scratch â€” take hours and cost money. For most solo sellers, e-commerce entrepreneurs, and small marketing teams, producing professional promotional content consistently is simply not feasible.
+                Traditional graphic design workflows — hiring a freelancer, using complex tools like Photoshop or Canva, writing copy from scratch — take hours and cost money. For most solo sellers, e-commerce entrepreneurs, and small marketing teams, producing professional promotional content consistently is simply not feasible.
               </p>
               <p>
                 AI ad creators like PromoGen collapse that workflow from hours to seconds. Whether you're promoting a product on <strong className="text-white">Amazon, Shopify, Etsy, eBay</strong>, or your own website, an AI promo generator can produce a campaign-ready image faster than you can open a design app.
@@ -1006,7 +978,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               <ol className="space-y-3 list-none">
                 {[
                   ['Product Analysis', 'PromoGen fetches your product URL and uses Google Gemini AI to extract the product name, category, key benefits, target audience, price point, and emotional selling angles.'],
-                  ['Psychology-Driven Copywriting', 'Four distinct copy variants are generated, each using a different psychological trigger â€” urgency, social proof, desire, or curiosity â€” matched to your product type and buyer persona.'],
+                  ['Psychology-Driven Copywriting', 'Four distinct copy variants are generated, each using a different psychological trigger — urgency, social proof, desire, or curiosity — matched to your product type and buyer persona.'],
                   ['Visual Concept Generation', 'The AI determines the ideal visual mood (aspirational, problem-solving, lifestyle, luxury, etc.) and generates a cinematic background image using leading image generation models.'],
                   ['Composition & Export', 'The headline, subheading, CTA, and product details are composited onto the background in your chosen template and aspect ratio, then exported as a high-resolution PNG ready for any platform.'],
                 ].map(([title, text], i) => (
@@ -1058,13 +1030,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   </thead>
                   <tbody className="divide-y divide-slate-700/50">
                     {[
-                      ['Time to first promo', '~10 seconds', '30â€“60 minutes', '1â€“3 days'],
+                      ['Time to first promo', '~10 seconds', '30–60 minutes', '1–3 days'],
                       ['Design skills needed', 'None', 'Moderate', 'None (you hire it out)'],
-                      ['Copywriting included', 'âœ“ AI-written, psych-driven', 'âœ— You write it', 'Sometimes (+$$)'],
-                      ['Cost per promo', '~$0.20â€“$0.36', '$0 (but your time)', '$50â€“$200+'],
-                      ['Custom AI visuals', 'âœ“ Unique per product', 'âœ— Stock templates', 'Varies'],
-                      ['Bulk generation', 'âœ“ Up to 10 at once', 'âœ—', 'âœ— (slow & expensive)'],
-                      ['Psychology optimization', 'âœ“ Built-in', 'âœ—', 'Depends on skill'],
+                      ['Copywriting included', '✔ AI-written, psych-driven', '✗ You write it', 'Sometimes (+$$)'],
+                      ['Cost per promo', '~$0.20–$0.36', '$0 (but your time)', '$50–$200+'],
+                      ['Custom AI visuals', '✔ Unique per product', '✗ Stock templates', 'Varies'],
+                      ['Bulk workflow support', '✔ Agency plan', '✗', '✗ (slow & expensive)'],
+                      ['Psychology optimization', '✔ Built-in', '✗', 'Depends on skill'],
                     ].map(([factor, pg, canva, designer], i) => (
                       <tr key={i} className={i % 2 === 0 ? 'bg-slate-800/20' : ''}>
                         <td className="p-4 text-slate-300 font-medium">{factor}</td>
@@ -1087,24 +1059,24 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </p>
               <ul className="space-y-2 text-slate-400">
                 {[
-                  'YouTube Promo Finder â€” discover which channels are currently being sponsored and by whom',
-                  'Domain Search â€” find sponsor websites linked in video descriptions at scale',
-                  'Unlisted Video Finder â€” surface hidden promotional content that standard tools miss',
-                  'Channel Growth Tracker â€” identify fast-growing channels before they become expensive to sponsor',
-                  'Collaboration Finder â€” discover creator collaboration networks and cross-promotion opportunities',
-                  'Compare Sponsors â€” benchmark competing brands\' influencer strategies side by side',
-                  'Sponsorship Rate Estimator â€” estimate fair market rates before you negotiate',
-                  'Viral Video Detector â€” catch trending content early for timely sponsorship deals',
-                  'Sponsor Saturation Score â€” measure how over-sponsored a niche is before you enter it',
+                  'YouTube Promo Finder — discover which channels are currently being sponsored and by whom',
+                  'Domain Search — find sponsor websites linked in video descriptions at scale',
+                  'Unlisted Video Finder — surface hidden promotional content that standard tools miss',
+                  'Channel Growth Tracker — identify fast-growing channels before they become expensive to sponsor',
+                  'Collaboration Finder — discover creator collaboration networks and cross-promotion opportunities',
+                  'Compare Sponsors — benchmark competing brands\' influencer strategies side by side',
+                  'Sponsorship Rate Estimator — estimate fair market rates before you negotiate',
+                  'Viral Video Detector — catch trending content early for timely sponsorship deals',
+                  'Sponsor Saturation Score — measure how over-sponsored a niche is before you enter it',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-indigo-400 mt-1 flex-shrink-0">â–¸</span>
+                    <span className="text-indigo-400 mt-1 flex-shrink-0">▸</span>
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <p className="mt-4">
-                All tools are free to use with no account required â€” a resource for anyone doing YouTube marketing research.
+                All tools are free to use with no account required — a resource for anyone doing YouTube marketing research.
               </p>
             </div>
 
@@ -1113,7 +1085,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                 Key Takeaway: The Best AI Promo Generator Is the One You'll Actually Use
               </h3>
               <p className="text-slate-400">
-                The most sophisticated design tool in the world is useless if the learning curve stops you from shipping content. PromoGen is built around one principle: <strong className="text-white">zero friction from idea to published promo</strong>. Paste a URL, get a promo. No tutorials, no templates to edit, no copy to agonize over. Just results â€” in the time it takes to make a coffee.
+                The most sophisticated design tool in the world is useless if the learning curve stops you from shipping content. PromoGen is built around one principle: <strong className="text-white">zero friction from idea to published promo</strong>. Paste a URL, get a promo. No tutorials, no templates to edit, no copy to agonize over. Just results — in the time it takes to make a coffee.
               </p>
             </div>
 
@@ -1124,23 +1096,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       {/* Final CTA */}
       <section className="py-24 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-full border border-red-500/30 text-red-300 text-sm font-medium mb-6">
-            <TimerIcon size={16} className="animate-pulse text-rose-400" />
-            Launch Week ends in {timeLeft.hours}h {timeLeft.minutes}m
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 rounded-full border border-emerald-500/30 text-emerald-300 text-sm font-medium mb-6">
+            <SparklesIcon size={16} className="text-emerald-400" />
+            Start free — 3 generations, no credit card required
           </div>
           
           <h2 className="text-3xl md:text-5xl font-bold font-display mb-6 leading-tight">
-            Every Minute You Wait,<br />
+            Your Product Deserves<br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-              Someone Else Gets the Click.
+              a Promo That Actually Sells.
             </span>
           </h2>
           <p className="text-xl text-slate-400 mb-4 max-w-2xl mx-auto">
-            Your product is already good enough. It just needs the promo it deserves. 
-            One that makes people feel something. One that stops the scroll.
+            The product is already good. What's been missing is a promo that communicates its value 
+            with the visuals and copy that make people stop, click, and buy.
           </p>
           <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto font-medium">
-            Your first 3 promos are on us. See for yourself.
+            Your first 3 promos are completely free. See exactly what PromoGen builds for your product.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -1155,12 +1127,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               onClick={() => onPurchase('pro')}
               className="btn-gold text-xl px-10 py-5 font-bold inline-flex"
             >
-              Go Pro â€” $29 for 100 Promos
+              Get 100 Credits — $29
             </button>
           </div>
           
           <p className="text-slate-500 text-sm mt-6">
-            No credit card required â€¢ 30-day money-back guarantee â€¢ Credits never expire
+            No credit card required &bull; 30-day money-back guarantee &bull; Credits never expire
           </p>
         </div>
       </section>
@@ -1188,7 +1160,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </button>
             </div>
             <div>
-              Â© {new Date().getFullYear()} 4ourMedia. All rights reserved.
+              © {new Date().getFullYear()} 4ourMedia. All rights reserved.
             </div>
           </div>
         </div>
@@ -1211,26 +1183,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
                   <GiftIcon size={36} className="text-emerald-400" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-2">Wait! Special Offer</h3>
+              <h3 className="text-2xl font-bold mb-2">Before you go — try it free</h3>
               <p className="text-slate-400 mb-6">
-                Get <span className="text-green-400 font-bold">5 extra credits FREE</span> when you purchase any pack in the next 10 minutes!
+                You get <span className="text-green-400 font-bold">3 free generations</span> with no commitment — no credit card, no account needed. See what PromoGen builds for your actual product first.
               </p>
               
               <button
                 onClick={() => {
                   setShowExitIntent(false);
-                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                  onGetStarted();
                 }}
-                className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold text-lg rounded-xl transition-all"
+                className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl transition-all"
               >
-                Claim My Bonus
+                Try Free — No Card Required
               </button>
               
               <button
                 onClick={() => setShowExitIntent(false)}
                 className="mt-4 text-slate-500 text-sm hover:text-slate-300"
               >
-                No thanks, I'll pay full price later
+                No thanks, I'll come back later
               </button>
             </div>
           </div>

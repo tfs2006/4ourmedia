@@ -19,11 +19,11 @@ const DemoBanner: React.FC<DemoBannerProps> = ({ remaining, maxGenerations, onPu
             <Sparkles className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <p className="font-semibold text-amber-200">Demo Mode</p>
+            <p className="font-semibold text-amber-200">Free Trial</p>
             <p className="text-sm text-amber-200/70">
               {remaining > 0 
                 ? `${remaining} of ${maxGenerations} free generations remaining`
-                : 'You\'ve used all free generations'}
+                : 'Free generations used — purchase credits to continue'}
             </p>
           </div>
         </div>
