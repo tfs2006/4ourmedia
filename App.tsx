@@ -1,6 +1,6 @@
-import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, SocialPlatform } from './types';
-import { analyzeProductUrl, generatePromoBackground } from './services/geminiService';
+import { generatePromoAsset } from './services/geminiService';
 import PromoCanvas from './components/PromoCanvas';
 import LoadingStep from './components/LoadingStep';
 import PurchaseModal from './components/PurchaseModalNew';
@@ -103,6 +103,7 @@ function claimDailyCredit(): number {
 }
 
 export default function App() {
+  const loadingTimerIds = useRef<number[]>([]);
   const [viewState, setViewState] = useState<ViewState>('landing');
   const [previousViewState, setPreviousViewState] = useState<ViewState>('landing');
   const [isAdminSessionActive, setIsAdminSessionActive] = useState(() => hasAdminSessionAccess());
@@ -201,6 +202,31 @@ export default function App() {
     window.addEventListener('hashchange', syncViewFromHash);
     return () => window.removeEventListener('hashchange', syncViewFromHash);
   }, []);
+
+  const clearLoadingTimers = useCallback(() => {
+    for (const timerId of loadingTimerIds.current) {
+      window.clearTimeout(timerId);
+    }
+    loadingTimerIds.current = [];
+  }, []);
+
+  const scheduleLoadingProgress = useCallback(() => {
+    clearLoadingTimers();
+    loadingTimerIds.current = [
+      window.setTimeout(() => {
+        setState((current) => current === AppState.ANALYZING ? AppState.GENERATING_IMAGE : current);
+      }, 5000),
+      window.setTimeout(() => {
+        setState((current) => (
+          current === AppState.ANALYZING || current === AppState.GENERATING_IMAGE
+            ? AppState.COMPOSITING
+            : current
+        ));
+      }, 12000),
+    ];
+  }, [clearLoadingTimers]);
+
+  useEffect(() => clearLoadingTimers, [clearLoadingTimers]);
   
   const initializeAuth = async () => {
     setIsLoadingAuth(true);
@@ -463,6 +489,7 @@ export default function App() {
     setActiveCopyVariation(-1);
     setContentKitTab('caption');
     setState(AppState.ANALYZING);
+    scheduleLoadingProgress();
 
     // Auto-select optimal aspect ratio for chosen platform
     const platformRatios: Record<SocialPlatform, AspectRatio> = {
@@ -475,30 +502,18 @@ export default function App() {
     setAspectRatio(platformRatios[platform] || aspectRatio);
 
     try {
-      const analysisResult = await analyzeProductUrl(url, platform);
-      setAnalysis(analysisResult);
-
-      setState(AppState.GENERATING_IMAGE);
-      const imageResult = await generatePromoBackground(
-        analysisResult.imagePrompt,
-        {
-          emotionalTrigger: analysisResult.emotionalTrigger,
-          colors: analysisResult.colors,
-          productCategory: analysisResult.productCategory,
-          visualStyle: analysisResult.visualStyle,
-          audienceProfile: analysisResult.audienceProfile,
-        },
-        platform,
-      );
-
-      setImageBase64(imageResult.imageBase64);
-      if (typeof imageResult.remainingCredits === 'number') {
-        setCreditsRemaining(imageResult.remainingCredits);
+      const promoResult = await generatePromoAsset(url, platform);
+      clearLoadingTimers();
+      setAnalysis(promoResult.analysis);
+      setImageBase64(promoResult.imageBase64);
+      if (typeof promoResult.remainingCredits === 'number') {
+        setCreditsRemaining(promoResult.remainingCredits);
       }
 
       setState(AppState.COMPOSITING);
 
     } catch (err: any) {
+      clearLoadingTimers();
       console.error(err);
       if (err.message?.includes('Demo limit') || err.message?.includes('limit reached') || err.message?.includes('Not enough credits')) {
         setShowPurchaseModal(true);
