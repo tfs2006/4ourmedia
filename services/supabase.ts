@@ -10,6 +10,51 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+function isAuthCallbackPath() {
+  return window.location.pathname === '/auth/callback';
+}
+
+function hasOAuthCode() {
+  const params = new URLSearchParams(window.location.search);
+  return params.has('code');
+}
+
+export async function finalizeAuthRedirect(): Promise<AuthUser | null> {
+  try {
+    if (isAuthCallbackPath() && hasOAuthCode()) {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+      if (error) {
+        throw error;
+      }
+
+      const sessionUser = data.session?.user;
+      if (sessionUser) {
+        await createUserProfile(sessionUser.id, sessionUser.email || '');
+        return {
+          id: sessionUser.id,
+          email: sessionUser.email || '',
+          name: sessionUser.user_metadata?.name || sessionUser.user_metadata?.full_name,
+          avatar: sessionUser.user_metadata?.avatar_url,
+        };
+      }
+    }
+
+    return getCurrentUser();
+  } catch (err) {
+    console.error('Error finalizing auth redirect:', err);
+    return getCurrentUser();
+  }
+}
+
+export function cleanupAuthRedirectUrl() {
+  if (!isAuthCallbackPath()) {
+    return;
+  }
+
+  const nextPath = `${window.location.origin}/#app`;
+  window.history.replaceState({}, '', nextPath);
+}
+
 // ============ Auth Functions ============
 
 export interface AuthUser {

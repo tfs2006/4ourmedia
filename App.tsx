@@ -18,6 +18,8 @@ import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, Arrow
 import { FlameIcon, SparklesIcon } from './components/Icons';
 import { 
   AuthUser, 
+  cleanupAuthRedirectUrl,
+  finalizeAuthRedirect,
   getCurrentUser, 
   onAuthStateChange, 
   signOut, 
@@ -203,12 +205,14 @@ export default function App() {
   const initializeAuth = async () => {
     setIsLoadingAuth(true);
     try {
-      const currentUser = await getCurrentUser();
+      const currentUser = await finalizeAuthRedirect();
       if (currentUser) {
         setUser(currentUser);
         await loadUserCreditsFromSupabase(currentUser.id);
         await checkDailyCreditSupabase(currentUser.id);
         await checkPurchaseReturn(currentUser.id);
+        cleanupAuthRedirectUrl();
+        setViewState('app');
       } else {
         // Fallback to localStorage for non-authenticated users
         loadUserCredits();
