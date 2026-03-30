@@ -105,6 +105,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         <div className="glow-orb-gold"   style={{ width: '300px', height: '300px', top: '30%', left: '50%', opacity: 0.4 }} />
         
         <div className="relative container mx-auto max-w-6xl">
+          <nav aria-label="Quick navigation" className="mb-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3 lg:justify-start">
+            <a
+              href="#pricing"
+              className="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-slate-300 transition-colors hover:border-indigo-400/50 hover:text-indigo-200"
+            >
+              Pricing
+            </a>
+            <a
+              href="#services"
+              className="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-slate-300 transition-colors hover:border-indigo-400/50 hover:text-indigo-200"
+            >
+              Services
+            </a>
+            <a
+              href="#services-faq"
+              className="rounded-full border border-indigo-400/40 bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-indigo-200 transition-colors hover:bg-indigo-500/20"
+            >
+              FAQ
+            </a>
+          </nav>
           <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
             
             {/* Left: Copy */}
@@ -586,7 +606,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       </section>
 
       {/* Services Promo (SEO) */}
-      <section className="py-16 px-4">
+      <section id="services" className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="relative overflow-hidden rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/70 via-slate-900 to-violet-950/60 p-8 md:p-10">
             <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
@@ -648,7 +668,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
       </section>
 
       {/* Services Intent FAQ (SEO) */}
-      <section className="py-12 px-4 bg-slate-900/40">
+      <section id="services-faq" className="py-12 px-4 bg-slate-900/40">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold font-display text-white">
