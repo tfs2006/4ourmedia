@@ -585,6 +585,68 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         </div>
       </section>
 
+      {/* Services Promo (SEO) */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="relative overflow-hidden rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/70 via-slate-900 to-violet-950/60 p-8 md:p-10">
+            <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
+
+            <div className="relative grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-indigo-200">
+                  Growth Services
+                </span>
+                <h2 className="mt-4 text-3xl font-bold font-display leading-tight text-white md:text-4xl">
+                  Need Done-For-You AI Marketing Services?
+                </h2>
+                <p className="mt-4 max-w-3xl text-slate-300 leading-relaxed">
+                  If you are searching for <strong className="text-white">AI marketing services</strong>, <strong className="text-white">social media content services</strong>, <strong className="text-white">YouTube sponsorship research</strong>, or <strong className="text-white">ecommerce promo design services</strong>, our team built a dedicated services hub for strategy + execution.
+                </p>
+                <p className="mt-3 max-w-3xl text-slate-400">
+                  Use PromoGen for instant creative output, then scale faster with 4ourMedia managed services when you want campaign planning, ongoing optimization, and growth support.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {[
+                    'ai marketing services',
+                    'social media marketing services',
+                    'youtube sponsorship research service',
+                    'ecommerce product promo services',
+                    'content strategy for online stores',
+                    'organic traffic growth services'
+                  ].map((keyword, i) => (
+                    <span
+                      key={i}
+                      className="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs font-medium text-slate-300"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-900/60 p-6">
+                <h3 className="text-xl font-bold text-white">Explore 4ourMedia Services</h3>
+                <p className="text-sm leading-relaxed text-slate-300">
+                  See our full breakdown of services, ideal client profiles, and engagement options built to help brands turn content into consistent sales.
+                </p>
+                <a
+                  href="https://promofinder.4ourmedia.com/services.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white transition-all hover:bg-indigo-500"
+                >
+                  Visit AI Marketing Services Page
+                  <ArrowRightIcon size={16} />
+                </a>
+                <p className="text-xs text-slate-500">Opens promofinder.4ourmedia.com in a new tab.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Emotional Mid-Page CTA */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-4xl">
@@ -1054,6 +1116,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               <h3 className="text-2xl font-bold text-white mb-4">
                 Free AI Marketing Tools: What 4ourMedia Offers Beyond PromoGen
               </h3>
+              <p className="mb-4">
+                Looking for hands-on execution instead of DIY software? Explore our <a href="https://promofinder.4ourmedia.com/services.html" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">AI marketing services for brands, creators, and ecommerce teams</a> to get strategy and implementation support.
+              </p>
               <p className="mb-4">
                 Beyond PromoGen, 4ourMedia operates a completely free suite of <strong className="text-white">YouTube intelligence and sponsorship research tools</strong> at <a href="https://promofinder.4ourmedia.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">promofinder.4ourmedia.com</a>. These nine free tools help creators, brands, and marketers understand the YouTube sponsorship landscape:
               </p>
