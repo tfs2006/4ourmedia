@@ -647,6 +647,61 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
         </div>
       </section>
 
+      {/* Services Intent FAQ (SEO) */}
+      <section className="py-12 px-4 bg-slate-900/40">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold font-display text-white">
+              Service Questions People Search Before Hiring
+            </h2>
+            <p className="mt-3 text-slate-400">
+              These answers help compare DIY tools vs done-for-you support before choosing a marketing partner.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: 'What are the best AI marketing services for ecommerce brands?',
+                a: 'The best AI marketing services for ecommerce combine strategy, content production, and conversion optimization. 4ourMedia services are designed for product sellers who want campaign support, not just software access.',
+              },
+              {
+                q: 'Do you offer YouTube sponsorship research services for brands?',
+                a: 'Yes. 4ourMedia provides YouTube sponsorship research workflows to identify creator-fit opportunities, monitor sponsor activity, and support data-backed outreach decisions.',
+              },
+              {
+                q: 'Can I get organic traffic growth services without a long contract?',
+                a: 'Yes. Organic traffic growth services can be scoped around your current stage, goals, and channels. You can start with a focused engagement instead of committing to a large retainer immediately.',
+              },
+              {
+                q: 'Should I use PromoGen only, or combine it with done-for-you social media content services?',
+                a: 'If you want speed and self-serve creative output, PromoGen is ideal. If you also want campaign direction, content planning, and execution support, combining PromoGen with done-for-you services is the fastest path to scale.',
+              },
+            ].map((item, i) => (
+              <details key={i} className="group rounded-xl border border-slate-700 bg-slate-900/60 overflow-hidden">
+                <summary className="flex cursor-pointer items-center justify-between px-5 py-4 font-semibold text-white hover:bg-slate-800/40 transition-colors">
+                  {item.q}
+                  <span className="text-xl text-slate-500 transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <div className="px-5 pb-4 text-sm leading-relaxed text-slate-400">{item.a}</div>
+              </details>
+            ))}
+          </div>
+
+          <div className="mt-7 text-center">
+            <a
+              href="https://promofinder.4ourmedia.com/services.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-indigo-400/30 bg-indigo-500/10 px-5 py-3 text-sm font-semibold text-indigo-200 transition-all hover:bg-indigo-500/20"
+            >
+              Read Full Service Details
+              <ArrowRightIcon size={16} />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Emotional Mid-Page CTA */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-4xl">
