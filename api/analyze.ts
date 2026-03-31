@@ -4,7 +4,7 @@ import { generatePromoAnalysis } from '../lib/promoPipelineRuntime.js';
 import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
-import type { SocialPlatform } from '../types';
+import type { PromoConversionPreset, SocialPlatform } from '../types';
 
 // Simple in-memory cache
 const analysisCache = new Map<string, { data: any; timestamp: number }>();
@@ -97,7 +97,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let chargedCredits = false;
 
   try {
-    const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
+    const { url, platform = 'instagram', conversionPreset = 'auto' } = req.body as {
+      url?: string;
+      platform?: SocialPlatform;
+      conversionPreset?: PromoConversionPreset;
+    };
     
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
@@ -105,6 +109,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const validPlatforms = ['instagram', 'tiktok', 'facebook', 'linkedin', 'youtube'];
     const safePlatform = validPlatforms.includes(platform) ? platform : 'instagram';
+    const safePreset: PromoConversionPreset = ['auto', 'fomo', 'social-proof', 'premium-authority', 'problem-solution'].includes(conversionPreset)
+      ? conversionPreset
+      : 'auto';
 
     const apiKey = process.env.DEMO_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -131,7 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     chargedCredits = true;
 
     // Check cache after charging so analysis-only access is always billed.
-    const cacheKey = `${url}::${safePlatform}`;
+    const cacheKey = `${url}::${safePlatform}::${safePreset}`;
     const cached = getCached(cacheKey);
     if (cached) {
       await logUsageTelemetry({
@@ -143,14 +150,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
         remainingCredits: charge.remaining,
         source: 'vercel-api',
-        metadata: { platform: safePlatform, cacheHit: true },
+        metadata: { platform: safePlatform, conversionPreset: safePreset, cacheHit: true },
       });
       return res.json({ ...cached, remainingCredits: charge.remaining });
     }
 
     const ai = new GoogleGenAI({ apiKey });
     const result = await withTimeout(
-      generatePromoAnalysis(ai, url, safePlatform),
+      generatePromoAnalysis(ai, url, safePlatform, safePreset),
       ANALYSIS_TIMEOUT_MS,
       'Product analysis timed out on the server. Please retry in a moment.'
     );
@@ -165,7 +172,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'vercel-api',
-      metadata: { platform: safePlatform, cacheHit: false },
+      metadata: { platform: safePlatform, conversionPreset: safePreset, cacheHit: false },
     });
 
     res.json({ ...result, remainingCredits: charge.remaining });

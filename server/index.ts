@@ -13,7 +13,7 @@ import { generatePromoAnalysis, generatePromoAsset, generatePromoImage } from '.
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBilling';
 import { logUsageTelemetry } from '../lib/usageTelemetry';
 import { generateVideoAsset } from '../lib/videoGeneration';
-import type { SocialPlatform } from '../types';
+import type { PromoConversionPreset, SocialPlatform } from '../types';
 import {
   DEMO_CONFIG,
   canUseDemo,
@@ -341,7 +341,15 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
   const requestIp = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip || 'unknown';
 
   try {
-    const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
+    const { url, platform = 'instagram', conversionPreset = 'auto' } = req.body as {
+      url?: string;
+      platform?: SocialPlatform;
+      conversionPreset?: PromoConversionPreset;
+    };
+    const safePreset: PromoConversionPreset = ['auto', 'fomo', 'social-proof', 'premium-authority', 'problem-solution'].includes(conversionPreset)
+      ? conversionPreset
+      : 'auto';
+
 
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
@@ -387,7 +395,7 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
     chargedCredits = true;
 
     // Check cache after charging so standalone analysis remains monetized.
-    const cacheKey = `${url}::${platform}`;
+    const cacheKey = `${url}::${platform}::${safePreset}`;
     const cached = getCachedAnalysis(cacheKey);
     if (cached) {
       await logUsageTelemetry({
@@ -399,12 +407,12 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
         creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
         remainingCredits: charge.remaining,
         source: 'express',
-        metadata: { platform, cacheHit: true },
+        metadata: { platform, conversionPreset: safePreset, cacheHit: true },
       });
       return res.json({ ...cached, remainingCredits: charge.remaining });
     }
 
-    const result = await generatePromoAnalysis(ai, url, platform);
+    const result = await generatePromoAnalysis(ai, url, platform, safePreset);
 
     // Cache the result to avoid duplicate API calls
     setCachedAnalysis(cacheKey, result);
@@ -424,7 +432,7 @@ app.post('/api/analyze', requireSetup, async (req, res) => {
       creditsCharged: FEATURE_PRICING['analysis-only'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'express',
-      metadata: { platform, cacheHit: false },
+      metadata: { platform, conversionPreset: safePreset, cacheHit: false },
     });
 
     res.json({ ...result, remainingCredits: charge.remaining });
@@ -452,14 +460,18 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
   let chargedCredits = false;
   const requestIp = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip || 'unknown';
   try {
-    const { imagePrompt, emotionalTrigger, colors, productCategory, platform, visualStyle } = req.body as {
+    const { imagePrompt, emotionalTrigger, colors, productCategory, platform, visualStyle, conversionPreset = 'auto' } = req.body as {
       imagePrompt?: string;
       emotionalTrigger?: string;
       colors?: string[];
       productCategory?: string;
       platform?: SocialPlatform;
       visualStyle?: string;
+      conversionPreset?: PromoConversionPreset;
     };
+    const safePreset: PromoConversionPreset = ['auto', 'fomo', 'social-proof', 'premium-authority', 'problem-solution'].includes(conversionPreset)
+      ? conversionPreset
+      : 'auto';
     const sessionId = req.headers['x-session-id'] as string;
     const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
 
@@ -514,6 +526,7 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
       productCategory,
       platform,
       visualStyle,
+      conversionPreset: safePreset,
     });
 
     // Track daily usage for cost control (image generation is the expensive part)
@@ -540,7 +553,7 @@ app.post('/api/generate-image', requireSetup, async (req, res) => {
       creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'express',
-      metadata: { mode: 'standalone-image' },
+      metadata: { conversionPreset: safePreset, mode: 'standalone-image' },
     });
 
     res.json({ imageBase64: base64Data, demoStatus, remainingCredits: charge.remaining });
@@ -575,10 +588,18 @@ app.post('/api/generate-promo', requireSetup, async (req, res) => {
       return res.status(401).json({ error: 'Please sign in to generate promos.', requiresAuth: true });
     }
 
-    const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
+    const { url, platform = 'instagram', conversionPreset = 'auto' } = req.body as {
+      url?: string;
+      platform?: SocialPlatform;
+      conversionPreset?: PromoConversionPreset;
+    };
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
     }
+
+    const safePreset: PromoConversionPreset = ['auto', 'fomo', 'social-proof', 'premium-authority', 'problem-solution'].includes(conversionPreset)
+      ? conversionPreset
+      : 'auto';
 
     if (IS_DEMO_SERVER) {
       const dailyCheck = checkDailyLimit();
@@ -613,7 +634,7 @@ app.post('/api/generate-promo', requireSetup, async (req, res) => {
     const ai = IS_DEMO_SERVER
       ? getAIClient(DEMO_CONFIG.demoApiKey)
       : getAIClient();
-    const promo = await generatePromoAsset(ai, url, platform);
+    const promo = await generatePromoAsset(ai, url, platform, safePreset);
 
     if (IS_DEMO_SERVER) {
       incrementDailyUsage('analysis');
@@ -638,7 +659,7 @@ app.post('/api/generate-promo', requireSetup, async (req, res) => {
       creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'express',
-      metadata: { platform, mode: 'atomic-promo' },
+      metadata: { platform, conversionPreset: safePreset, mode: 'atomic-promo' },
     });
 
     res.json({ ...promo, demoStatus, remainingCredits: charge.remaining });

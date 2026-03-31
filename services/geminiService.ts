@@ -1,4 +1,4 @@
-import type { GeneratedAsset, ProductAnalysis, SocialPlatform } from "../types";
+import type { GeneratedAsset, ProductAnalysis, PromoConversionPreset, SocialPlatform } from "../types";
 import { getSession } from './supabase';
 
 const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
@@ -34,7 +34,11 @@ async function getAuthHeaders() {
   return headers;
 }
 
-export const analyzeProductUrl = async (url: string, platform: SocialPlatform = 'instagram'): Promise<ProductAnalysis> => {
+export const analyzeProductUrl = async (
+  url: string,
+  platform: SocialPlatform = 'instagram',
+  conversionPreset: PromoConversionPreset = 'auto'
+): Promise<ProductAnalysis> => {
   const headers = await getAuthHeaders();
 
   let response: Response;
@@ -42,7 +46,7 @@ export const analyzeProductUrl = async (url: string, platform: SocialPlatform = 
     response = await fetchWithTimeout(`${API_BASE}/api/analyze`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ url, platform })
+      body: JSON.stringify({ url, platform, conversionPreset })
     }, ANALYZE_TIMEOUT_MS);
   } catch (error: any) {
     if (error?.name === 'AbortError') {
@@ -88,7 +92,8 @@ export interface GenerateImageResult {
 export const generatePromoBackground = async (
   imagePrompt: string,
   context?: Pick<ProductAnalysis, 'emotionalTrigger' | 'colors' | 'productCategory' | 'visualStyle' | 'audienceProfile'>,
-  platform?: SocialPlatform
+  platform?: SocialPlatform,
+  conversionPreset: PromoConversionPreset = 'auto'
 ): Promise<GenerateImageResult> => {
   const headers = await getAuthHeaders();
 
@@ -105,6 +110,7 @@ export const generatePromoBackground = async (
         visualStyle: context?.visualStyle,
         toneOfVoice: context?.audienceProfile?.toneOfVoice,
         platform: platform || 'instagram',
+        conversionPreset,
       })
     }, GENERATE_TIMEOUT_MS);
   } catch (error: any) {
@@ -150,7 +156,8 @@ export const generatePromoBackground = async (
 
 export const generatePromoAsset = async (
   url: string,
-  platform: SocialPlatform = 'instagram'
+  platform: SocialPlatform = 'instagram',
+  conversionPreset: PromoConversionPreset = 'auto'
 ): Promise<GeneratedAsset> => {
   const headers = await getAuthHeaders();
 
@@ -159,7 +166,7 @@ export const generatePromoAsset = async (
     response = await fetchWithTimeout(`${API_BASE}/api/generate-promo`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ url, platform })
+      body: JSON.stringify({ url, platform, conversionPreset })
     }, GENERATE_TIMEOUT_MS);
   } catch (error: any) {
     if (error?.name === 'AbortError') {

@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, SocialPlatform } from './types';
+import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, PromoConversionPreset, SocialPlatform } from './types';
 import { generatePromoAsset } from './services/geminiService';
 import LandingPage from './components/LandingPageNew';
 import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/BrandKit';
@@ -38,6 +38,39 @@ const RefundPolicy = lazy(() => import('./components/LegalPages').then((module) 
 const ContactPage = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.ContactPage })));
 
 type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
+
+const CONVERSION_PRESETS: Array<{ id: PromoConversionPreset; label: string; blurb: string; trigger: string }> = [
+  {
+    id: 'auto',
+    label: 'Auto Best-Fit',
+    blurb: 'AI picks the highest-converting psychology approach automatically.',
+    trigger: 'Adaptive',
+  },
+  {
+    id: 'fomo',
+    label: 'Urgency / FOMO',
+    blurb: 'Scarcity and momentum messaging for fast action.',
+    trigger: 'Fear of Missing Out',
+  },
+  {
+    id: 'social-proof',
+    label: 'Social Proof',
+    blurb: 'Trust-forward framing that signals popularity and validation.',
+    trigger: 'Belonging + Trust',
+  },
+  {
+    id: 'premium-authority',
+    label: 'Premium Authority',
+    blurb: 'High-value positioning with status and expertise cues.',
+    trigger: 'Status + Identity',
+  },
+  {
+    id: 'problem-solution',
+    label: 'Problem → Solution',
+    blurb: 'Clear pain-to-relief framing for practical buyers.',
+    trigger: 'Pain Avoidance',
+  },
+];
 
 function PageLoader({ label }: { label: string }) {
   return (
@@ -182,6 +215,7 @@ export default function App() {
   
   // Platform & social content state
   const [platform, setPlatform] = useState<SocialPlatform>('instagram');
+  const [conversionPreset, setConversionPreset] = useState<PromoConversionPreset>('auto');
   const [contentKitTab, setContentKitTab] = useState<'caption' | 'hashtags' | 'hook' | 'email'>('caption');
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -448,6 +482,7 @@ export default function App() {
   const handleLoadFromHistory = (item: HistoryItem) => {
     setUrl(item.url);
     setAnalysis(item.analysis);
+    setConversionPreset(item.analysis.appliedPreset || 'auto');
     setImageBase64(item.backgroundImage);
     setFinalImage(item.finalImage);
     setState(AppState.COMPLETE);
@@ -566,7 +601,7 @@ export default function App() {
     setAspectRatio(platformRatios[platform] || aspectRatio);
 
     try {
-      const promoResult = await generatePromoAsset(url, platform);
+      const promoResult = await generatePromoAsset(url, platform, conversionPreset);
       clearLoadingTimers();
       setAnalysis(promoResult.analysis);
       setImageBase64(promoResult.imageBase64);
@@ -1263,6 +1298,40 @@ export default function App() {
                 </p>
               </div>
 
+              {/* Conversion Preset Selector */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Target className="w-4 h-4 text-indigo-400" />
+                  Conversion Preset (Optional)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {CONVERSION_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => setConversionPreset(preset.id)}
+                      className={`text-left rounded-xl border p-3 transition-all ${
+                        conversionPreset === preset.id
+                          ? 'bg-indigo-500/20 border-indigo-500/60 text-indigo-200'
+                          : 'bg-slate-800/40 border-slate-700 text-slate-300 hover:border-slate-500'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wide">{preset.label}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">
+                          {preset.trigger}
+                        </span>
+                      </div>
+                      <p className="text-xs mt-1.5 text-slate-400 leading-relaxed">{preset.blurb}</p>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                  Leave on <strong className="text-slate-300">Auto Best-Fit</strong> for the highest no-thinking experience.
+                </p>
+              </div>
+
               {/* Branding Customization (Foldable) */}
               <div>
                  <button 
@@ -1495,6 +1564,13 @@ export default function App() {
                       <div className="pt-2 border-t border-slate-700">
                         <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Psychology Target</span>
                         <p className="text-slate-400 text-xs mt-0.5 capitalize">{effectiveAnalysis.emotionalTrigger.replace(/_/g, ' ')}</p>
+                      </div>
+                    )}
+
+                    {analysis?.presetStrategy && (
+                      <div className="pt-2 border-t border-slate-700">
+                        <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Applied Conversion Strategy</span>
+                        <p className="text-slate-300 text-xs mt-0.5">{analysis.presetStrategy}</p>
                       </div>
                     )}
                   </div>

@@ -1,5 +1,7 @@
 export type SocialPlatform = 'instagram' | 'tiktok' | 'facebook' | 'linkedin' | 'youtube';
 
+export type PromoConversionPreset = 'auto' | 'fomo' | 'social-proof' | 'premium-authority' | 'problem-solution';
+
 export type VideoGenerationMode = 'assets' | 'frames';
 export type VideoAspectRatio = '16:9' | '9:16';
 export type VideoResolution = '720p' | '1080p';
@@ -67,6 +69,9 @@ export interface ProductAnalysis {
   // Enhanced audience insights
   audienceProfile?: AudienceProfile;
   copyVariations?: CopyVariation[];
+  // Optional preset strategy metadata for low-friction high-conversion generation
+  appliedPreset?: PromoConversionPreset;
+  presetStrategy?: string;
 }
 
 export interface AudienceProfile {

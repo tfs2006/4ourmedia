@@ -4,7 +4,7 @@ import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
 import { generatePromoAsset } from '../lib/promoPipelineRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
-import type { SocialPlatform } from '../types';
+import type { PromoConversionPreset, SocialPlatform } from '../types';
 
 const sessionUsage = new Map<string, { generationsUsed: number }>();
 const MAX_DEMO_GENERATIONS = 3;
@@ -76,10 +76,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let chargedCredits = false;
 
   try {
-    const { url, platform = 'instagram' } = req.body as { url?: string; platform?: SocialPlatform };
+    const { url, platform = 'instagram', conversionPreset = 'auto' } = req.body as {
+      url?: string;
+      platform?: SocialPlatform;
+      conversionPreset?: PromoConversionPreset;
+    };
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
     }
+
+    const safePreset: PromoConversionPreset = ['auto', 'fomo', 'social-proof', 'premium-authority', 'problem-solution'].includes(conversionPreset)
+      ? conversionPreset
+      : 'auto';
 
     if (process.env.DEMO_MODE === 'true' && sessionId) {
       const usage = sessionUsage.get(sessionId) || { generationsUsed: 0 };
@@ -118,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ai = new GoogleGenAI({ apiKey });
     const promo = await withTimeout(
-      generatePromoAsset(ai, url, platform),
+      generatePromoAsset(ai, url, platform, safePreset),
       PROMO_TIMEOUT_MS,
       'Promo generation timed out on the server. Please retry the same URL.'
     );
@@ -143,7 +151,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'vercel-api',
-      metadata: { platform, mode: 'atomic-promo' },
+      metadata: { platform, conversionPreset: safePreset, mode: 'atomic-promo' },
     });
 
     return res.json({ ...promo, demoStatus, remainingCredits: charge.remaining });

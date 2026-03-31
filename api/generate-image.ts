@@ -4,7 +4,7 @@ import { generatePromoImage } from '../lib/promoPipelineRuntime.js';
 import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
-import type { SocialPlatform } from '../types';
+import type { PromoConversionPreset, SocialPlatform } from '../types';
 
 // Session tracking for demo limits (backup - Supabase is primary)
 const sessionUsage = new Map<string, { generationsUsed: number }>();
@@ -83,14 +83,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let chargedCredits = false;
 
   try {
-    const { imagePrompt, emotionalTrigger, colors, productCategory, platform, visualStyle } = req.body as {
+    const { imagePrompt, emotionalTrigger, colors, productCategory, platform, visualStyle, conversionPreset = 'auto' } = req.body as {
       imagePrompt?: string;
       emotionalTrigger?: string;
       colors?: string[];
       productCategory?: string;
       platform?: SocialPlatform;
       visualStyle?: string;
+      conversionPreset?: PromoConversionPreset;
     };
+
+    const safePreset: PromoConversionPreset = ['auto', 'fomo', 'social-proof', 'premium-authority', 'problem-solution'].includes(conversionPreset)
+      ? conversionPreset
+      : 'auto';
 
     if (!imagePrompt) {
       return res.status(400).json({ error: 'imagePrompt is required' });
@@ -141,6 +146,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         productCategory,
         platform,
         visualStyle,
+        conversionPreset: safePreset,
       }),
       IMAGE_TIMEOUT_MS,
       'Image generation timed out on the server. Please retry.'
@@ -167,7 +173,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       creditsCharged: FEATURE_PRICING['promo-generation'].creditsRequired,
       remainingCredits: charge.remaining,
       source: 'vercel-api',
-      metadata: { mode: 'standalone-image' },
+      metadata: { conversionPreset: safePreset, mode: 'standalone-image' },
     });
 
     res.json({ imageBase64: base64Data, demoStatus, remainingCredits: charge.remaining });
