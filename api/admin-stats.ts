@@ -154,6 +154,17 @@ async function getAdminStats() {
     estimatedRevenue: number;
     estimatedProfit: number;
   }>();
+  const presetStats = new Map<string, {
+    preset: string;
+    totalCalls: number;
+    successfulCalls: number;
+    failedCalls: number;
+    creditsCharged: number;
+    estimatedCost: number;
+    estimatedRevenue: number;
+    estimatedProfit: number;
+    endpoints: Set<string>;
+  }>();
 
   for (const row of costData) {
     const metadata = typeof row.metadata === 'object' && row.metadata ? row.metadata as Record<string, any> : {};
@@ -166,6 +177,9 @@ async function getAdminStats() {
     const rowCredits = typeof metadata.creditsCharged === 'number'
       ? metadata.creditsCharged
       : 0;
+    const rowPreset = typeof metadata.conversionPreset === 'string'
+      ? metadata.conversionPreset.trim()
+      : '';
 
     estimatedCost += rowCost;
     estimatedRevenue += rowRevenue;
@@ -190,6 +204,30 @@ async function getAdminStats() {
     current.estimatedRevenue += rowRevenue;
     current.estimatedProfit = current.estimatedRevenue - current.estimatedCost;
     endpointStats.set(row.endpoint, current);
+
+    if (rowPreset) {
+      const presetCurrent = presetStats.get(rowPreset) || {
+        preset: rowPreset,
+        totalCalls: 0,
+        successfulCalls: 0,
+        failedCalls: 0,
+        creditsCharged: 0,
+        estimatedCost: 0,
+        estimatedRevenue: 0,
+        estimatedProfit: 0,
+        endpoints: new Set<string>(),
+      };
+
+      presetCurrent.totalCalls += 1;
+      if (row.success) presetCurrent.successfulCalls += 1;
+      else presetCurrent.failedCalls += 1;
+      presetCurrent.creditsCharged += rowCredits;
+      presetCurrent.estimatedCost += rowCost;
+      presetCurrent.estimatedRevenue += rowRevenue;
+      presetCurrent.estimatedProfit = presetCurrent.estimatedRevenue - presetCurrent.estimatedCost;
+      presetCurrent.endpoints.add(row.endpoint);
+      presetStats.set(rowPreset, presetCurrent);
+    }
   }
 
   const byEndpoint = Array.from(endpointStats.values())
@@ -197,6 +235,23 @@ async function getAdminStats() {
     .map((entry) => ({
       ...entry,
       estimatedMargin: entry.estimatedRevenue > 0 ? entry.estimatedProfit / entry.estimatedRevenue : null,
+    }));
+
+  const byPreset = Array.from(presetStats.values())
+    .sort((left, right) => right.estimatedRevenue - left.estimatedRevenue)
+    .map((entry) => ({
+      preset: entry.preset,
+      totalCalls: entry.totalCalls,
+      successfulCalls: entry.successfulCalls,
+      failedCalls: entry.failedCalls,
+      successRate: entry.totalCalls > 0 ? entry.successfulCalls / entry.totalCalls : null,
+      creditsCharged: entry.creditsCharged,
+      estimatedCost: entry.estimatedCost,
+      estimatedRevenue: entry.estimatedRevenue,
+      estimatedProfit: entry.estimatedProfit,
+      estimatedMargin: entry.estimatedRevenue > 0 ? entry.estimatedProfit / entry.estimatedRevenue : null,
+      endpointCount: entry.endpoints.size,
+      endpoints: Array.from(entry.endpoints).sort(),
     }));
 
   const estimatedProfit = estimatedRevenue - estimatedCost;
@@ -212,6 +267,7 @@ async function getAdminStats() {
       totalCreditsCharged,
       limitReached: (monthlyCalls || 0) >= GLOBAL_MONTHLY_LIMIT || (dailyCalls || 0) >= GLOBAL_DAILY_LIMIT,
       byEndpoint,
+      byPreset,
     },
     limits: {
       globalMonthly: GLOBAL_MONTHLY_LIMIT,

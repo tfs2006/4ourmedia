@@ -29,6 +29,21 @@ interface EndpointStats {
   estimatedMargin: number | null;
 }
 
+interface PresetStats {
+  preset: string;
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  successRate: number | null;
+  creditsCharged: number;
+  estimatedCost: number;
+  estimatedRevenue: number;
+  estimatedProfit: number;
+  estimatedMargin: number | null;
+  endpointCount: number;
+  endpoints: string[];
+}
+
 interface AdminStatsResponse {
   success: boolean;
   timestamp: string;
@@ -46,6 +61,7 @@ interface AdminStatsResponse {
     totalCreditsCharged: number;
     limitReached: boolean;
     byEndpoint: EndpointStats[];
+    byPreset?: PresetStats[];
   } | null;
   limits: {
     globalMonthly: number;
@@ -89,6 +105,18 @@ function formatEndpointName(endpoint: string) {
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
+}
+
+function formatPresetName(preset: string) {
+  const known: Record<string, string> = {
+    auto: 'Auto Best-Fit',
+    fomo: 'Urgency / FOMO',
+    'social-proof': 'Social Proof',
+    'premium-authority': 'Premium Authority',
+    'problem-solution': 'Problem to Solution',
+  };
+
+  return known[preset] || preset;
 }
 
 function toneClasses(tone: StatCardProps['tone']) {
@@ -188,6 +216,7 @@ export default function AdminDashboardPage({ onBack, onAccessGranted, onAccessRe
   }, []);
 
   const topEndpoint = useMemo(() => stats?.usage?.byEndpoint?.[0] || null, [stats]);
+  const topPreset = useMemo(() => stats?.usage?.byPreset?.[0] || null, [stats]);
 
   const handleClearAccess = () => {
     clearAdminSession();
@@ -447,6 +476,42 @@ export default function AdminDashboardPage({ onBack, onAccessGranted, onAccessRe
                       </div>
                     ) : (
                       <p className="mt-4 text-sm text-slate-400">No endpoint data has been logged yet.</p>
+                    )}
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/20">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Preset Performance</p>
+                    {stats.usage.byPreset && stats.usage.byPreset.length > 0 ? (
+                      <div className="mt-4 space-y-3">
+                        {topPreset && (
+                          <div className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-slate-950/40 p-4">
+                            <p className="text-sm font-semibold text-indigo-200">Top preset: {formatPresetName(topPreset.preset)}</p>
+                            <p className="mt-1 text-xs text-slate-400">
+                              {topPreset.totalCalls} calls, {formatUsd(topPreset.estimatedRevenue)} revenue, {formatPercent(topPreset.estimatedMargin)} margin
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          {stats.usage.byPreset.slice(0, 5).map((preset) => (
+                            <div key={preset.preset} className="rounded-2xl border border-slate-800 bg-slate-950/60 p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-sm font-semibold text-white">{formatPresetName(preset.preset)}</p>
+                                <span className="text-xs text-slate-500">{preset.totalCalls} calls</span>
+                              </div>
+                              <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-400">
+                                <span>Revenue: {formatUsd(preset.estimatedRevenue)}</span>
+                                <span>Profit: {formatUsd(preset.estimatedProfit)}</span>
+                                <span>Success: {formatPercent(preset.successRate)}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-4 text-sm text-slate-400">
+                        No preset telemetry yet. Generate promos using presets and refresh this dashboard.
+                      </p>
                     )}
                   </div>
 
