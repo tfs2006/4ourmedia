@@ -6,8 +6,7 @@
   "functions": {
     "api/**/*.ts": {
       "memory": 1024,
-      "maxDuration": 60,
-      "includeFiles": "api/lib/**"
+      "maxDuration": 60
     },
     "api/og.tsx": {
       "memory": 256,
@@ -17,6 +16,9 @@
   "rewrites": [
     { "source": "/api/admin/stats", "destination": "/api/admin-stats" },
     { "source": "/api/setup/status", "destination": "/api/health" },
+    { "source": "/api/purchase/checkout", "destination": "/api/purchase?op=checkout" },
+    { "source": "/api/purchase/verify", "destination": "/api/purchase?op=verify" },
+    { "source": "/api/purchase/info", "destination": "/api/purchase?op=info" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
