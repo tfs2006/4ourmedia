@@ -39,6 +39,31 @@ const ContactPage = lazy(() => import('./components/LegalPages').then((module) =
 
 type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
 
+const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
+  '/app': 'app',
+  '/privacy': 'privacy',
+  '/terms': 'terms',
+  '/refund': 'refund',
+  '/contact': 'contact',
+  '/free-tools': 'free-tools',
+  '/perplexity': 'perplexity',
+  '/veo-studio': 'veo-studio',
+  '/admin': 'admin',
+};
+
+const VIEW_STATE_TO_PATH: Partial<Record<ViewState, string>> = {
+  landing: '/',
+  app: '/app',
+  privacy: '/privacy',
+  terms: '/terms',
+  refund: '/refund',
+  contact: '/contact',
+  'free-tools': '/free-tools',
+  perplexity: '/perplexity',
+  'veo-studio': '/veo-studio',
+  admin: '/admin',
+};
+
 const CONVERSION_PRESETS: Array<{ id: PromoConversionPreset; label: string; blurb: string; trigger: string }> = [
   {
     id: 'auto',
@@ -262,18 +287,56 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const syncViewFromHash = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash === 'admin') {
-        setViewState('admin');
-      }
-    };
+  const syncViewFromLocation = useCallback(() => {
+    const pathname = window.location.pathname.toLowerCase();
+    if (pathname === '/auth/callback') {
+      return;
+    }
 
-    syncViewFromHash();
-    window.addEventListener('hashchange', syncViewFromHash);
-    return () => window.removeEventListener('hashchange', syncViewFromHash);
+    const hash = window.location.hash.replace('#', '').toLowerCase();
+    if (hash === 'admin') {
+      setViewState('admin');
+      return;
+    }
+    if (hash === 'app') {
+      setViewState('app');
+      return;
+    }
+
+    const mapped = PATH_TO_VIEW_STATE[pathname];
+    if (mapped) {
+      setViewState(mapped);
+    }
   }, []);
+
+  useEffect(() => {
+    syncViewFromLocation();
+    window.addEventListener('popstate', syncViewFromLocation);
+    window.addEventListener('hashchange', syncViewFromLocation);
+    return () => {
+      window.removeEventListener('popstate', syncViewFromLocation);
+      window.removeEventListener('hashchange', syncViewFromLocation);
+    };
+  }, [syncViewFromLocation]);
+
+  useEffect(() => {
+    if (window.location.pathname.toLowerCase() === '/auth/callback') {
+      return;
+    }
+
+    const targetPath = VIEW_STATE_TO_PATH[viewState];
+    if (!targetPath) {
+      return;
+    }
+
+    const currentPath = window.location.pathname;
+    const currentHash = window.location.hash;
+    const shouldClearHash = currentHash === '#admin' || currentHash === '#app';
+
+    if (currentPath !== targetPath || shouldClearHash) {
+      window.history.pushState({}, '', targetPath);
+    }
+  }, [viewState]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -412,14 +475,10 @@ export default function App() {
     }
 
     setPreviousViewState(viewState === 'admin' ? 'landing' : viewState);
-    window.location.hash = 'admin';
     setViewState('admin');
   };
 
   const closeAdminDashboard = () => {
-    if (window.location.hash === '#admin') {
-      window.history.replaceState({}, '', `${window.location.pathname}${window.location.search}`);
-    }
     setViewState(previousViewState === 'admin' ? 'landing' : previousViewState);
   };
   
