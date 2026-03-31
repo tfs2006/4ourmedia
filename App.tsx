@@ -40,6 +40,7 @@ const ContactPage = lazy(() => import('./components/LegalPages').then((module) =
 type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
 
 const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
+  '/': 'landing',
   '/app': 'app',
   '/privacy': 'privacy',
   '/terms': 'terms',
