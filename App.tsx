@@ -6,7 +6,7 @@ import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/Bra
 import HistoryPanel, { addToHistory } from './components/HistoryPanel';
 import { FEATURE_PRICING } from './lib/pricing';
 import { clearAdminSession, hasAdminSessionAccess } from './lib/adminSession';
-import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail, Shield } from 'lucide-react';
+import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, TrendingUp, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail, Shield } from 'lucide-react';
 import { FlameIcon, SparklesIcon } from './components/Icons';
 import { 
   AuthUser, 
