@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface AppErrorBoundaryProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface AppErrorBoundaryState {
@@ -9,7 +9,41 @@ interface AppErrorBoundaryState {
   errorMessage: string;
 }
 
-export default class AppErrorBoundary extends React.Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
+const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
+
+function reportClientError(error: Error, errorInfo: ErrorInfo) {
+  try {
+    const payload = {
+      message: error?.message || 'Unknown runtime error',
+      stack: error?.stack || '',
+      componentStack: errorInfo?.componentStack || '',
+      route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+      userAgent: window.navigator.userAgent,
+      source: 'react-error-boundary',
+    };
+
+    const body = JSON.stringify(payload);
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' });
+      const sent = navigator.sendBeacon(`${API_BASE}/api/client-error`, blob);
+      if (sent) return;
+    }
+
+    void fetch(`${API_BASE}/api/client-error`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => undefined);
+  } catch {
+    // Avoid cascading failures from error reporting itself.
+  }
+}
+
+export default class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
+  declare props: AppErrorBoundaryProps;
+  declare state: AppErrorBoundaryState;
+
   constructor(props: AppErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -25,8 +59,9 @@ export default class AppErrorBoundary extends React.Component<AppErrorBoundaryPr
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('AppErrorBoundary caught error:', error, errorInfo);
+    reportClientError(error, errorInfo);
   }
 
   handleReload = () => {

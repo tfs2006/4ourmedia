@@ -137,7 +137,7 @@ async function getAdminStats() {
   const [{ count: dailyCalls }, { count: monthlyCalls }, usageResult] = await Promise.all([
     supabase.from('api_usage').select('*', { count: 'exact', head: true }).gte('created_at', startOfDay),
     supabase.from('api_usage').select('*', { count: 'exact', head: true }).gte('created_at', startOfMonth),
-    supabase.from('api_usage').select('endpoint, success, metadata').gte('created_at', startOfMonth),
+    supabase.from('api_usage').select('endpoint, success, metadata, created_at').gte('created_at', startOfMonth),
   ]);
 
   const costData = usageResult.data || [];
@@ -165,6 +165,14 @@ async function getAdminStats() {
     estimatedProfit: number;
     endpoints: Set<string>;
   }>();
+  const clientErrorFingerprints = new Map<string, {
+    fingerprint: string;
+    count: number;
+    latestMessage: string;
+    latestRoute: string | null;
+    lastSeen: string;
+  }>();
+  let clientErrorEvents = 0;
 
   for (const row of costData) {
     const metadata = typeof row.metadata === 'object' && row.metadata ? row.metadata as Record<string, any> : {};
@@ -180,6 +188,7 @@ async function getAdminStats() {
     const rowPreset = typeof metadata.conversionPreset === 'string'
       ? metadata.conversionPreset.trim()
       : '';
+    const rowCreatedAt = typeof row.created_at === 'string' ? row.created_at : new Date(0).toISOString();
 
     estimatedCost += rowCost;
     estimatedRevenue += rowRevenue;
@@ -228,6 +237,32 @@ async function getAdminStats() {
       presetCurrent.endpoints.add(row.endpoint);
       presetStats.set(rowPreset, presetCurrent);
     }
+
+    if (row.endpoint === 'client-error') {
+      clientErrorEvents += 1;
+      const fingerprint = typeof metadata.errorFingerprint === 'string' && metadata.errorFingerprint.trim()
+        ? metadata.errorFingerprint.trim()
+        : 'unknown';
+      const message = typeof metadata.errorMessage === 'string' ? metadata.errorMessage : 'Unknown client error';
+      const route = typeof metadata.errorRoute === 'string' && metadata.errorRoute.trim() ? metadata.errorRoute : null;
+
+      const current = clientErrorFingerprints.get(fingerprint) || {
+        fingerprint,
+        count: 0,
+        latestMessage: message,
+        latestRoute: route,
+        lastSeen: rowCreatedAt,
+      };
+
+      current.count += 1;
+      if (rowCreatedAt >= current.lastSeen) {
+        current.lastSeen = rowCreatedAt;
+        current.latestMessage = message;
+        current.latestRoute = route;
+      }
+
+      clientErrorFingerprints.set(fingerprint, current);
+    }
   }
 
   const byEndpoint = Array.from(endpointStats.values())
@@ -254,6 +289,14 @@ async function getAdminStats() {
       endpoints: Array.from(entry.endpoints).sort(),
     }));
 
+  const clientErrors = {
+    totalEvents: clientErrorEvents,
+    uniqueFingerprints: clientErrorFingerprints.size,
+    topFingerprints: Array.from(clientErrorFingerprints.values())
+      .sort((left, right) => right.count - left.count)
+      .slice(0, 8),
+  };
+
   const estimatedProfit = estimatedRevenue - estimatedCost;
 
   return {
@@ -268,6 +311,7 @@ async function getAdminStats() {
       limitReached: (monthlyCalls || 0) >= GLOBAL_MONTHLY_LIMIT || (dailyCalls || 0) >= GLOBAL_DAILY_LIMIT,
       byEndpoint,
       byPreset,
+      clientErrors,
     },
     limits: {
       globalMonthly: GLOBAL_MONTHLY_LIMIT,

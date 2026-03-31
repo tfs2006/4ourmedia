@@ -44,6 +44,14 @@ interface PresetStats {
   endpoints: string[];
 }
 
+interface ClientErrorFingerprint {
+  fingerprint: string;
+  count: number;
+  latestMessage: string;
+  latestRoute: string | null;
+  lastSeen: string;
+}
+
 interface AdminStatsResponse {
   success: boolean;
   timestamp: string;
@@ -62,6 +70,11 @@ interface AdminStatsResponse {
     limitReached: boolean;
     byEndpoint: EndpointStats[];
     byPreset?: PresetStats[];
+    clientErrors?: {
+      totalEvents: number;
+      uniqueFingerprints: number;
+      topFingerprints: ClientErrorFingerprint[];
+    };
   } | null;
   limits: {
     globalMonthly: number;
@@ -511,6 +524,42 @@ export default function AdminDashboardPage({ onBack, onAccessGranted, onAccessRe
                     ) : (
                       <p className="mt-4 text-sm text-slate-400">
                         No preset telemetry yet. Generate promos using presets and refresh this dashboard.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/20">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Frontend Error Signals</p>
+                    {stats.usage.clientErrors && stats.usage.clientErrors.totalEvents > 0 ? (
+                      <div className="mt-4 space-y-3">
+                        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4">
+                          <p className="text-sm font-semibold text-rose-200">
+                            {stats.usage.clientErrors.totalEvents} client error events
+                          </p>
+                          <p className="mt-1 text-xs text-slate-300">
+                            {stats.usage.clientErrors.uniqueFingerprints} unique fingerprints this month
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          {stats.usage.clientErrors.topFingerprints.slice(0, 5).map((item) => (
+                            <div key={item.fingerprint} className="rounded-2xl border border-slate-800 bg-slate-950/60 p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-xs font-semibold text-slate-300">{item.fingerprint}</p>
+                                <span className="text-xs text-slate-500">{item.count} hits</span>
+                              </div>
+                              <p className="mt-1 text-xs text-slate-400 line-clamp-2">{item.latestMessage}</p>
+                              {item.latestRoute && (
+                                <p className="mt-1 text-[11px] text-slate-500">Route: {item.latestRoute}</p>
+                              )}
+                              <p className="mt-1 text-[11px] text-slate-600">Last seen: {new Date(item.lastSeen).toLocaleString()}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-4 text-sm text-slate-400">
+                        No client runtime errors captured this month.
                       </p>
                     )}
                   </div>
