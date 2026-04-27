@@ -7,6 +7,7 @@ export interface BotProductPlan {
   description: string;
   badge?: string;
   fileName: string;
+  contentType: 'text/markdown';
   features: string[];
 }
 
@@ -18,6 +19,7 @@ export const BOT_PRODUCT_PLANS: Record<BotPlanId, BotProductPlan> = {
     description: 'Momentum + Mean Reversion starter templates with quick-start setup docs.',
     badge: 'ENTRY',
     fileName: 'starter-personality-pack.md',
+    contentType: 'text/markdown',
     features: [
       '2 personality profiles (Momentum + Mean Reversion)',
       'Risk guardrails starter config',
@@ -32,6 +34,7 @@ export const BOT_PRODUCT_PLANS: Record<BotPlanId, BotProductPlan> = {
     description: 'Multi-style bot pack for serious operators and small teams.',
     badge: 'MOST POPULAR',
     fileName: 'pro-personality-pack.md',
+    contentType: 'text/markdown',
     features: [
       '5 personality profiles',
       'Advanced risk and confidence presets',
@@ -46,6 +49,7 @@ export const BOT_PRODUCT_PLANS: Record<BotPlanId, BotProductPlan> = {
     description: 'Commercial-ready personality catalog with resale support docs.',
     badge: 'BEST VALUE',
     fileName: 'elite-commercial-pack.md',
+    contentType: 'text/markdown',
     features: [
       '10 personality profiles',
       'Commercial usage + resale templates',

@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { ACTIVE_PLAN_IDS, ACTIVE_PRICING_PLANS, formatPricePerCredit } from '../lib/pricingRuntime.js';
 import { BOT_PRODUCT_PLANS } from '../lib/botProductsRuntime.js';
 
@@ -299,12 +301,17 @@ async function handleBotDownload(req: VercelRequest, res: VercelResponse) {
 
   const botPlanId = (session.metadata?.botPlanId || 'bot-pro') as keyof typeof BOT_PRODUCT_PLANS;
   const plan = BOT_PRODUCT_PLANS[botPlanId] || BOT_PRODUCT_PLANS['bot-pro'];
-  const buyerEmail = session.customer_details?.email || session.metadata?.userEmail || 'customer';
-  const content = renderBotPackContent(plan.id as keyof typeof BOT_PRODUCT_PLANS, buyerEmail);
+  const downloadFile = path.join(process.cwd(), 'public', 'downloads', 'bots', plan.fileName);
 
-  res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+  if (!fs.existsSync(downloadFile)) {
+    return res.status(404).json({ error: 'Download bundle not found' });
+  }
+
+  const fileBuffer = fs.readFileSync(downloadFile);
+
+  res.setHeader('Content-Type', `${plan.contentType}; charset=utf-8`);
   res.setHeader('Content-Disposition', `attachment; filename="${plan.fileName}"`);
-  return res.status(200).send(content);
+  return res.status(200).send(fileBuffer);
 }
 
 async function handleVerify(req: VercelRequest, res: VercelResponse) {
