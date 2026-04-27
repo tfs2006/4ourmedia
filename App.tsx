@@ -218,6 +218,8 @@ export default function App() {
   const [sessionId, setSessionId] = useState<string>('');
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>('pro');
+  const [showBotPurchaseModal, setShowBotPurchaseModal] = useState(false);
+  const [selectedBotPlan, setSelectedBotPlan] = useState<string>('bot-pro');
   const [hasPurchased, setHasPurchased] = useState(false);
   
   // Daily credit state
@@ -586,6 +588,9 @@ export default function App() {
     const purchaseStatus = urlParams.get('purchase');
     const stripeSessionId = urlParams.get('session_id');
     const planId = urlParams.get('plan');
+    const botPurchaseStatus = urlParams.get('botPurchase');
+    const botSessionId = urlParams.get('bot_session_id');
+    const botPlan = urlParams.get('botPlan');
 
     if (purchaseStatus === 'success' && stripeSessionId) {
       try {
@@ -617,6 +622,28 @@ export default function App() {
       }
       
       // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    if (botPurchaseStatus === 'success' && botSessionId) {
+      try {
+        const response = await fetch(`${API_BASE}/api/purchase/bot-verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: botSessionId, planId: botPlan }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.downloadUrl) {
+            window.location.href = data.downloadUrl;
+          }
+          setViewState('landing');
+        }
+      } catch (err) {
+        console.error('Failed to verify bot purchase:', err);
+      }
+
       window.history.replaceState({}, '', window.location.pathname);
     }
   };
@@ -950,8 +977,81 @@ export default function App() {
             setSelectedPlan(planId);
             setShowPurchaseModal(true);
           }}
+          onPurchaseBot={(planId: string) => {
+            setSelectedBotPlan(planId);
+            setShowBotPurchaseModal(true);
+          }}
           onNavigate={(page: string) => setViewState(page as ViewState)}
         />
+
+        {showBotPurchaseModal && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Autopilot Bot Pack Checkout</h3>
+                <button
+                  onClick={() => setShowBotPurchaseModal(false)}
+                  className="rounded-lg border border-slate-700 px-2 py-1 text-slate-300 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-slate-300 text-sm mb-3">
+                Selected package: <span className="font-semibold text-indigo-300">{selectedBotPlan}</span>
+              </p>
+              <p className="text-slate-400 text-sm mb-5">
+                This package includes downloadable bot templates, personality presets, and setup documentation with BYOK model guidance.
+              </p>
+              <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 mb-5">
+                <p className="text-xs text-indigo-200 leading-relaxed">
+                  Next step: wire these packages to Stripe product IDs and secure download delivery (Supabase storage + signed links).
+                  I can complete this end-to-end as the next action.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                <button
+                  onClick={() => setShowBotPurchaseModal(false)}
+                  className="px-4 py-2 rounded-lg border border-slate-700 text-slate-300 hover:text-white"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowBotPurchaseModal(false);
+                    const successUrl = `${window.location.origin}/?botPurchase=success&botPlan=${encodeURIComponent(selectedBotPlan)}&bot_session_id={CHECKOUT_SESSION_ID}`;
+                    const cancelUrl = `${window.location.origin}/#bot-store`;
+                    fetch(`${API_BASE}/api/purchase/bot-checkout`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        planId: selectedBotPlan,
+                        userId: user?.id || '',
+                        userEmail: user?.email || '',
+                        successUrl,
+                        cancelUrl,
+                      }),
+                    })
+                      .then(async (res) => {
+                        const data = await res.json();
+                        if (res.ok && data?.url) {
+                          window.location.href = data.url;
+                          return;
+                        }
+                        throw new Error(data?.error || 'Unable to start checkout');
+                      })
+                      .catch((err) => {
+                        console.error('Bot checkout error:', err);
+                        alert('Unable to start bot checkout right now. Please try again.');
+                      });
+                  }}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
+                >
+                  Continue to Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Footer */}
         <footer className="py-12 px-4 border-t border-slate-800">

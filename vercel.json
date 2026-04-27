@@ -17,7 +17,10 @@
     { "source": "/api/admin/stats", "destination": "/api/admin-stats" },
     { "source": "/api/setup/status", "destination": "/api/health" },
     { "source": "/api/purchase/checkout", "destination": "/api/purchase?op=checkout" },
+    { "source": "/api/purchase/bot-checkout", "destination": "/api/purchase?op=bot-checkout" },
     { "source": "/api/purchase/verify", "destination": "/api/purchase?op=verify" },
+    { "source": "/api/purchase/bot-verify", "destination": "/api/purchase?op=bot-verify" },
+    { "source": "/api/purchase/bot-download", "destination": "/api/purchase?op=bot-download" },
     { "source": "/api/purchase/info", "destination": "/api/purchase?op=info" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }

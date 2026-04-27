@@ -20,6 +20,7 @@ import { ACTIVE_PLAN_IDS, ACTIVE_PRICING_PLANS, FEATURE_PRICING, formatPricePerC
 interface LandingPageProps {
   onGetStarted: () => void;
   onPurchase: (planId: string) => void;
+  onPurchaseBot?: (planId: string) => void;
   onNavigate?: (page: string) => void;
 }
 
@@ -61,7 +62,7 @@ const PRICING_PLANS: Record<string, PricingPlan> = Object.fromEntries(
   })
 ) as Record<string, PricingPlan>;
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onNavigate }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onPurchaseBot, onNavigate }) => {
   const [showExitIntent, setShowExitIntent] = useState(false);
 
   useEffect(() => {
@@ -259,6 +260,76 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onN
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Autopilot Bot Store */}
+      <section id="bot-store" className="py-20 px-4 bg-slate-900/60">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-medium mb-4">
+              <Brain size={16} className="text-indigo-300" />
+              New: Downloadable Autopilot Trading Bot Packs
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
+              Sell-Ready Bot Personalities Your Customers Can Run
+            </h2>
+            <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+              Each pack includes setup instructions, personality presets, and bring-your-own API key guidance.
+              Users keep control of their own broker/exchange/API credentials.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                id: 'bot-starter',
+                name: 'Starter Personality Pack',
+                price: '$149',
+                blurb: 'Momentum + Mean Reversion presets with quick-start docs.',
+                points: ['2 bot personalities', 'Setup checklist + risk defaults', 'BYOK AI model instructions'],
+              },
+              {
+                id: 'bot-pro',
+                name: 'Pro Personality Pack',
+                price: '$349',
+                blurb: 'Balanced portfolio of personalities with deeper configuration controls.',
+                points: ['5 bot personalities', 'Advanced risk/playbook docs', 'Preset tuning matrix'],
+              },
+              {
+                id: 'bot-elite',
+                name: 'Elite Commercial Pack',
+                price: '$999',
+                blurb: 'Full catalog + commercial resale-ready documentation bundle.',
+                points: ['10 bot personalities', 'Commercial resale templates', 'Priority update channel'],
+              },
+            ].map((pack) => (
+              <div key={pack.id} className="pg-card card-beam p-6 flex flex-col">
+                <h3 className="text-xl font-bold mb-2">{pack.name}</h3>
+                <p className="text-3xl font-bold text-indigo-300 mb-2">{pack.price}</p>
+                <p className="text-slate-400 text-sm mb-4">{pack.blurb}</p>
+                <ul className="space-y-2 mb-6 flex-1">
+                  {pack.points.map((point) => (
+                    <li key={point} className="flex items-start gap-2 text-sm text-slate-300">
+                      <CheckCircleIcon size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => (onPurchaseBot ? onPurchaseBot(pack.id) : onPurchase('pro'))}
+                  className="w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white"
+                >
+                  <DownloadIcon size={16} />
+                  Buy & Download
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs text-slate-500 mt-6 text-center max-w-4xl mx-auto">
+            Software-only product. Not investment advice. Results vary based on market conditions, user setup, and risk controls.
+          </p>
         </div>
       </section>
 
