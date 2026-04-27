@@ -636,7 +636,15 @@ export default function App() {
         if (response.ok) {
           const data = await response.json();
           if (data?.downloadUrl) {
-            window.location.href = data.downloadUrl;
+            const email = user?.email ? `&email=${encodeURIComponent(user.email)}` : '';
+            const downloadResponse = await fetch(`${data.downloadUrl}${email}`);
+            const downloadData = await downloadResponse.json().catch(() => null);
+
+            if (downloadResponse.ok && downloadData?.delivery === 'signed-url' && downloadData?.url) {
+              window.location.href = downloadData.url;
+            } else {
+              window.location.href = `${data.downloadUrl}${email}`;
+            }
           }
           setViewState('landing');
         }

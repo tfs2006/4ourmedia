@@ -8,6 +8,7 @@ export interface BotProductPlan {
   badge?: string;
   fileName: string;
   contentType: 'text/markdown';
+  storagePath: string;
   features: string[];
 }
 
@@ -20,6 +21,7 @@ export const BOT_PRODUCT_PLANS: Record<BotPlanId, BotProductPlan> = {
     badge: 'ENTRY',
     fileName: 'starter-personality-pack.md',
     contentType: 'text/markdown',
+    storagePath: 'bots/starter-personality-pack.md',
     features: [
       '2 personality profiles (Momentum + Mean Reversion)',
       'Risk guardrails starter config',
@@ -35,6 +37,7 @@ export const BOT_PRODUCT_PLANS: Record<BotPlanId, BotProductPlan> = {
     badge: 'MOST POPULAR',
     fileName: 'pro-personality-pack.md',
     contentType: 'text/markdown',
+    storagePath: 'bots/pro-personality-pack.md',
     features: [
       '5 personality profiles',
       'Advanced risk and confidence presets',
@@ -50,6 +53,7 @@ export const BOT_PRODUCT_PLANS: Record<BotPlanId, BotProductPlan> = {
     badge: 'BEST VALUE',
     fileName: 'elite-commercial-pack.md',
     contentType: 'text/markdown',
+    storagePath: 'bots/elite-commercial-pack.md',
     features: [
       '10 personality profiles',
       'Commercial usage + resale templates',

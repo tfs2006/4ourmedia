@@ -299,6 +299,31 @@ GRANT ALL ON public.purchases TO service_role;
 GRANT ALL ON public.api_usage TO service_role;
 
 -- ============================================
+-- BOT SALES TABLE
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS public.bot_sales (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  stripe_session_id TEXT UNIQUE NOT NULL,
+  plan_id TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  buyer_email TEXT,
+  status TEXT DEFAULT 'completed',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_bot_sales_created ON public.bot_sales(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_bot_sales_plan ON public.bot_sales(plan_id);
+
+ALTER TABLE public.bot_sales ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service role full access to bot_sales" ON public.bot_sales
+  FOR ALL USING (true) WITH CHECK (true);
+
+GRANT ALL ON public.bot_sales TO service_role;
+
+-- ============================================
 -- DONE!
 -- ============================================
 -- After running this SQL, you'll need to:

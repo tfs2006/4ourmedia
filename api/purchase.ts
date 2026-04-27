@@ -31,6 +31,43 @@ function getSupabaseAdmin() {
   return createClient(supabaseUrl, supabaseServiceKey);
 }
 
+function getSupabasePublicClient() {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
+async function logBotSale(order: {
+  stripeSessionId: string;
+  planId: string;
+  amountCents: number;
+  email: string;
+  userId?: string;
+}) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
+
+  const { data: existing } = await supabase
+    .from('bot_sales')
+    .select('id')
+    .eq('stripe_session_id', order.stripeSessionId)
+    .maybeSingle();
+
+  if (existing) return;
+
+  await supabase.from('bot_sales').insert({
+    stripe_session_id: order.stripeSessionId,
+    plan_id: order.planId,
+    amount_cents: order.amountCents,
+    buyer_email: order.email || null,
+    user_id: order.userId || null,
+    status: 'completed',
+  });
+}
+
 function generateLicenseKey(): string {
   const segments = [];
   for (let i = 0; i < 4; i++) {
@@ -269,6 +306,14 @@ async function handleBotVerify(req: VercelRequest, res: VercelResponse) {
   const botPlanId = (session.metadata?.botPlanId || 'bot-pro') as keyof typeof BOT_PRODUCT_PLANS;
   const plan = BOT_PRODUCT_PLANS[botPlanId] || BOT_PRODUCT_PLANS['bot-pro'];
 
+  await logBotSale({
+    stripeSessionId: session.id,
+    planId: plan.id,
+    amountCents: session.amount_total || plan.priceInCents,
+    email: session.customer_details?.email || session.metadata?.userEmail || '',
+    userId: session.metadata?.userId || undefined,
+  });
+
   return res.json({
     success: true,
     planId: plan.id,
@@ -299,16 +344,39 @@ async function handleBotDownload(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid product session' });
   }
 
+  const expectedEmail = (session.customer_details?.email || session.metadata?.userEmail || '').toLowerCase();
+  const emailParam = String(req.query.email || '').toLowerCase().trim();
+  if (expectedEmail && emailParam && expectedEmail !== emailParam) {
+    return res.status(403).json({ error: 'Email does not match purchase record' });
+  }
+
   const botPlanId = (session.metadata?.botPlanId || 'bot-pro') as keyof typeof BOT_PRODUCT_PLANS;
   const plan = BOT_PRODUCT_PLANS[botPlanId] || BOT_PRODUCT_PLANS['bot-pro'];
-  const downloadFile = path.join(process.cwd(), 'public', 'downloads', 'bots', plan.fileName);
 
+  const supabaseAdmin = getSupabaseAdmin();
+  if (supabaseAdmin) {
+    const expiresIn = 60 * 10;
+    const { data, error } = await supabaseAdmin.storage
+      .from('digital-products')
+      .createSignedUrl(plan.storagePath, expiresIn);
+
+    if (!error && data?.signedUrl) {
+      return res.status(200).json({
+        success: true,
+        delivery: 'signed-url',
+        url: data.signedUrl,
+        expiresIn,
+        fileName: plan.fileName,
+      });
+    }
+  }
+
+  const downloadFile = path.join(process.cwd(), 'public', 'downloads', 'bots', plan.fileName);
   if (!fs.existsSync(downloadFile)) {
     return res.status(404).json({ error: 'Download bundle not found' });
   }
 
   const fileBuffer = fs.readFileSync(downloadFile);
-
   res.setHeader('Content-Type', `${plan.contentType}; charset=utf-8`);
   res.setHeader('Content-Disposition', `attachment; filename="${plan.fileName}"`);
   return res.status(200).send(fileBuffer);
