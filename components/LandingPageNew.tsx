@@ -64,6 +64,33 @@ const PRICING_PLANS: Record<string, PricingPlan> = Object.fromEntries(
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onPurchaseBot, onNavigate }) => {
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [liveProof, setLiveProof] = useState<any>(null);
+  const [liveProofLoading, setLiveProofLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadProof = async () => {
+      try {
+        const response = await fetch('/api/clawstreet/proof');
+        const data = await response.json();
+        if (!cancelled) {
+          setLiveProof(data?.ok ? data : null);
+        }
+      } catch {
+        if (!cancelled) setLiveProof(null);
+      } finally {
+        if (!cancelled) setLiveProofLoading(false);
+      }
+    };
+
+    loadProof();
+    const interval = window.setInterval(loadProof, 120000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     // Exit intent detection
@@ -352,6 +379,63 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onP
               <span className="ml-2"><strong className="text-white">4.9</strong> average rating</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Live ClawStreet Proof */}
+      <section id="live-proof" className="py-14 px-4 bg-slate-900/70 border-y border-slate-800">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-semibold uppercase tracking-[0.14em]">
+              <TrendingUp size={14} className="text-emerald-300" />
+              Live Contest Proof
+            </span>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold font-display">Our ClawStreet bots are live right now</h2>
+            <p className="mt-3 text-slate-400 max-w-3xl mx-auto">
+              Real-time performance from our public competition bots. This is the same bot engineering style available in our downloadable personality packs.
+            </p>
+          </div>
+
+          {liveProofLoading ? (
+            <div className="text-center text-slate-400 text-sm">Loading live contest data…</div>
+          ) : liveProof?.bots?.length ? (
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {liveProof.bots.map((bot: any) => (
+                  <a
+                    key={bot.slug}
+                    href={`https://www.clawstreet.io/agents/${bot.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pg-card card-beam p-5 hover:border-emerald-500/40 transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-bold text-white">{bot.label}</p>
+                      <span className="text-xs px-2 py-1 rounded-full border border-slate-700 text-slate-300">
+                        {bot.leaderboardRank ? `#${bot.leaderboardRank}` : 'Live'}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-emerald-300">
+                      {typeof bot.returnPct === 'number' ? `${bot.returnPct.toFixed(2)}%` : '—'}
+                    </p>
+                    <div className="mt-3 text-xs text-slate-400 space-y-1">
+                      <p>Positions: {bot.positions ?? '—'}</p>
+                      <p>Confidence: {typeof bot.confidence === 'number' ? bot.confidence.toFixed(2) : '—'}</p>
+                      <p>Contest return: {typeof bot.leaderboardReturnPct === 'number' ? `${bot.leaderboardReturnPct.toFixed(2)}%` : '—'}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-6 text-center text-xs text-slate-500">
+                Updated from live bridge + leaderboard snapshots. Performance varies and is not guaranteed.
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-slate-500 text-sm">
+              Live proof feed temporarily unavailable. Contest links remain public on ClawStreet.
+            </div>
+          )}
         </div>
       </section>
 

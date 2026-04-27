@@ -15,6 +15,7 @@
   },
   "rewrites": [
     { "source": "/api/admin/stats", "destination": "/api/admin-stats" },
+    { "source": "/api/clawstreet/proof", "destination": "/api/clawstreet-proof" },
     { "source": "/api/setup/status", "destination": "/api/health" },
     { "source": "/api/purchase/checkout", "destination": "/api/purchase?op=checkout" },
     { "source": "/api/purchase/bot-checkout", "destination": "/api/purchase?op=bot-checkout" },
