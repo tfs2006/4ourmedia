@@ -8,15 +8,34 @@ import { ACTIVE_PLAN_IDS, ACTIVE_PRICING_PLANS, formatPricePerCredit } from '../
 import { BOT_PRODUCT_PLANS } from '../lib/botProductsRuntime.js';
 
 let stripe: Stripe | null = null;
+let stripeFetch: typeof fetch | null = null;
+
+function getStripeFetch() {
+  if (!stripeFetch) {
+    stripeFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      try {
+        return await fetch(input, {
+          ...init,
+          signal: init?.signal || controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+    }) as typeof fetch;
+  }
+  return stripeFetch;
+}
 
 function getStripe(): Stripe {
   if (!stripe) {
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
     stripe = new Stripe(key, {
-      httpClient: Stripe.createNodeHttpClient(),
-      maxNetworkRetries: 3,
-      timeout: 30000,
+      httpClient: Stripe.createFetchHttpClient(getStripeFetch()),
+      maxNetworkRetries: 1,
+      timeout: 12000,
     });
   }
   return stripe;
@@ -228,33 +247,50 @@ async function handleBotCheckout(req: VercelRequest, res: VercelResponse) {
 
   const origin = req.headers.origin || req.headers.referer || 'https://www.4ourmedia.com';
 
-  const session = await stripeClient.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `4ourMedia Autopilot Bots - ${plan.name}`,
-            description: plan.description,
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripeClient.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `4ourMedia Autopilot Bots - ${plan.name}`,
+              description: plan.description,
+            },
+            unit_amount: plan.priceInCents,
           },
-          unit_amount: plan.priceInCents,
+          quantity: 1,
         },
-        quantity: 1,
+      ],
+      mode: 'payment',
+      success_url:
+        successUrl || `${origin}/?botPurchase=success&botPlan=${plan.id}&bot_session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${origin}/#bot-store`,
+      customer_email: userEmail || undefined,
+      metadata: {
+        product: 'autopilot-bot-pack',
+        botPlanId: plan.id,
+        userId: userId || '',
+        userEmail: userEmail || '',
       },
-    ],
-    mode: 'payment',
-    success_url:
-      successUrl || `${origin}/?botPurchase=success&botPlan=${plan.id}&bot_session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: cancelUrl || `${origin}/#bot-store`,
-    customer_email: userEmail || undefined,
-    metadata: {
-      product: 'autopilot-bot-pack',
-      botPlanId: plan.id,
-      userId: userId || '',
-      userEmail: userEmail || '',
-    },
-  });
+    });
+  } catch (error: any) {
+    console.error('Bot checkout Stripe error', {
+      type: error?.type || error?.constructor?.name,
+      code: error?.code,
+      message: error?.message,
+      statusCode: error?.statusCode,
+      requestId: error?.requestId,
+    });
+
+    return res.status(502).json({
+      error: 'Stripe checkout is temporarily unavailable. Please try again in a moment.',
+      errorType: error?.type || error?.constructor?.name || 'StripeError',
+      requestId: error?.requestId || null,
+    });
+  }
 
   return res.json({ url: session.url, sessionId: session.id, planId: plan.id });
 }
