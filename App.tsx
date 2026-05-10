@@ -13,6 +13,7 @@ import {
   cleanupAuthRedirectUrl,
   finalizeAuthRedirect,
   getCurrentUser, 
+  getSession,
   onAuthStateChange, 
   signOut, 
   getUserCredits, 
@@ -36,6 +37,7 @@ const PrivacyPolicy = lazy(() => import('./components/LegalPages').then((module)
 const TermsOfService = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.TermsOfService })));
 const RefundPolicy = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.RefundPolicy })));
 const ContactPage = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.ContactPage })));
+const PROMOFINDER_ORIGIN = 'https://promofinder.4ourmedia.com';
 
 type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
 
@@ -256,6 +258,33 @@ export default function App() {
   
   // Copy variation state: -1 = original, 0/1/2 = variation index
   const [activeCopyVariation, setActiveCopyVariation] = useState<number>(-1);
+
+  const launchPromofinder = useCallback(async (targetUrl: string, newTab = true) => {
+    try {
+      const resolved = new URL(targetUrl, window.location.origin);
+      if (resolved.origin === PROMOFINDER_ORIGIN && user) {
+        const session = await getSession();
+        const accessToken = session?.access_token;
+        if (accessToken) {
+          const hashParams = new URLSearchParams(resolved.hash.startsWith('#') ? resolved.hash.slice(1) : resolved.hash);
+          hashParams.set('accountToken', accessToken);
+          resolved.hash = hashParams.toString();
+        }
+      }
+
+      if (newTab) {
+        window.open(resolved.toString(), '_blank', 'noopener,noreferrer');
+      } else {
+        window.location.assign(resolved.toString());
+      }
+    } catch {
+      if (newTab) {
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        window.location.assign(targetUrl);
+      }
+    }
+  }, [user]);
   
   // Computed analysis that reflects the selected copy variation
   const effectiveAnalysis = useMemo(() => {
@@ -848,7 +877,7 @@ export default function App() {
   if (viewState === 'free-tools') {
     return (
       <Suspense fallback={<PageLoader label="Loading Free Tools" />}>
-        <FreeToolsPage onBack={() => setViewState('landing')} />
+        <FreeToolsPage onBack={() => setViewState('landing')} onLaunchPromofinder={launchPromofinder} isSignedIn={!!user} />
       </Suspense>
     );
   }
@@ -981,6 +1010,7 @@ export default function App() {
         
         <LandingPage 
           onGetStarted={() => user ? setViewState('app') : openAuth('signup')}
+          onLaunchPromofinder={launchPromofinder}
           onPurchase={(planId: string) => {
             setSelectedPlan(planId);
             setShowPurchaseModal(true);

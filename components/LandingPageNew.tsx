@@ -19,6 +19,7 @@ import { ACTIVE_PLAN_IDS, ACTIVE_PRICING_PLANS, FEATURE_PRICING, formatPricePerC
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  onLaunchPromofinder?: (url: string, newTab?: boolean) => void | Promise<void>;
   onPurchase: (planId: string) => void;
   onPurchaseBot?: (planId: string) => void;
   onNavigate?: (page: string) => void;
@@ -62,10 +63,16 @@ const PRICING_PLANS: Record<string, PricingPlan> = Object.fromEntries(
   })
 ) as Record<string, PricingPlan>;
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onPurchaseBot, onNavigate }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLaunchPromofinder, onPurchase, onPurchaseBot, onNavigate }) => {
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [liveProof, setLiveProof] = useState<any>(null);
   const [liveProofLoading, setLiveProofLoading] = useState(true);
+
+  const handlePromofinderLaunch = async (event: React.MouseEvent<HTMLAnchorElement>, url: string, newTab = false) => {
+    if (!onLaunchPromofinder) return;
+    event.preventDefault();
+    await onLaunchPromofinder(url, newTab);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -201,6 +208,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onP
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <a
                   href="https://promofinder.4ourmedia.com/unlisted"
+                  onClick={(event) => handlePromofinderLaunch(event, 'https://promofinder.4ourmedia.com/unlisted', false)}
                   className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3.5 sm:py-4 group w-full sm:w-auto inline-flex items-center justify-center"
                 >
                   Launch Unlisted Finder

@@ -7,6 +7,8 @@ import {
 
 interface FreeToolsPageProps {
   onBack: () => void;
+  onLaunchPromofinder?: (url: string, newTab?: boolean) => void | Promise<void>;
+  isSignedIn?: boolean;
 }
 
 const tools = [
@@ -117,7 +119,13 @@ const tools = [
   },
 ];
 
-const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
+const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack, onLaunchPromofinder, isSignedIn = false }) => {
+  const handlePromofinderLaunch = async (event: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    if (!onLaunchPromofinder) return;
+    event.preventDefault();
+    await onLaunchPromofinder(url, true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white">
       {/* Header */}
@@ -177,6 +185,11 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
               </span>
             ))}
           </div>
+          {isSignedIn && (
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-200">
+              Signed-in 4ourMedia users carry account credits into Promofinder automatically.
+            </div>
+          )}
         </div>
       </section>
 
@@ -223,6 +236,7 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
                   href={tool.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(event) => handlePromofinderLaunch(event, tool.url)}
                   className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all whitespace-nowrap"
                 >
                   {tool.cta}
@@ -251,6 +265,7 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
                   href={tool.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(event) => handlePromofinderLaunch(event, tool.url)}
                   className="flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-white border border-slate-700 hover:border-indigo-500 px-4 py-2 rounded-lg transition-all w-fit"
                 >
                   {tool.cta}
@@ -279,6 +294,7 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
               href="https://promofinder.4ourmedia.com"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(event) => handlePromofinderLaunch(event, 'https://promofinder.4ourmedia.com')}
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
             >
               Explore the Full Suite
@@ -288,6 +304,7 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
               href="https://promofinder.4ourmedia.com/credits"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(event) => handlePromofinderLaunch(event, 'https://promofinder.4ourmedia.com/credits')}
               className="inline-flex items-center gap-2 px-8 py-4 border border-slate-600 hover:border-indigo-400 text-white font-bold text-lg rounded-xl transition-all"
             >
               Buy Promofinder Credits
