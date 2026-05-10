@@ -4,7 +4,7 @@ import {
   CheckCircle, Star, ArrowRight, Play, Users, Award,
   Palette, Brain, Download, Globe, Mail, Crown,
   Layers, Image, Package, Infinity, Timer, Gift,
-  AlertTriangle, ChevronDown, X, CreditCard, Lock
+  AlertTriangle, ChevronDown, X, CreditCard, Lock, Search
 } from 'lucide-react';
 import {
   MagicWandIcon, RocketIcon, SpeedIcon, AIBrainIcon, SparklesIcon,
