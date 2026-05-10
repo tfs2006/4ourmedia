@@ -117,10 +117,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onP
         <div className="relative flex items-center justify-center gap-3 flex-wrap">
           <span className="flex items-center gap-2">
             <SparklesIcon size={14} className="text-yellow-300" />
-            Social Content Kit included — promo image + caption + hashtags + video hook in one generation
+            Promofinder research suite is now front and center — find sponsors, hidden videos, and creator fit before you build the campaign
           </span>
           <span className="hidden sm:flex items-center gap-1.5 bg-white/15 px-3 py-0.5 rounded-full border border-white/20 text-xs text-yellow-200 font-bold">
-            Instagram · TikTok · Facebook · LinkedIn · YouTube
+            Promofinder research + PromoGen creative workflow
           </span>
         </div>
       </div>
@@ -159,38 +159,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onP
             <div className="flex-1 text-center lg:text-left space-y-5 sm:space-y-6">
               <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500/15 rounded-full border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-medium">
                 <SparklesIcon size={14} className="text-emerald-400" />
-                The Complete Social Media Kit for Online Sellers
+                Creator research + AI creative in one stack
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-200">
-                  Paste a URL. Get a
+                  Find the right creators.
                 </span>
                 <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-                  Ready-to-Post Kit.
+                  Then ship the campaign.
                 </span>
               </h1>
               
               <p className="text-base sm:text-xl md:text-2xl text-slate-300 max-w-xl leading-relaxed">
-                PromoGen analyzes any Amazon, Shopify, or Etsy product and instantly creates a{' '}
-                <strong className="text-white">promo image</strong>,{' '}
-                <strong className="text-white">caption</strong>,{' '}
-                <strong className="text-white">hashtags</strong>, and{' '}
-                <strong className="text-white">video hook</strong> — tailored to your chosen platform.
+                4ourMedia now combines{' '}
+                <strong className="text-white">Promofinder's YouTube research tools</strong> with{' '}
+                <strong className="text-white">PromoGen's creative workflow</strong>. Start with the unlisted finder,
+                domain search, growth tracking, and sponsor comparison tools, then move into asset production when you are ready.
               </p>
 
               <p className="text-base text-slate-400 max-w-lg">
-                No designer. No copywriter. No agency. Just paste the URL, pick your platform, and walk away with a complete content kit in under 30 seconds.
+                Promofinder stays live on its existing URLs so the search traffic keeps flowing. 4ourmedia.com becomes the command center that sends people into the research suite and keeps PromoGen available at /app for execution.
               </p>
 
               {/* Value Props */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 {[
-                  { Icon: SpeedIcon,    text: 'Promo image in 10 sec' },
-                  { Icon: AIBrainIcon,  text: 'Platform-native caption' },
-                  { Icon: TemplateIcon, text: 'Hashtag bundle included' },
-                  { Icon: PGImageIcon,  text: 'Instagram · TikTok · LinkedIn · YouTube' }
+                  { Icon: Search,       text: 'Unlisted video finder for hidden uploads' },
+                  { Icon: GlobeIcon,    text: 'Domain and sponsor overlap research' },
+                  { Icon: TrendingUpIcon, text: 'Growth, collab, and rate checks' },
+                  { Icon: PGImageIcon,  text: 'PromoGen remains available at /app' }
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-slate-300 glass-card px-3 py-2 text-left">
                     <item.Icon size={16} className="text-violet-400 flex-shrink-0" />
@@ -199,31 +198,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onPurchase, onP
                 ))}
               </div>
               
-                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button
-                  onClick={onGetStarted}
-                  className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3.5 sm:py-4 group w-full sm:w-auto"
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <a
+                  href="https://promofinder.4ourmedia.com/unlisted"
+                  className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3.5 sm:py-4 group w-full sm:w-auto inline-flex items-center justify-center"
                 >
-                  Create My First Promo Free
+                  Launch Unlisted Finder
                   <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+                </a>
                 <button
-                  onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => onNavigate?.('free-tools')}
                   className="btn-ghost text-base sm:text-lg px-6 sm:px-8 py-3.5 sm:py-4 w-full sm:w-auto"
                 >
-                  View Pricing
+                  Explore All Research Tools
                   <ChevronDown className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={onGetStarted}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors hover:text-white"
+                >
+                  Open PromoGen at /app
+                  <ArrowRightIcon size={16} />
                 </button>
               </div>
               
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-6 pt-2 text-sm text-slate-400">
                 <div className="flex items-center gap-2">
                   <CheckCircleIcon size={16} className="text-emerald-400" />
-                  No credit card needed
+                  Promofinder starts with a free first search
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircleIcon size={16} className="text-emerald-400" />
-                  3 free generations
+                  PromoGen stays available as the account workspace
                 </div>
               </div>
             </div>

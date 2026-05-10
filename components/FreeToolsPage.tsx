@@ -12,7 +12,7 @@ interface FreeToolsPageProps {
 const tools = [
   {
     icon: Search,
-    label: 'Most Popular',
+    label: 'Top Search Tool',
     labelColor: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white',
     name: 'YouTube Promo Finder',
     tagline: 'Uncover every sponsorship hiding in any channel',
@@ -21,7 +21,7 @@ const tools = [
     bullets: [
       'Analyzes up to 12 months of content',
       'Detects affiliate links, tracking codes & brand mentions',
-      'Export results to CSV or JSON',
+      'Start with one free search, then buy credits only if you need more',
     ],
     url: 'https://promofinder.4ourmedia.com',
     cta: 'Launch Tool',
@@ -128,13 +128,13 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to PromoGen
+            Back to 4ourMedia
           </button>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg shadow-purple-500/30">
               4
             </div>
-            <span className="font-bold text-sm hidden sm:inline font-display">4ourMedia Free Tools</span>
+            <span className="font-bold text-sm hidden sm:inline font-display">4ourMedia Research Hub</span>
           </div>
         </div>
       </header>
@@ -146,15 +146,15 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
         <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-indigo-500/15 rounded-full blur-3xl" />
         <div className="relative container mx-auto max-w-3xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full border border-green-500/30 text-green-300 text-sm font-medium mb-6">
-            🎬 100% Free · No Login Required · No Paywall
+            🎬 Start Free · No Subscription · Pay Only When You Need More
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-tight mb-6">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-200">
-              The Free YouTube
+              The Promofinder
             </span>
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-              Intelligence Suite
+              Research Hub
             </span>
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
@@ -168,10 +168,10 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
               PromoFinder
             </a>{' '}
             that give brands, creators, and marketers the sponsorship data agencies charge thousands for.
-            No account. No paywall. No tricks.
+            Start with a free search, then buy credits only when the research is useful.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-slate-400">
-            {['9 Free Tools', 'No Signup', 'Export to CSV/JSON', 'Real-Time Data'].map((item) => (
+            {['9 Research Tools', 'Unlisted Finder Leads', 'Export to CSV/JSON', 'Pay Only When Needed'].map((item) => (
               <span key={item} className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400" /> {item}
               </span>
@@ -266,30 +266,41 @@ const FreeToolsPage: React.FC<FreeToolsPageProps> = ({ onBack }) => {
       <section className="py-20 px-4 text-center">
         <div className="container mx-auto max-w-2xl">
           <h2 className="text-3xl font-bold font-display mb-4">
-            All Nine Tools.{' '}
+            Start with the suite.{' '}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400">
-              Always Free.
+              Scale with credits only when needed.
             </span>
           </h2>
           <p className="text-slate-400 mb-8">
-            No login. No credit card. No premium tier. Just the data you need to make smarter sponsorship decisions.
+            Keep Promofinder on its live URLs, launch the research from here, and buy credits only after the first search proves useful.
           </p>
-          <a
-            href="https://promofinder.4ourmedia.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
-          >
-            🎬 Explore the Full Suite
-            <ExternalLink className="w-5 h-5" />
-          </a>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="https://promofinder.4ourmedia.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
+            >
+              Explore the Full Suite
+              <ExternalLink className="w-5 h-5" />
+            </a>
+            <a
+              href="https://promofinder.4ourmedia.com/credits"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 border border-slate-600 hover:border-indigo-400 text-white font-bold text-lg rounded-xl transition-all"
+            >
+              Buy Promofinder Credits
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-slate-800 text-center text-slate-500 text-sm">
         <p>
-          © {new Date().getFullYear()} 4ourMedia. Free YouTube intelligence tools powered by{' '}
+          © {new Date().getFullYear()} 4ourMedia. YouTube creator research tools powered by{' '}
           <a href="https://promofinder.4ourmedia.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-white">
             PromoFinder
           </a>.

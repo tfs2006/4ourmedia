@@ -939,8 +939,8 @@ export default function App() {
                 4
               </div>
               <div>
-                <h1 className="text-lg font-bold font-display tracking-wide">PromoGen</h1>
-                <p className="text-xs text-slate-400">by 4ourMedia</p>
+                <h1 className="text-lg font-bold font-display tracking-wide">4ourMedia</h1>
+                <p className="text-xs text-slate-400">Research + creative tools</p>
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
@@ -954,7 +954,7 @@ export default function App() {
                 onClick={() => setViewState('free-tools')}
                 className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
               >
-                🎬 Free Tools
+                🎬 Promofinder Suite
               </button>
               <button
                 onClick={() => setViewState('perplexity')}
@@ -966,14 +966,14 @@ export default function App() {
                 onClick={() => user ? setViewState('app') : openAuth('signup')}
                 className="px-4 py-2 text-slate-300 hover:text-white transition-colors font-medium"
               >
-                Try Free
+                Open PromoGen
               </button>
               <button
                 onClick={() => setShowPurchaseModal(true)}
                 className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-bold rounded-lg transition-all flex items-center gap-2"
               >
                 <Zap className="w-4 h-4" />
-                Get Credits
+                PromoGen Credits
               </button>
             </div>
           </div>
@@ -1073,16 +1073,16 @@ export default function App() {
                   <span className="font-bold font-display">PromoGen</span>
                 </div>
                 <p className="text-slate-400 text-sm">
-                  AI-powered promo generator for marketers who want results, not headaches.
+                  Creator research and AI production tools for teams that want better campaigns with less guesswork.
                 </p>
               </div>
               <div>
                 <h4 className="font-bold mb-4">Product</h4>
                 <ul className="space-y-2 text-slate-400 text-sm">
-                  <li><button onClick={() => user ? setViewState('app') : openAuth('signup')} className="hover:text-white transition-colors">Try Free</button></li>
-                  <li><button onClick={() => setShowPurchaseModal(true)} className="hover:text-white transition-colors">Get Credits</button></li>
+                  <li><button onClick={() => user ? setViewState('app') : openAuth('signup')} className="hover:text-white transition-colors">Open PromoGen</button></li>
+                  <li><button onClick={() => setShowPurchaseModal(true)} className="hover:text-white transition-colors">PromoGen Credits</button></li>
                   <li><button onClick={() => setViewState('veo-studio')} className="hover:text-white transition-colors">🎥 Veo Studio</button></li>
-                  <li><button onClick={() => setViewState('free-tools')} className="hover:text-white transition-colors">🎬 Free YouTube Tools</button></li>
+                  <li><button onClick={() => setViewState('free-tools')} className="hover:text-white transition-colors">🎬 Promofinder Suite</button></li>
                   <li><button onClick={() => setViewState('perplexity')} className="hover:text-white transition-colors">☄️ Perplexity AI Free</button></li>
                 </ul>
               </div>
