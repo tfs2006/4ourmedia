@@ -8,7 +8,7 @@ import { FEATURE_PRICING } from './lib/pricing';
 import { clearAdminSession, hasAdminSessionAccess } from './lib/adminSession';
 import { Download, Sparkles, AlertCircle, RefreshCw, Upload, Layout, Type, ArrowLeft, Zap, Star, Palette, Clock, Gift, User, LogOut, Target, TrendingUp, ChevronDown, ChevronUp, PartyPopper, X, Lock, RectangleHorizontal, Copy, CheckCheck, Hash, MessageSquare, Film, Mail, Shield } from 'lucide-react';
 import { FlameIcon, SparklesIcon } from './components/Icons';
-import { 
+import {
   AuthUser, 
   cleanupAuthRedirectUrl,
   finalizeAuthRedirect,
@@ -23,181 +23,13 @@ import {
   savePromoToHistory as saveSupabaseHistory,
   addCredits
 } from './services/supabase';
-
-const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : '';
-const AdminDashboardPage = lazy(() => import('./components/AdminDashboardPage'));
-const PromoCanvas = lazy(() => import('./components/PromoCanvas'));
-const LoadingStep = lazy(() => import('./components/LoadingStep'));
-const PurchaseModal = lazy(() => import('./components/PurchaseModalNew'));
-const AuthModal = lazy(() => import('./components/AuthModal'));
-const FreeToolsPage = lazy(() => import('./components/FreeToolsPage'));
-const PerplexityPage = lazy(() => import('./components/PerplexityPage'));
-const VeoStudioPage = lazy(() => import('./components/VeoStudioPage'));
-const PrivacyPolicy = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.PrivacyPolicy })));
-const TermsOfService = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.TermsOfService })));
-const RefundPolicy = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.RefundPolicy })));
-const ContactPage = lazy(() => import('./components/LegalPages').then((module) => ({ default: module.ContactPage })));
-const PROMOFINDER_ORIGIN = 'https://promofinder.4ourmedia.com';
-
-type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
-
-const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
-  '/': 'landing',
-  '/app': 'app',
-  '/privacy': 'privacy',
-  '/terms': 'terms',
-  '/refund': 'refund',
-  '/contact': 'contact',
-  '/free-tools': 'free-tools',
-  '/perplexity': 'perplexity',
-  '/veo-studio': 'veo-studio',
-  '/admin': 'admin',
-};
-
-const VIEW_STATE_TO_PATH: Partial<Record<ViewState, string>> = {
-  landing: '/',
-  app: '/app',
-  privacy: '/privacy',
-  terms: '/terms',
-  refund: '/refund',
-  contact: '/contact',
-  'free-tools': '/free-tools',
-  perplexity: '/perplexity',
-  'veo-studio': '/veo-studio',
-  admin: '/admin',
-};
-
-const CONVERSION_PRESETS: Array<{ id: PromoConversionPreset; label: string; blurb: string; trigger: string }> = [
-  {
-    id: 'auto',
-    label: 'Auto Best-Fit',
-    blurb: 'AI picks the highest-converting psychology approach automatically.',
-    trigger: 'Adaptive',
-  },
-  {
-    id: 'fomo',
-    label: 'Urgency / FOMO',
-    blurb: 'Scarcity and momentum messaging for fast action.',
-    trigger: 'Fear of Missing Out',
-  },
-  {
-    id: 'social-proof',
-    label: 'Social Proof',
-    blurb: 'Trust-forward framing that signals popularity and validation.',
-    trigger: 'Belonging + Trust',
-  },
-  {
-    id: 'premium-authority',
-    label: 'Premium Authority',
-    blurb: 'High-value positioning with status and expertise cues.',
-    trigger: 'Status + Identity',
-  },
-  {
-    id: 'problem-solution',
-    label: 'Problem → Solution',
-    blurb: 'Clear pain-to-relief framing for practical buyers.',
-    trigger: 'Pain Avoidance',
-  },
-];
-
-function PageLoader({ label }: { label: string }) {
-  return (
-    <div className="min-h-screen bg-slate-950 text-white" role="status" aria-live="polite" aria-label={label}>
-      <div className="pg-bg" />
-      <div className="flex min-h-screen items-center justify-center px-6">
-        <div className="max-w-sm rounded-3xl border border-slate-800 bg-slate-900/70 px-8 py-10 text-center shadow-2xl shadow-black/20">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-500/10">
-            <RefreshCw className="h-8 w-8 animate-spin text-violet-300" />
-          </div>
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/80">PromoGen</p>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">{label}</p>
-          <p className="mt-3 text-sm text-slate-500">This view is loading in a separate chunk to keep the main app fast.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ModalLoader({ label }: { label: string }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-6" role="status" aria-live="polite" aria-label={label}>
-      <div className="w-full max-w-xs rounded-2xl border border-slate-800 bg-slate-900/85 px-6 py-5 text-center shadow-2xl shadow-black/30">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-500/10">
-          <RefreshCw className="h-6 w-6 animate-spin text-violet-300" />
-        </div>
-        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/80">PromoGen</p>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{label}</p>
-        <p className="mt-2 text-xs text-slate-500">Just a moment while the modal loads.</p>
-      </div>
-    </div>
-  );
-}
-
-// Daily credit helper functions (localStorage fallback for non-authenticated users)
-function getDailyCreditStatus(): DailyCreditStatus {
-  try {
-    const stored = localStorage.getItem('promo_daily_credit');
-    if (stored) return JSON.parse(stored);
-  } catch {}
-  return {
-    lastClaimDate: '',
-    dailyCreditAvailable: true,
-    streakDays: 0,
-    totalFreeCreditsEarned: 0
-  };
-}
-
-function saveDailyCreditStatus(status: DailyCreditStatus) {
-  localStorage.setItem('promo_daily_credit', JSON.stringify(status));
-}
-
-function checkDailyCredit(): { available: boolean; streakDays: number } {
-  const status = getDailyCreditStatus();
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  
-  if (status.lastClaimDate === today) {
-    return { available: false, streakDays: status.streakDays };
-  }
-  
-  // Check if streak continues
-  let newStreakDays = status.streakDays;
-  if (status.lastClaimDate === yesterday) {
-    newStreakDays = status.streakDays; // Will be incremented on claim
-  } else if (status.lastClaimDate !== '') {
-    newStreakDays = 0; // Streak broken
-  }
-  
-  return { available: true, streakDays: newStreakDays };
-}
-
-function claimDailyCredit(): number {
-  const status = getDailyCreditStatus();
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  
-  // Calculate streak
-  let newStreakDays = 1;
-  if (status.lastClaimDate === yesterday) {
-    newStreakDays = status.streakDays + 1;
-  }
-  
-  // Bonus credits for streaks!
-  let bonusCredits = 0;
-  if (newStreakDays === 7) bonusCredits = 2;  // 7-day streak = 2 bonus
-  if (newStreakDays === 30) bonusCredits = 5; // 30-day streak = 5 bonus
-  
-  const totalCredits = 1 + bonusCredits;
-  
-  saveDailyCreditStatus({
-    lastClaimDate: today,
-    dailyCreditAvailable: false,
-    streakDays: newStreakDays,
-    totalFreeCreditsEarned: status.totalFreeCreditsEarned + totalCredits
-  });
-  
-  return totalCredits;
-}
+import {
+  API_BASE, PROMOFINDER_ORIGIN, PATH_TO_VIEW_STATE, VIEW_STATE_TO_PATH, CONVERSION_PRESETS,
+  ViewState, PageLoader, ModalLoader, AdminDashboardPage, PromoCanvas, LoadingStep,
+  PurchaseModal, AuthModal, FreeToolsPage, PerplexityPage, VeoStudioPage,
+  PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage,
+  getDailyCreditStatus, saveDailyCreditStatus, checkDailyCredit, claimDailyCredit,
+} from './lib/appShared';
 
 export default function App() {
   const loadingTimerIds = useRef<number[]>([]);
