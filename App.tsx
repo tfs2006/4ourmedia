@@ -29,7 +29,7 @@ import {
   API_BASE, PROMOFINDER_ORIGIN, PATH_TO_VIEW_STATE, VIEW_STATE_TO_PATH, CONVERSION_PRESETS,
   ViewState, PageLoader, ModalLoader, AdminDashboardPage, PromoCanvas, LoadingStep,
   PurchaseModal, AuthModal, FreeToolsPage, PerplexityPage, VeoStudioPage, TitleScorerPage,
-  UploadAuditorPage, TitleTrackerPage, HookLibraryPage, ThumbnailCheckerPage,
+  UploadAuditorPage, TitleTrackerPage, HookLibraryPage, ThumbnailCheckerPage, MuseCoursePage,
   PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage,
   getDailyCreditStatus, saveDailyCreditStatus, checkDailyCredit, claimDailyCredit,
 } from './lib/appShared';
@@ -766,6 +766,18 @@ export default function App() {
       />
     );
   }
+  if (viewState === 'muse-course') {
+    return (
+      <Suspense fallback={<PageLoader label="Loading Muse Course" />}>
+        <MuseCoursePage
+          onBack={() => setViewState('landing')}
+          user={user}
+          onRequireAuth={() => openAuth('signup')}
+          onNavigate={(view) => setViewState(view as ViewState)}
+        />
+      </Suspense>
+    );
+  }
   if (viewState === 'admin') {
     return (
       <Suspense
@@ -872,6 +884,12 @@ export default function App() {
                 className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
               >
                 🖼️ Thumbnail Checker
+              </button>
+              <button
+                onClick={() => setViewState('muse-course')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                🎓 Free Muse Course
               </button>
               <button
                 onClick={() => setViewState('free-tools')}

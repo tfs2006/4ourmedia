@@ -16,13 +16,14 @@ export const UploadAuditorPage = lazy(() => import('../components/UploadAuditorP
 export const TitleTrackerPage = lazy(() => import('../components/TitleTrackerPage'));
 export const HookLibraryPage = lazy(() => import('../components/HookLibraryPage'));
 export const ThumbnailCheckerPage = lazy(() => import('../components/ThumbnailCheckerPage'));
+export const MuseCoursePage = lazy(() => import('../components/MuseCoursePage'));
 export const PrivacyPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.PrivacyPolicy })));
 export const TermsOfService = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.TermsOfService })));
 export const RefundPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.RefundPolicy })));
 export const ContactPage = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.ContactPage })));
 export const PROMOFINDER_ORIGIN = 'https://promofinder.4ourmedia.com';
 
-export type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'title-scorer' | 'upload-auditor' | 'title-tracker' | 'hook-library' | 'thumbnail-checker' | 'admin';
+export type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'title-scorer' | 'upload-auditor' | 'title-tracker' | 'hook-library' | 'thumbnail-checker' | 'muse-course' | 'admin';
 
 export const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
   '/': 'landing',
@@ -39,6 +40,7 @@ export const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
   '/title-tracker': 'title-tracker',
   '/hook-library': 'hook-library',
   '/thumbnail-checker': 'thumbnail-checker',
+  '/muse-course': 'muse-course',
   '/admin': 'admin',
 };
 
@@ -57,6 +59,7 @@ export const VIEW_STATE_TO_PATH: Partial<Record<ViewState, string>> = {
   'title-tracker': '/title-tracker',
   'hook-library': '/hook-library',
   'thumbnail-checker': '/thumbnail-checker',
+  'muse-course': '/muse-course',
   admin: '/admin',
 };
 
