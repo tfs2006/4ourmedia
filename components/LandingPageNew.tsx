@@ -132,6 +132,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLaunchPromofi
         </div>
       </div>
 
+      {/* 30-Day Viral Shorts Pack Promo Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-pink-700 via-rose-600 to-amber-600 text-white py-2.5 px-4 text-center text-sm font-semibold">
+        <div className="absolute inset-0 shimmer opacity-20" />
+        <div className="relative flex items-center justify-center gap-3 flex-wrap">
+          <span className="flex items-center gap-2">
+            <SparklesIcon size={14} className="text-yellow-200" />
+            30 Days of Viral Shorts, Done For You: 30 copy-paste AI video prompts with titles and hashtags. Just $9.
+          </span>
+          <a
+            href="https://shorts-pack-david-j-woodburys-projects.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-white text-rose-700 px-4 py-1 rounded-full text-xs font-bold hover:bg-yellow-200 transition-colors"
+          >
+            Get the Pack
+          </a>
+        </div>
+      </div>
+
             {/* Hero Section */}
       <section className="relative py-12 sm:py-16 lg:py-28 px-4 overflow-hidden">
         {/* Background orbs */}
