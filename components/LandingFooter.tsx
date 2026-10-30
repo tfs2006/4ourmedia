@@ -3,7 +3,7 @@ import React from 'react';
 interface LandingFooterProps {
   onOpenPromoGen: () => void;
   onPurchase: () => void;
-  onNavigate: (view: 'veo-studio' | 'title-scorer' | 'free-tools' | 'perplexity' | 'contact' | 'privacy' | 'terms' | 'refund') => void;
+  onNavigate: (view: 'veo-studio' | 'title-scorer' | 'upload-auditor' | 'title-tracker' | 'hook-library' | 'thumbnail-checker' | 'free-tools' | 'perplexity' | 'contact' | 'privacy' | 'terms' | 'refund') => void;
 }
 
 export default function LandingFooter({ onOpenPromoGen, onPurchase, onNavigate }: LandingFooterProps) {
@@ -29,6 +29,10 @@ export default function LandingFooter({ onOpenPromoGen, onPurchase, onNavigate }
               <li><button onClick={onPurchase} className="hover:text-white transition-colors">PromoGen Credits</button></li>
               <li><button onClick={() => onNavigate('veo-studio')} className="hover:text-white transition-colors">🎥 Veo Studio</button></li>
               <li><button onClick={() => onNavigate('title-scorer')} className="hover:text-white transition-colors">📝 Title Scorer</button></li>
+              <li><button onClick={() => onNavigate('upload-auditor')} className="hover:text-white transition-colors">✅ Upload Auditor</button></li>
+              <li><button onClick={() => onNavigate('title-tracker')} className="hover:text-white transition-colors">🧪 Title Tracker</button></li>
+              <li><button onClick={() => onNavigate('hook-library')} className="hover:text-white transition-colors">🪝 Hook Library</button></li>
+              <li><button onClick={() => onNavigate('thumbnail-checker')} className="hover:text-white transition-colors">🖼️ Thumbnail Checker</button></li>
               <li><button onClick={() => onNavigate('free-tools')} className="hover:text-white transition-colors">🎬 Promofinder Suite</button></li>
               <li><button onClick={() => onNavigate('perplexity')} className="hover:text-white transition-colors">☄️ Perplexity AI Free</button></li>
             </ul>

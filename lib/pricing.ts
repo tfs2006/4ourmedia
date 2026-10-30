@@ -1,6 +1,6 @@
 export const TARGET_PROFIT_MARGIN = 0.8;
 
-export type FeaturePricingId = 'analysis-only' | 'promo-generation' | 'veo-video' | 'title-score';
+export type FeaturePricingId = 'analysis-only' | 'promo-generation' | 'veo-video' | 'title-score' | 'upload-audit' | 'declare-winner' | 'hook-unlock' | 'thumbnail-check';
 export type ActivePlanId = 'starter' | 'pro' | 'agency';
 
 export interface FeaturePricing {
@@ -54,6 +54,30 @@ export const FEATURE_PRICING: Record<FeaturePricingId, FeaturePricing> = {
     label: 'Viral title score',
     estimatedCostUsd: 0,
     creditsRequired: requiredCreditsForTargetMargin(0),
+  },
+  'upload-audit': {
+    id: 'upload-audit',
+    label: 'Pre-publish upload audit',
+    estimatedCostUsd: 0,
+    creditsRequired: 1,
+  },
+  'declare-winner': {
+    id: 'declare-winner',
+    label: 'Title test winner verdict',
+    estimatedCostUsd: 0,
+    creditsRequired: 1,
+  },
+  'hook-unlock': {
+    id: 'hook-unlock',
+    label: 'Hook Swipe File unlock (one time)',
+    estimatedCostUsd: 0,
+    creditsRequired: 5,
+  },
+  'thumbnail-check': {
+    id: 'thumbnail-check',
+    label: 'Thumbnail safe-zone check',
+    estimatedCostUsd: 0,
+    creditsRequired: 1,
   },
 };
 

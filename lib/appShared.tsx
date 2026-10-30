@@ -12,13 +12,17 @@ export const FreeToolsPage = lazy(() => import('../components/FreeToolsPage'));
 export const PerplexityPage = lazy(() => import('../components/PerplexityPage'));
 export const VeoStudioPage = lazy(() => import('../components/VeoStudioPage'));
 export const TitleScorerPage = lazy(() => import('../components/TitleScorerPage'));
+export const UploadAuditorPage = lazy(() => import('../components/UploadAuditorPage'));
+export const TitleTrackerPage = lazy(() => import('../components/TitleTrackerPage'));
+export const HookLibraryPage = lazy(() => import('../components/HookLibraryPage'));
+export const ThumbnailCheckerPage = lazy(() => import('../components/ThumbnailCheckerPage'));
 export const PrivacyPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.PrivacyPolicy })));
 export const TermsOfService = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.TermsOfService })));
 export const RefundPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.RefundPolicy })));
 export const ContactPage = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.ContactPage })));
 export const PROMOFINDER_ORIGIN = 'https://promofinder.4ourmedia.com';
 
-export type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'title-scorer' | 'admin';
+export type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'title-scorer' | 'upload-auditor' | 'title-tracker' | 'hook-library' | 'thumbnail-checker' | 'admin';
 
 export const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
   '/': 'landing',
@@ -31,6 +35,10 @@ export const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
   '/perplexity': 'perplexity',
   '/veo-studio': 'veo-studio',
   '/title-scorer': 'title-scorer',
+  '/upload-auditor': 'upload-auditor',
+  '/title-tracker': 'title-tracker',
+  '/hook-library': 'hook-library',
+  '/thumbnail-checker': 'thumbnail-checker',
   '/admin': 'admin',
 };
 
@@ -45,6 +53,10 @@ export const VIEW_STATE_TO_PATH: Partial<Record<ViewState, string>> = {
   perplexity: '/perplexity',
   'veo-studio': '/veo-studio',
   'title-scorer': '/title-scorer',
+  'upload-auditor': '/upload-auditor',
+  'title-tracker': '/title-tracker',
+  'hook-library': '/hook-library',
+  'thumbnail-checker': '/thumbnail-checker',
   admin: '/admin',
 };
 

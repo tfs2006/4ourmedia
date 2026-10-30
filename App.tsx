@@ -3,6 +3,7 @@ import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, Hist
 import { generatePromoAsset } from './services/geminiService';
 import LandingPage from './components/LandingPageNew';
 import LandingFooter from './components/LandingFooter';
+import ToolViews from './components/ToolViews';
 import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/BrandKit';
 import HistoryPanel, { addToHistory } from './components/HistoryPanel';
 import { FEATURE_PRICING } from './lib/pricing';
@@ -28,6 +29,7 @@ import {
   API_BASE, PROMOFINDER_ORIGIN, PATH_TO_VIEW_STATE, VIEW_STATE_TO_PATH, CONVERSION_PRESETS,
   ViewState, PageLoader, ModalLoader, AdminDashboardPage, PromoCanvas, LoadingStep,
   PurchaseModal, AuthModal, FreeToolsPage, PerplexityPage, VeoStudioPage, TitleScorerPage,
+  UploadAuditorPage, TitleTrackerPage, HookLibraryPage, ThumbnailCheckerPage,
   PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage,
   getDailyCreditStatus, saveDailyCreditStatus, checkDailyCredit, claimDailyCredit,
 } from './lib/appShared';
@@ -740,6 +742,7 @@ export default function App() {
       <Suspense fallback={<PageLoader label="Loading Title Scorer" />}>
         <TitleScorerPage
           onBack={() => setViewState('landing')}
+          onOpenTool={(v) => setViewState(v as ViewState)}
           user={user}
           creditsRemaining={creditsRemaining}
           onRequireAuth={() => openAuth('signup')}
@@ -747,6 +750,20 @@ export default function App() {
           onCreditsUpdated={(remaining) => setCreditsRemaining(remaining)}
         />
       </Suspense>
+    );
+  }
+  if (viewState === 'upload-auditor' || viewState === 'title-tracker' || viewState === 'hook-library' || viewState === 'thumbnail-checker') {
+    return (
+      <ToolViews
+        view={viewState}
+        onBack={() => setViewState('landing')}
+        onOpenTool={(v) => setViewState(v as ViewState)}
+        user={user}
+        creditsRemaining={creditsRemaining}
+        onRequireAuth={() => openAuth('signup')}
+        onRequirePurchase={() => setShowPurchaseModal(true)}
+        onCreditsUpdated={(remaining) => setCreditsRemaining(remaining)}
+      />
     );
   }
   if (viewState === 'admin') {
@@ -831,6 +848,30 @@ export default function App() {
                 className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
               >
                 📝 Title Scorer
+              </button>
+              <button
+                onClick={() => setViewState('upload-auditor')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                ✅ Upload Auditor
+              </button>
+              <button
+                onClick={() => setViewState('title-tracker')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                🧪 Title Tracker
+              </button>
+              <button
+                onClick={() => setViewState('hook-library')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                🪝 Hook Library
+              </button>
+              <button
+                onClick={() => setViewState('thumbnail-checker')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                🖼️ Thumbnail Checker
               </button>
               <button
                 onClick={() => setViewState('free-tools')}

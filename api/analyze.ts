@@ -2,9 +2,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { generatePromoAnalysis } from '../lib/promoPipelineRuntime.js';
 import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
-import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
+import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser, getSupabaseAdmin } from '../lib/serverBillingRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
 import { scoreTitle } from '../lib/titleScorerRuntime.js';
+import { auditUpload } from '../lib/uploadAuditRuntime.js';
 import type { PromoConversionPreset, SocialPlatform } from '../types';
 
 // Simple in-memory cache
@@ -134,6 +135,232 @@ async function handleScoreTitle(
   }
 }
 
+// Shared credit gate for the deterministic creator tools. Returns the charge
+// record, or sends a 402 and returns null when the user cannot pay.
+async function chargeCredits(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string,
+  featureId: string,
+  endpoint: string,
+) {
+  const creditsRequired = (FEATURE_PRICING as Record<string, { creditsRequired: number }>)[featureId].creditsRequired;
+  const charge = await consumeUserCredits(authenticatedUser.id, creditsRequired);
+  if (!charge.success) {
+    await logUsageTelemetry({
+      endpoint,
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: false,
+      featureId,
+      source: 'vercel-api',
+      metadata: { failureReason: 'insufficient_credits' },
+    });
+    res.status(402).json({
+      error: 'Not enough credits. Purchase more credits to continue.',
+      insufficientCredits: true,
+      remainingCredits: charge.remaining,
+    });
+    return null;
+  }
+  return { charge, creditsRequired };
+}
+
+async function handleAuditUpload(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string,
+) {
+  let chargedCredits = false;
+  const creditsRequired = (FEATURE_PRICING as Record<string, { creditsRequired: number }>)['upload-audit'].creditsRequired;
+  try {
+    const billed = await chargeCredits(req, res, authenticatedUser, ip, 'upload-audit', 'upload-auditor');
+    if (!billed) return;
+    chargedCredits = true;
+    const { title, description, tags, pinned, chapters, endScreen, cards } = req.body as {
+      title?: string; description?: string; tags?: string;
+      pinned?: boolean; chapters?: boolean; endScreen?: boolean; cards?: boolean;
+    };
+    const result = auditUpload({
+      title: title || '', description: description || '', tags: tags || '',
+      pinned: !!pinned, chapters: !!chapters, endScreen: !!endScreen, cards: !!cards,
+    });
+    await logUsageTelemetry({
+      endpoint: 'upload-auditor',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'upload-audit',
+      creditsCharged: creditsRequired,
+      remainingCredits: billed.charge.remaining,
+      source: 'vercel-api',
+      metadata: { verdict: result.verdict },
+    });
+    return res.json({ ...result, remainingCredits: billed.charge.remaining });
+  } catch (error: any) {
+    console.error('Upload auditor error:', error);
+    if (chargedCredits) {
+      await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+    }
+    return res.status(500).json({ error: error.message || 'Audit failed' });
+  }
+}
+
+async function handleDeclareWinner(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string,
+) {
+  let chargedCredits = false;
+  const creditsRequired = (FEATURE_PRICING as Record<string, { creditsRequired: number }>)['declare-winner'].creditsRequired;
+  try {
+    const { video_name } = req.body as { video_name?: string };
+    const videoName = (video_name || '').trim();
+    if (!videoName) {
+      return res.status(400).json({ error: 'Video name is required.' });
+    }
+    const admin = getSupabaseAdmin();
+    const { data: rows, error } = await admin
+      .from('title_tests')
+      .select('title, ctr, impressions')
+      .eq('user_id', authenticatedUser.id)
+      .eq('video_name', videoName);
+    if (error) {
+      return res.status(500).json({ error: 'Could not read your tests. Try again.' });
+    }
+    const withCtr = (rows || []).filter((r: any) => r.ctr != null);
+    if (withCtr.length < 2) {
+      return res.status(400).json({ error: 'Log at least two title variants with CTR data for this video first.' });
+    }
+    const billed = await chargeCredits(req, res, authenticatedUser, ip, 'declare-winner', 'title-tracker');
+    if (!billed) return;
+    chargedCredits = true;
+    const sorted = [...withCtr].sort((a: any, b: any) => Number(b.ctr) - Number(a.ctr));
+    const winner = sorted[0];
+    const minImpressions = Math.min(...withCtr.map((r: any) => Number(r.impressions) || 0));
+    const significant = minImpressions >= 1000;
+    const verdict = {
+      winner: winner.title as string,
+      winnerCtr: Number(winner.ctr),
+      significant,
+      reason: significant
+        ? `"${winner.title}" leads at ${winner.ctr}% CTR, and every variant has enough impressions to trust it. Make it your template.`
+        : `"${winner.title}" leads at ${winner.ctr}% CTR, but at least one variant is under 1,000 impressions. Keep testing before you call it.`,
+    };
+    await logUsageTelemetry({
+      endpoint: 'title-tracker',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'declare-winner',
+      creditsCharged: creditsRequired,
+      remainingCredits: billed.charge.remaining,
+      source: 'vercel-api',
+      metadata: { videoName, significant },
+    });
+    return res.json({ verdict, remainingCredits: billed.charge.remaining });
+  } catch (error: any) {
+    console.error('Declare winner error:', error);
+    if (chargedCredits) {
+      await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+    }
+    return res.status(500).json({ error: error.message || 'Verdict failed' });
+  }
+}
+
+async function handleUnlockHooks(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string,
+) {
+  let chargedCredits = false;
+  const creditsRequired = (FEATURE_PRICING as Record<string, { creditsRequired: number }>)['hook-unlock'].creditsRequired;
+  try {
+    const admin = getSupabaseAdmin();
+    const { data: existing, error: readError } = await admin
+      .from('hook_unlocks')
+      .select('user_id')
+      .eq('user_id', authenticatedUser.id)
+      .maybeSingle();
+    if (readError && (readError as any).code === '42P01') {
+      return res.status(503).json({ error: 'The Hook Swipe File is finishing setup. Try again in a few minutes.' });
+    }
+    if (existing) {
+      return res.json({ alreadyUnlocked: true });
+    }
+    const billed = await chargeCredits(req, res, authenticatedUser, ip, 'hook-unlock', 'hook-library');
+    if (!billed) return;
+    chargedCredits = true;
+    const { error: insertError } = await admin
+      .from('hook_unlocks')
+      .insert({ user_id: authenticatedUser.id });
+    if (insertError) {
+      if ((insertError as any).code === '42P01') {
+        await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+        return res.status(503).json({ error: 'The Hook Swipe File is finishing setup. Try again in a few minutes.' });
+      }
+      throw insertError;
+    }
+    await logUsageTelemetry({
+      endpoint: 'hook-library',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'hook-unlock',
+      creditsCharged: creditsRequired,
+      remainingCredits: billed.charge.remaining,
+      source: 'vercel-api',
+      metadata: {},
+    });
+    return res.json({ unlocked: true, remainingCredits: billed.charge.remaining });
+  } catch (error: any) {
+    console.error('Hook unlock error:', error);
+    if (chargedCredits) {
+      await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+    }
+    return res.status(500).json({ error: error.message || 'Unlock failed' });
+  }
+}
+
+async function handleThumbnailCheck(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string,
+) {
+  let chargedCredits = false;
+  const creditsRequired = (FEATURE_PRICING as Record<string, { creditsRequired: number }>)['thumbnail-check'].creditsRequired;
+  try {
+    // The image analysis runs in the browser for privacy (never uploaded).
+    // This endpoint is the usage gate: it spends the credit and returns.
+    const billed = await chargeCredits(req, res, authenticatedUser, ip, 'thumbnail-check', 'thumbnail-checker');
+    if (!billed) return;
+    chargedCredits = true;
+    await logUsageTelemetry({
+      endpoint: 'thumbnail-checker',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'thumbnail-check',
+      creditsCharged: creditsRequired,
+      remainingCredits: billed.charge.remaining,
+      source: 'vercel-api',
+      metadata: {},
+    });
+    return res.json({ ok: true, remainingCredits: billed.charge.remaining });
+  } catch (error: any) {
+    console.error('Thumbnail check error:', error);
+    if (chargedCredits) {
+      await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+    }
+    return res.status(500).json({ error: error.message || 'Check failed' });
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -170,6 +397,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const op = typeof req.query.op === 'string' ? req.query.op : undefined;
   if (op === 'score-title') {
     return handleScoreTitle(req, res, authenticatedUser, ip);
+  }
+  if (op === 'audit-upload') {
+    return handleAuditUpload(req, res, authenticatedUser, ip);
+  }
+  if (op === 'declare-winner') {
+    return handleDeclareWinner(req, res, authenticatedUser, ip);
+  }
+  if (op === 'unlock-hooks') {
+    return handleUnlockHooks(req, res, authenticatedUser, ip);
+  }
+  if (op === 'thumbnail-check') {
+    return handleThumbnailCheck(req, res, authenticatedUser, ip);
   }
 
   let chargedCredits = false;

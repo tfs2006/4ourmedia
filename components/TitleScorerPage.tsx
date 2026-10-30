@@ -14,6 +14,7 @@ const CREDITS_PER_SCORE = FEATURE_PRICING['title-score'].creditsRequired;
 
 interface TitleScorerPageProps {
   onBack: () => void;
+  onOpenTool?: (view: string) => void;
   user: AuthUser | null;
   creditsRemaining: number;
   onRequireAuth: () => void;
@@ -65,7 +66,7 @@ function scoreVerdict(score: number): string {
 }
 
 export default function TitleScorerPage({
-  onBack, user, creditsRemaining, onRequireAuth, onRequirePurchase, onCreditsUpdated,
+  onBack, onOpenTool, user, creditsRemaining, onRequireAuth, onRequirePurchase, onCreditsUpdated,
 }: TitleScorerPageProps) {
   const [title, setTitle] = useState('');
   const [result, setResult] = useState<TitleScoreResult | null>(null);
@@ -257,6 +258,17 @@ export default function TitleScorerPage({
                 ))}
               </ul>
               <p className="mt-5 border-t border-white/5 pt-4 text-xs leading-relaxed text-slate-500">
+                Like these rewrites? There are 560 more where they came from. The Hook Swipe File
+                has proven openers for every niche, each tagged with the principle behind it.{' '}
+                {onOpenTool ? (
+                  <button onClick={() => onOpenTool('hook-library')} className="font-semibold text-violet-300 hover:text-violet-200">
+                    Open the Hook Swipe File.
+                  </button>
+                ) : (
+                  <span className="font-semibold text-violet-300">Find it in the tools menu.</span>
+                )}
+              </p>
+              <p className="mt-3 text-xs leading-relaxed text-slate-500">
                 Writing titles for the 30-Day Viral Shorts Pack? The pack includes 30 ready-made
                 titles with hashtags.{' '}
                 <a href={SHORTS_PACK_URL} target="_blank" rel="noreferrer" className="font-semibold text-violet-300 hover:text-violet-200">
