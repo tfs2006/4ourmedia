@@ -11,13 +11,14 @@ export const AuthModal = lazy(() => import('../components/AuthModal'));
 export const FreeToolsPage = lazy(() => import('../components/FreeToolsPage'));
 export const PerplexityPage = lazy(() => import('../components/PerplexityPage'));
 export const VeoStudioPage = lazy(() => import('../components/VeoStudioPage'));
+export const TitleScorerPage = lazy(() => import('../components/TitleScorerPage'));
 export const PrivacyPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.PrivacyPolicy })));
 export const TermsOfService = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.TermsOfService })));
 export const RefundPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.RefundPolicy })));
 export const ContactPage = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.ContactPage })));
 export const PROMOFINDER_ORIGIN = 'https://promofinder.4ourmedia.com';
 
-export type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'admin';
+export type ViewState = 'landing' | 'app' | 'privacy' | 'terms' | 'refund' | 'contact' | 'free-tools' | 'perplexity' | 'veo-studio' | 'title-scorer' | 'admin';
 
 export const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
   '/': 'landing',
@@ -29,6 +30,7 @@ export const PATH_TO_VIEW_STATE: Record<string, ViewState> = {
   '/free-tools': 'free-tools',
   '/perplexity': 'perplexity',
   '/veo-studio': 'veo-studio',
+  '/title-scorer': 'title-scorer',
   '/admin': 'admin',
 };
 
@@ -42,6 +44,7 @@ export const VIEW_STATE_TO_PATH: Partial<Record<ViewState, string>> = {
   'free-tools': '/free-tools',
   perplexity: '/perplexity',
   'veo-studio': '/veo-studio',
+  'title-scorer': '/title-scorer',
   admin: '/admin',
 };
 

@@ -1,6 +1,6 @@
 export const TARGET_PROFIT_MARGIN = 0.8;
 
-export type FeaturePricingId = 'analysis-only' | 'promo-generation' | 'veo-video';
+export type FeaturePricingId = 'analysis-only' | 'promo-generation' | 'veo-video' | 'title-score';
 export type ActivePlanId = 'starter' | 'pro' | 'agency';
 
 export interface FeaturePricing {
@@ -48,6 +48,12 @@ export const FEATURE_PRICING: Record<FeaturePricingId, FeaturePricing> = {
     label: 'Veo video render',
     estimatedCostUsd: 0.45,
     creditsRequired: requiredCreditsForTargetMargin(0.45),
+  },
+  'title-score': {
+    id: 'title-score',
+    label: 'Viral title score',
+    estimatedCostUsd: 0,
+    creditsRequired: requiredCreditsForTargetMargin(0),
   },
 };
 

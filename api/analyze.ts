@@ -4,6 +4,7 @@ import { generatePromoAnalysis } from '../lib/promoPipelineRuntime.js';
 import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser } from '../lib/serverBillingRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
+import { scoreTitle } from '../lib/titleScorerRuntime.js';
 import type { PromoConversionPreset, SocialPlatform } from '../types';
 
 // Simple in-memory cache
@@ -62,6 +63,77 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   return { allowed: true };
 }
 
+async function handleScoreTitle(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string
+) {
+  let chargedCredits = false;
+  const creditsRequired = FEATURE_PRICING['title-score'].creditsRequired;
+  try {
+    const { title } = req.body as { title?: string };
+    const cleanTitle = (title || '').trim();
+    if (!cleanTitle) {
+      return res.status(400).json({ error: 'A title is required.' });
+    }
+    if (cleanTitle.length > 200) {
+      return res.status(400).json({ error: 'Keep the title under 200 characters.' });
+    }
+
+    const charge = await consumeUserCredits(authenticatedUser.id, creditsRequired);
+    if (!charge.success) {
+      await logUsageTelemetry({
+        endpoint: 'title-scorer',
+        ipAddress: ip,
+        userId: authenticatedUser.id,
+        success: false,
+        featureId: 'title-score',
+        source: 'vercel-api',
+        metadata: { failureReason: 'insufficient_credits' },
+      });
+      return res.status(402).json({
+        error: 'Not enough credits. Purchase more credits to continue.',
+        insufficientCredits: true,
+        remainingCredits: charge.remaining,
+      });
+    }
+    chargedCredits = true;
+
+    const result = scoreTitle(cleanTitle);
+
+    await logUsageTelemetry({
+      endpoint: 'title-scorer',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'title-score',
+      creditsCharged: creditsRequired,
+      remainingCredits: charge.remaining,
+      source: 'vercel-api',
+      metadata: { titleLength: cleanTitle.length, score: result.score },
+    });
+
+    return res.json({ ...result, remainingCredits: charge.remaining });
+  } catch (error: any) {
+    console.error('Title scorer error:', error);
+    if (chargedCredits) {
+      await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+    }
+    await logUsageTelemetry({
+      endpoint: 'title-scorer',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: false,
+      featureId: 'title-score',
+      refunded: chargedCredits,
+      source: 'vercel-api',
+      metadata: { failureReason: error.message || 'score_failed' },
+    });
+    return res.status(500).json({ error: error.message || 'Failed to score title' });
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -92,6 +164,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const authenticatedUser = await verifyAuthenticatedUser(req.headers as Record<string, any>);
   if (!authenticatedUser) {
     return res.status(401).json({ error: 'Please sign in to use PromoGen.', requiresAuth: true });
+  }
+
+  // Viral Title Scorer op. Deterministic, no AI key needed. 1 credit per score.
+  const op = typeof req.query.op === 'string' ? req.query.op : undefined;
+  if (op === 'score-title') {
+    return handleScoreTitle(req, res, authenticatedUser, ip);
   }
 
   let chargedCredits = false;

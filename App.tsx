@@ -26,7 +26,7 @@ import {
 import {
   API_BASE, PROMOFINDER_ORIGIN, PATH_TO_VIEW_STATE, VIEW_STATE_TO_PATH, CONVERSION_PRESETS,
   ViewState, PageLoader, ModalLoader, AdminDashboardPage, PromoCanvas, LoadingStep,
-  PurchaseModal, AuthModal, FreeToolsPage, PerplexityPage, VeoStudioPage,
+  PurchaseModal, AuthModal, FreeToolsPage, PerplexityPage, VeoStudioPage, TitleScorerPage,
   PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage,
   getDailyCreditStatus, saveDailyCreditStatus, checkDailyCredit, claimDailyCredit,
 } from './lib/appShared';
@@ -734,6 +734,20 @@ export default function App() {
       </Suspense>
     );
   }
+  if (viewState === 'title-scorer') {
+    return (
+      <Suspense fallback={<PageLoader label="Loading Title Scorer" />}>
+        <TitleScorerPage
+          onBack={() => setViewState('landing')}
+          user={user}
+          creditsRemaining={creditsRemaining}
+          onRequireAuth={() => openAuth('signup')}
+          onRequirePurchase={() => setShowPurchaseModal(true)}
+          onCreditsUpdated={(remaining) => setCreditsRemaining(remaining)}
+        />
+      </Suspense>
+    );
+  }
   if (viewState === 'admin') {
     return (
       <Suspense
@@ -810,6 +824,12 @@ export default function App() {
                 className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
               >
                 🎥 Veo Studio
+              </button>
+              <button
+                onClick={() => setViewState('title-scorer')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                📝 Title Scorer
               </button>
               <button
                 onClick={() => setViewState('free-tools')}
@@ -944,6 +964,7 @@ export default function App() {
                   <li><button onClick={() => user ? setViewState('app') : openAuth('signup')} className="hover:text-white transition-colors">Open PromoGen</button></li>
                   <li><button onClick={() => setShowPurchaseModal(true)} className="hover:text-white transition-colors">PromoGen Credits</button></li>
                   <li><button onClick={() => setViewState('veo-studio')} className="hover:text-white transition-colors">🎥 Veo Studio</button></li>
+                  <li><button onClick={() => setViewState('title-scorer')} className="hover:text-white transition-colors">📝 Title Scorer</button></li>
                   <li><button onClick={() => setViewState('free-tools')} className="hover:text-white transition-colors">🎬 Promofinder Suite</button></li>
                   <li><button onClick={() => setViewState('perplexity')} className="hover:text-white transition-colors">☄️ Perplexity AI Free</button></li>
                 </ul>
