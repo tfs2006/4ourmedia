@@ -1323,7 +1323,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="p-6 text-center text-slate-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} 4ourMedia. Powered by Google Gemini.</p>
+        <p>&copy; {new Date().getFullYear()} 4ourMedia.</p>
       </footer>
     </div>
   );
