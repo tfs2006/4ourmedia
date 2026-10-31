@@ -96,7 +96,7 @@ export const ACTIVE_PRICING_PLANS: Record<ActivePlanId, PricingPlanDefinition> =
     description: 'Perfect for testing the workflow without committing to a large pack.',
     features: [
       '25 credits',
-      'Title Scorer, Upload Auditor, Thumbnail Checker, Title Test Tracker: 1 credit each',
+      'Title Scorer, Upload Auditor, Thumbnail Checker, Title Test Tracker, Script Builder: 1 credit each',
       'Hook Swipe File full unlock: 5 credits, one time',
       'Veo Studio renders: 12 credits',
       'Credits never expire',
@@ -114,7 +114,7 @@ export const ACTIVE_PRICING_PLANS: Record<ActivePlanId, PricingPlanDefinition> =
     savings: '19%',
     features: [
       '100 credits',
-      'Title Scorer, Upload Auditor, Thumbnail Checker, Title Test Tracker: 1 credit each',
+      'Title Scorer, Upload Auditor, Thumbnail Checker, Title Test Tracker, Script Builder: 1 credit each',
       'Hook Swipe File full unlock: 5 credits, one time',
       'Veo Studio renders: 12 credits',
       'Credits never expire',
@@ -131,7 +131,7 @@ export const ACTIVE_PRICING_PLANS: Record<ActivePlanId, PricingPlanDefinition> =
     savings: '45%',
     features: [
       '500 credits',
-      'Title Scorer, Upload Auditor, Thumbnail Checker, Title Test Tracker: 1 credit each',
+      'Title Scorer, Upload Auditor, Thumbnail Checker, Title Test Tracker, Script Builder: 1 credit each',
       'Hook Swipe File full unlock: 5 credits, one time',
       'Veo Studio renders: 12 credits',
       'Credits never expire',
