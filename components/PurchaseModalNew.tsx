@@ -244,7 +244,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
             ) : (
               <>
                 <Zap className="w-5 h-5" />
-                Get {plan.credits} Credits — ${plan.price}
+                Get {plan.credits} Credits for ${plan.price}
               </>
             )}
           </button>
