@@ -5,6 +5,7 @@ import { FEATURE_PRICING } from '../lib/pricingRuntime.js';
 import { consumeUserCredits, refundUserCredits, verifyAuthenticatedUser, getSupabaseAdmin } from '../lib/serverBillingRuntime.js';
 import { logUsageTelemetry } from '../lib/usageTelemetryRuntime.js';
 import { scoreTitle } from '../lib/titleScorerRuntime.js';
+import { buildScript } from '../lib/scriptBuilderRuntime.js';
 import { auditUpload } from '../lib/uploadAuditRuntime.js';
 import type { PromoConversionPreset, SocialPlatform } from '../types';
 
@@ -361,6 +362,74 @@ async function handleThumbnailCheck(
   }
 }
 
+// Viral Script Builder op. Deterministic, no AI key needed. 1 credit per build.
+async function handleBuildScript(
+  req: VercelRequest,
+  res: VercelResponse,
+  authenticatedUser: { id: string },
+  ip: string,
+) {
+  let chargedCredits = false;
+  const creditsRequired = (FEATURE_PRICING as Record<string, { creditsRequired: number }>)['script-build'].creditsRequired;
+  try {
+    const { topic, hook, lengthSec, tone } = req.body as {
+      topic?: string; hook?: string; lengthSec?: number; tone?: string;
+    };
+    const cleanTopic = (topic || '').trim();
+    const cleanHook = (hook || '').trim();
+    const secs = lengthSec === 60 ? 60 : 30;
+    const cleanTone = tone === 'funny' || tone === 'curiosity' ? tone : 'direct';
+    if (!cleanTopic) {
+      return res.status(400).json({ error: 'A topic is required.' });
+    }
+    if (cleanTopic.length > 120) {
+      return res.status(400).json({ error: 'Keep the topic under 120 characters.' });
+    }
+    if (!cleanHook) {
+      return res.status(400).json({ error: 'Pick a hook or write your own.' });
+    }
+    if (cleanHook.length > 200) {
+      return res.status(400).json({ error: 'Keep the hook under 200 characters.' });
+    }
+
+    const billed = await chargeCredits(req, res, authenticatedUser, ip, 'script-build', 'script-builder');
+    if (!billed) return;
+    chargedCredits = true;
+
+    const script = buildScript({ topic: cleanTopic, hook: cleanHook, lengthSec: secs, tone: cleanTone });
+
+    await logUsageTelemetry({
+      endpoint: 'script-builder',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: true,
+      featureId: 'script-build',
+      creditsCharged: creditsRequired,
+      remainingCredits: billed.charge.remaining,
+      source: 'vercel-api',
+      metadata: { lengthSec: secs, tone: cleanTone },
+    });
+
+    return res.json({ script, remainingCredits: billed.charge.remaining });
+  } catch (error: any) {
+    console.error('Script builder error:', error);
+    if (chargedCredits) {
+      await refundUserCredits(authenticatedUser.id, creditsRequired).catch(() => undefined);
+    }
+    await logUsageTelemetry({
+      endpoint: 'script-builder',
+      ipAddress: ip,
+      userId: authenticatedUser.id,
+      success: false,
+      featureId: 'script-build',
+      refunded: chargedCredits,
+      source: 'vercel-api',
+      metadata: { failureReason: error.message || 'build_failed' },
+    });
+    return res.status(500).json({ error: error.message || 'Failed to build script' });
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -409,6 +478,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (op === 'thumbnail-check') {
     return handleThumbnailCheck(req, res, authenticatedUser, ip);
+  }
+  if (op === 'build-script') {
+    return handleBuildScript(req, res, authenticatedUser, ip);
   }
 
   let chargedCredits = false;

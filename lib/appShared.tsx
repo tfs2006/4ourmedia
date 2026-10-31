@@ -16,6 +16,7 @@ export const UploadAuditorPage = lazy(() => import('../components/UploadAuditorP
 export const TitleTrackerPage = lazy(() => import('../components/TitleTrackerPage'));
 export const HookLibraryPage = lazy(() => import('../components/HookLibraryPage'));
 export const ThumbnailCheckerPage = lazy(() => import('../components/ThumbnailCheckerPage'));
+export const ScriptBuilderPage = lazy(() => import('../components/ScriptBuilderPage'));
 export const MuseCoursePage = lazy(() => import('../components/MuseCoursePage'));
 export const PrivacyPolicy = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.PrivacyPolicy })));
 export const TermsOfService = lazy(() => import('../components/LegalPages').then((module) => ({ default: module.TermsOfService })));

@@ -1,6 +1,6 @@
 export const TARGET_PROFIT_MARGIN = 0.8;
 
-export type FeaturePricingId = 'analysis-only' | 'promo-generation' | 'veo-video' | 'title-score' | 'upload-audit' | 'declare-winner' | 'hook-unlock' | 'thumbnail-check';
+export type FeaturePricingId = 'analysis-only' | 'promo-generation' | 'veo-video' | 'title-score' | 'upload-audit' | 'declare-winner' | 'hook-unlock' | 'thumbnail-check' | 'script-build';
 export type ActivePlanId = 'starter' | 'pro' | 'agency';
 
 export interface FeaturePricing {
@@ -76,6 +76,12 @@ export const FEATURE_PRICING: Record<FeaturePricingId, FeaturePricing> = {
   'thumbnail-check': {
     id: 'thumbnail-check',
     label: 'Thumbnail safe-zone check',
+    estimatedCostUsd: 0,
+    creditsRequired: 1,
+  },
+  'script-build': {
+    id: 'script-build',
+    label: 'Viral script build',
     estimatedCostUsd: 0,
     creditsRequired: 1,
   },
