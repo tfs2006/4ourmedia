@@ -9,6 +9,7 @@ interface PurchaseModalProps {
   selectedPlan?: string;
   userId?: string;
   userEmail?: string;
+  onNavigate?: (view: string) => void;
 }
 
 const API_BASE = (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? 'http://localhost:3001' : '';
@@ -79,7 +80,7 @@ const PLANS: Record<string, Plan> = Object.fromEntries(
   })
 ) as Record<string, Plan>;
 
-const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsRemaining = 0, selectedPlan = 'pro', userId, userEmail }) => {
+const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsRemaining = 0, selectedPlan = 'pro', userId, userEmail, onNavigate }) => {
   const [currentPlan, setCurrentPlan] = useState(selectedPlan);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -263,6 +264,14 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
               No subscription
             </span>
           </div>
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('pricing')}
+              className="mt-4 text-sm text-indigo-300 hover:text-indigo-200 underline underline-offset-4 transition-colors"
+            >
+              See all offers
+            </button>
+          )}
         </div>
       </div>
       </div>

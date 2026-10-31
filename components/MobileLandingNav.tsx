@@ -12,6 +12,7 @@ const NAV_ITEMS: { label: string; view: ViewState }[] = [
   { label: '🎓 Free Muse Course', view: 'muse-course' },
   { label: '🎬 Promofinder Suite', view: 'free-tools' },
   { label: '☄️ Perplexity AI', view: 'perplexity' },
+  { label: '💳 Pricing', view: 'pricing' },
 ];
 
 export default function MobileLandingNav({ onNavigate }: { onNavigate: (view: ViewState) => void }) {

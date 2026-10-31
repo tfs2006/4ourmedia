@@ -30,7 +30,7 @@ import {
   API_BASE, PROMOFINDER_ORIGIN, PATH_TO_VIEW_STATE, VIEW_STATE_TO_PATH, CONVERSION_PRESETS,
   ViewState, PageLoader, ModalLoader, AdminDashboardPage, PromoCanvas, LoadingStep,
   PurchaseModal, AuthModal, FreeToolsPage, PerplexityPage, VeoStudioPage, TitleScorerPage,
-  UploadAuditorPage, TitleTrackerPage, HookLibraryPage, ThumbnailCheckerPage, ScriptBuilderPage, MuseCoursePage,
+  UploadAuditorPage, TitleTrackerPage, HookLibraryPage, ThumbnailCheckerPage, ScriptBuilderPage, MuseCoursePage, PricingPage,
   PrivacyPolicy, TermsOfService, RefundPolicy, ContactPage,
   getDailyCreditStatus, saveDailyCreditStatus, checkDailyCredit, claimDailyCredit,
 } from './lib/appShared';
@@ -775,6 +775,125 @@ export default function App() {
       </Suspense>
     );
   }
+  if (viewState === 'pricing') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white">
+        <Suspense fallback={<PageLoader label="Loading Pricing" />}>
+          <PricingPage
+            onBack={() => setViewState('landing')}
+            onPurchase={(planId: string) => {
+              setSelectedPlan(planId);
+              setShowPurchaseModal(true);
+            }}
+            onPurchaseBot={(planId: string) => {
+              setSelectedBotPlan(planId);
+              setShowBotPurchaseModal(true);
+            }}
+            onSignIn={() => openAuth('signup')}
+            onOpenTool={(v) => setViewState(v as ViewState)}
+            isSignedIn={!!user}
+          />
+        </Suspense>
+
+        {/* Auth Modal */}
+        {showAuthModal && (
+          <Suspense fallback={<ModalLoader label="Loading Sign In" />}>
+            <AuthModal
+              isOpen={showAuthModal}
+              onClose={() => setShowAuthModal(false)}
+              onAuthSuccess={handleAuthSuccess}
+              initialMode={authMode}
+            />
+          </Suspense>
+        )}
+
+        {/* Purchase Modal */}
+        {showPurchaseModal && (
+          <Suspense fallback={<ModalLoader label="Loading Checkout" />}>
+            <PurchaseModal
+              isOpen={showPurchaseModal}
+              onClose={() => setShowPurchaseModal(false)}
+              onNavigate={(v) => { setShowPurchaseModal(false); setViewState(v as ViewState); }}
+              creditsRemaining={creditsRemaining}
+              selectedPlan={selectedPlan}
+              userId={user?.id}
+              userEmail={user?.email}
+            />
+          </Suspense>
+        )}
+
+        {/* Bot Pack Checkout Modal */}
+        {showBotPurchaseModal && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Autopilot Bot Pack Checkout</h3>
+                <button
+                  onClick={() => setShowBotPurchaseModal(false)}
+                  className="rounded-lg border border-slate-700 px-2 py-1 text-slate-300 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-slate-300 text-sm mb-3">
+                Selected package: <span className="font-semibold text-indigo-300">{selectedBotPlan}</span>
+              </p>
+              <p className="text-slate-400 text-sm mb-5">
+                This package includes downloadable bot templates, personality presets, and setup documentation with BYOK model guidance.
+              </p>
+              <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 mb-5">
+                <p className="text-xs text-indigo-200 leading-relaxed">
+                  Next step: wire these packages to Stripe product IDs and secure download delivery (Supabase storage + signed links).
+                  I can complete this end-to-end as the next action.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                <button
+                  onClick={() => setShowBotPurchaseModal(false)}
+                  className="px-4 py-2 rounded-lg border border-slate-700 text-slate-300 hover:text-white"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowBotPurchaseModal(false);
+                    const successUrl = `${window.location.origin}/?botPurchase=success&botPlan=${encodeURIComponent(selectedBotPlan)}&bot_session_id={CHECKOUT_SESSION_ID}`;
+                    const cancelUrl = `${window.location.origin}/#bot-store`;
+                    fetch(`${API_BASE}/api/purchase/bot-checkout`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        planId: selectedBotPlan,
+                        userId: user?.id || '',
+                        userEmail: user?.email || '',
+                        successUrl,
+                        cancelUrl,
+                      }),
+                    })
+                      .then(async (res) => {
+                        const data = await res.json();
+                        if (res.ok && data?.url) {
+                          window.location.href = data.url;
+                          return;
+                        }
+                        throw new Error(data?.error || 'Unable to start checkout');
+                      })
+                      .catch((err) => {
+                        console.error('Bot checkout error:', err);
+                        alert('Unable to start bot checkout right now. Please try again.');
+                      });
+                  }}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
+                >
+                  Continue to Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
   if (viewState === 'admin') {
     return (
       <Suspense
@@ -902,6 +1021,12 @@ export default function App() {
                 ☄️ Perplexity AI
               </button>
               <button
+                onClick={() => setViewState('pricing')}
+                className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                💳 Pricing
+              </button>
+              <button
                 onClick={() => user ? setViewState('app') : openAuth('signup')}
                 className="px-4 py-2 text-slate-300 hover:text-white transition-colors font-medium"
               >
@@ -1025,6 +1150,7 @@ export default function App() {
             <PurchaseModal 
               isOpen={showPurchaseModal} 
               onClose={() => setShowPurchaseModal(false)}
+              onNavigate={(v) => { setShowPurchaseModal(false); setViewState(v as ViewState); }}
               creditsRemaining={creditsRemaining}
               selectedPlan={selectedPlan}
               userId={user?.id}
@@ -1057,6 +1183,7 @@ export default function App() {
           <PurchaseModal 
             isOpen={showPurchaseModal} 
             onClose={() => setShowPurchaseModal(false)}
+            onNavigate={(v) => { setShowPurchaseModal(false); setViewState(v as ViewState); }}
             creditsRemaining={creditsRemaining}
             selectedPlan={selectedPlan}
             userId={user?.id}
