@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRe
 import { AppState, ProductAnalysis, LogoPosition, BrandKit as BrandKitType, HistoryItem, DailyCreditStatus, AspectRatio, ASPECT_RATIO_DIMENSIONS, PromoConversionPreset, SocialPlatform } from './types';
 import { generatePromoAsset } from './services/geminiService';
 import LandingPage from './components/LandingPageNew';
+import MobileLandingNav from './components/MobileLandingNav';
 import LandingFooter from './components/LandingFooter';
 import ToolViews from './components/ToolViews';
 import BrandKit, { getActiveBrandKit, setActiveBrandKit } from './components/BrandKit';
@@ -837,7 +838,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white">
         {/* Header */}
-        <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10">
+        <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10 relative">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-purple-500/30">
@@ -849,6 +850,7 @@ export default function App() {
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
+              <MobileLandingNav onNavigate={(view) => setViewState(view)} />
               <button
                 onClick={() => setViewState('veo-studio')}
                 className="hidden md:block px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"

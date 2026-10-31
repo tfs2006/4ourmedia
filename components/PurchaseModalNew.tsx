@@ -218,7 +218,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, creditsR
               ))}
             </ul>
             <p className="mt-4 text-xs text-slate-500">
-              Standard promo generations use {FEATURE_PRICING['promo-generation'].creditsRequired} credit. Veo video renders use {FEATURE_PRICING['veo-video'].creditsRequired} credits.
+              Title scores, upload audits, thumbnail checks, and title winner verdicts use 1 credit each. The Hook Swipe File unlocks once for 5 credits. Veo Studio renders use {FEATURE_PRICING['veo-video'].creditsRequired} credits.
             </p>
           </div>
 
